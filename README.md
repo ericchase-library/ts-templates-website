@@ -1,5 +1,7 @@
 ## About
 
+https://github.com/ericchase-library/ts-templates-website
+
 This is a template for website projects. It is not fully complete, but it should be a good start (I am using and updating it myself).
 
 It relies on the TypeScript library in this organization.
@@ -126,7 +128,7 @@ The code in this repository will always be truly free and open source (unless I 
 When making a copy of this project, I _kindly ask_ that you include the text within the `NOTICE` file somewhere (perhaps in your own README.md or LICENSE or NOTICE file?) or a link to this repository so that other readers of your project may also be able to find this original template.
 
 ```
-Template Website
+Typescript Template Website
 https://github.com/ericchase-library/ts-templates-website
 
 Copyright © 2024 ericchase
