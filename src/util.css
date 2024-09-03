@@ -1,0 +1,27 @@
+.col {
+  display: flex;
+  flex-direction: column;
+  min-height: auto;
+  min-width: auto;
+}
+.row {
+  display: flex;
+  min-height: auto;
+  min-width: auto;
+}
+.align-center {
+  align-items: center;
+}
+
+.fill-h {
+  height: 100%;
+}
+.fill-w {
+  width: 100%;
+}
+.mba {
+  margin-block: auto;
+}
+.mia {
+  margin-inline: auto;
+}
