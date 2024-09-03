@@ -26,6 +26,7 @@ const toBundle = new GlobManager() //
 // you can modify this module however you want, this is just an example
 await LoadIncludeFile('hello-bun', sourceDir + 'component/hello-bun.html');
 await ProcessTemplateFile(sourceDir + 'index.template.html', buildDir + 'index.html');
+toExclude.scan(sourceDir, 'component/*');
 
 // Bundle
 // processed files are stored in tempDir, so their paths are added to the toCopy set
