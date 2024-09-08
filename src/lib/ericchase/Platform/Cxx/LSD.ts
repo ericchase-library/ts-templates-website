@@ -1,6 +1,7 @@
 import node_child_process, { type ExecFileOptions } from 'node:child_process';
 import type { ObjectEncodingOptions } from 'node:fs';
 import { GlobSearch } from '../../Algorithm/String/Search/GlobSearch.js';
+import { ConsoleLog } from '../../Utility/Console.js';
 import type { STDIO } from '../Node/Process.js';
 
 export interface LSDParams {
@@ -38,18 +39,20 @@ export async function IterateLSD(
   callback?: (result: LSDResult) => void,
 ) {
   const { stdout = '', stderr } = await command;
-  if (stderr) console.log('LSD Error:', stderr);
-  const results = stdout
-    .split('\n')
-    .filter((line) => line.length > 0)
-    .map((line) => ({
-      kind: line[0] === 'D' ? PathKind.Directory : PathKind.File,
-      path: line.slice(2),
-    }));
-  if (callback) {
-    for (const { kind, path } of results) {
-      if (kind & filterkind) {
-        callback({ kind, path });
+  if (stderr) ConsoleLog('LSD Error:', stderr);
+  if (typeof stdout === 'string') {
+    const results = stdout
+      .split('\n')
+      .filter((line) => line.length > 0)
+      .map((line) => ({
+        kind: line[0] === 'D' ? PathKind.Directory : PathKind.File,
+        path: line.slice(2),
+      }));
+    if (callback) {
+      for (const { kind, path } of results) {
+        if (kind & filterkind) {
+          callback({ kind, path });
+        }
       }
     }
   }
@@ -66,7 +69,11 @@ export async function FilterDirectoryListing(
 ) {
   const directories: string[] = [];
   const files: string[] = [];
-  for (const entry of (await LSD({ path: options.path })).stdout?.split('\n') ?? []) {
+  let stdout = (await LSD({ path: options.path })).stdout;
+  if (typeof stdout !== 'string') {
+    stdout = new TextDecoder().decode(stdout);
+  }
+  for (const entry of stdout.split('\n') ?? []) {
     if (entry.length > 0) {
       const entry_name = entry.slice(2);
       if (entry[0] === 'D') {
@@ -91,7 +98,11 @@ export async function FilterDirectoryTree(
   const directories: string[] = [options.path];
   const files: string[] = [];
   for (let i = 0; i < directories.length; i++) {
-    for (const entry of (await LSD({ path: directories[i] })).stdout?.split('\n') ?? []) {
+    let stdout = (await LSD({ path: directories[i] })).stdout;
+    if (typeof stdout !== 'string') {
+      stdout = new TextDecoder().decode(stdout);
+    }
+    for (const entry of stdout.split('\n') ?? []) {
       if (entry.length > 0) {
         const entry_name = entry.slice(2);
         const entry_path = directories[i] + '/' + entry_name;

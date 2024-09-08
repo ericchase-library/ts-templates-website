@@ -1,5 +1,7 @@
 import type { Subprocess } from 'bun';
 
+Bun.spawnSync(['bun', 'install']);
+
 let proc: Subprocess<'ignore', 'inherit', 'inherit'> | undefined = undefined;
 while (true) {
   proc = Bun.spawn(['bun', './src/server.ts'], { stdout: 'inherit' });

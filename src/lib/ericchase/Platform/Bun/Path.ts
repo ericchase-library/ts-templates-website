@@ -34,10 +34,10 @@ export class GlobGroup {
     public readonly pattern: string,
     public readonly pathGroupSet: Set<PathGroup>,
   ) {}
-  static new({ basedir, pattern }: { basedir: string; pattern: string }) {
+  static new({ basedir, pattern, dot = false }: { basedir: string; pattern: string; dot?: boolean }) {
     basedir = node_path.normalize(basedir);
     const pathGroupSet = new Set<PathGroup>();
-    for (const path of new Bun.Glob(pattern).scanSync(basedir)) {
+    for (const path of new Bun.Glob(pattern).scanSync({ cwd: basedir, dot })) {
       pathGroupSet.add(PathGroup.new(basedir, path));
     }
     return new GlobGroup(basedir, pattern, pathGroupSet);
@@ -69,8 +69,8 @@ export class GlobGroup {
 }
 
 export class GlobManager {
-  static Scan(basedir: string, pattern: string) {
-    return GlobGroup.new({ basedir: node_path.normalize(basedir), pattern });
+  static Scan(basedir: string, pattern: string, dot = false) {
+    return GlobGroup.new({ basedir: node_path.normalize(basedir), pattern, dot });
   }
   globGroupMap = new Map<string, GlobGroup>();
   get globGroups() {
@@ -91,9 +91,18 @@ export class GlobManager {
     }
     return this;
   }
-  scan(basedir: string, pattern: string) {
-    const globGroup = GlobManager.Scan(basedir, pattern);
-    this.globGroupMap.set(`${globGroup.basedir}|${globGroup.pattern}`, globGroup);
+  scan(basedir: string, ...patterns: string[]) {
+    for (const pattern of patterns) {
+      const globGroup = GlobManager.Scan(basedir, pattern);
+      this.globGroupMap.set(`${globGroup.basedir}|${globGroup.pattern}`, globGroup);
+    }
+    return this;
+  }
+  scanDot(basedir: string, ...patterns: string[]) {
+    for (const pattern of patterns) {
+      const globGroup = GlobManager.Scan(basedir, pattern, true);
+      this.globGroupMap.set(`${globGroup.basedir}|${globGroup.pattern}`, globGroup);
+    }
     return this;
   }
   *pathGroup_iterator() {

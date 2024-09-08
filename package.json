@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "all": "bun ./tools/all.ts",
     "build": "bun ./tools/build.ts",
     "dev": "bun ./tools/dev.ts",
     "serve": "bun ./tools/serve.ts",
@@ -8,7 +9,7 @@
   },
   "devDependencies": {
     "@types/bun": "^1.1.8",
-    "@types/node": "^22.5.2",
+    "@types/node": "^22.5.4",
     "node-html-parser": "^6.1.13",
     "prettier": "^3.3.3"
   }

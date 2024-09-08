@@ -3,6 +3,8 @@ import type { Subprocess } from 'bun';
 import { Broadcast } from './lib/Broadcast.js';
 import { Watcher } from './lib/Watch.js';
 
+Bun.spawnSync(['bun', 'install']);
+
 const pipe = new Broadcast<string>();
 
 (async function () {

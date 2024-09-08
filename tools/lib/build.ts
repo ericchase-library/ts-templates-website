@@ -1,5 +1,6 @@
 import { CopyFile } from '../../src/lib/ericchase/Platform/Bun/Fs.js';
-import { GlobManager } from '../../src/lib/ericchase/Platform/Bun/Path.js';
+import { GlobManager, PathGroup } from '../../src/lib/ericchase/Platform/Bun/Path.js';
+import { type NodeHTMLParser, ParseHTML } from '../../src/lib/ericchase/Platform/Web/HTML/ParseHTML.js';
 
 interface BundleParams {
   outDir?: string;
@@ -8,6 +9,7 @@ interface BundleParams {
   toExclude?: GlobManager;
 }
 export async function bundle({ outDir = './temp', sourcemapMode = 'inline', toBundle, toExclude }: BundleParams) {
+  const toCopy = new GlobManager();
   const excludePaths = new Set(toExclude?.paths ?? []);
   for (const globGroup of toBundle.globGroups) {
     for (const pathGroup of globGroup.pathGroups) {
@@ -21,11 +23,12 @@ export async function bundle({ outDir = './temp', sourcemapMode = 'inline', toBu
         });
         if (success) {
           await Bun.write(pathGroup.replaceBasedir(outDir).replaceExt('.js').path, outputs[0]);
+          toCopy.scan(outDir, pathGroup.replaceBasedir('').replaceExt('.js').path);
         }
       }
     }
   }
-  return new GlobManager().scan(outDir, '**/*.js');
+  return toCopy;
 }
 
 // interface CompileParams {
@@ -71,4 +74,30 @@ export async function copy({ outDir = './build', toCopy, toExclude }: CopyParams
       });
     }
   }
+}
+
+export type HTMLPreprocessor = (root: NodeHTMLParser.HTMLElement, html: string, pathGroup: PathGroup) => Promise<void>;
+interface ProcessHTMLParams {
+  outDir?: string;
+  preprocessors: HTMLPreprocessor[];
+  toExclude?: GlobManager;
+  toProcess: GlobManager;
+}
+export async function processHTML({ outDir = './temp', preprocessors, toExclude, toProcess }: ProcessHTMLParams) {
+  const toCopy = new GlobManager();
+  const excludePaths = new Set(toExclude?.paths ?? []);
+  for (const globGroup of toProcess.globGroups) {
+    for (const pathGroup of globGroup.pathGroups) {
+      if (!excludePaths.has(pathGroup.path)) {
+        const html = await Bun.file(pathGroup.path).text();
+        const root = ParseHTML(html, { convert_tagnames_to_lowercase: true, self_close_void_tags: true });
+        for (const preprocessor of preprocessors) {
+          await preprocessor(root, html, pathGroup);
+        }
+        await Bun.write(pathGroup.replaceBasedir(outDir).path, root.toString());
+        toCopy.scan(outDir, pathGroup.replaceBasedir('').path);
+      }
+    }
+  }
+  return toCopy;
 }

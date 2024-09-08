@@ -15,7 +15,7 @@ export async function WriteFile(path: string, text: string) {
   await node_fs.writeFile(path, text, { encoding: 'utf8' });
 }
 
-export async function ClearDirectory(path: string) {
+export async function CleanDirectory(path: string) {
   await DeleteDirectory(path);
   await CreateDirectory(path);
 }

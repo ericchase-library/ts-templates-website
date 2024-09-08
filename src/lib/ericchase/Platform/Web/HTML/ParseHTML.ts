@@ -1,4 +1,8 @@
-import { parse, type Options } from 'node-html-parser';
+import { HTMLElement as NodeHTMLParser_HTMLElement, parse, type Options } from 'node-html-parser';
+
+export namespace NodeHTMLParser {
+  export type HTMLElement = NodeHTMLParser_HTMLElement;
+}
 
 /**
  * @convert_tagnames_to_lowercase convert tag name to lower case (hurts performance heavily). default: `false`
@@ -18,7 +22,7 @@ export interface HTMLParserOptions {
   self_close_void_tags?: boolean;
   void_tags?: string[];
 }
-export function ParseHTML(html: string, options: HTMLParserOptions = {}) {
+export function ParseHTML(html: string, options: HTMLParserOptions = {}): NodeHTMLParser.HTMLElement {
   const _options: Partial<Options> = {
     // keep text content when parsing
     // [keep_text_content_when_parsing]
