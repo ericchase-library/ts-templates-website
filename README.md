@@ -52,10 +52,9 @@ bun run format
 
 This folder contains _all_ of the files that are needed to build the website.
 
-`*.template.html`
+`*.html`
 
-- During builds, `*.template.html` files can be processed to produce files with the same name minus the `.template` part. For example, the `<include hello-bun></include>` tag from `./src/index.template.html` will be replaced with the contents of `./src/component/hello-bun.html` during build.
-- This process doesn't happen automatically for all `.template` files. Steps need to be added to the build script `./tools/build.ts` for different kinds of preprocessing. This is just an example to show what you can do with a custom build tool.
+- During builds, `*.html` files are processed to replace tags that look like custom elements from Web Components api by replacing them with the contents of files from `./src/components/` that have the same name. You can still use custom elements and Web Components; just don't reuse the same names.
 
 `./src/lib/`
 
