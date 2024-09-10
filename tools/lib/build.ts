@@ -3,12 +3,13 @@ import { GlobManager, PathGroup } from '../../src/lib/ericchase/Platform/Bun/Pat
 import { type NodeHTMLParser, ParseHTML } from '../../src/lib/ericchase/Platform/Web/HTML/ParseHTML.js';
 
 interface BundleParams {
+  externalImports?: string[];
   outDir?: string;
   sourcemapMode?: Parameters<typeof Bun.build>[0]['sourcemap'];
   toBundle: GlobManager;
   toExclude?: GlobManager;
 }
-export async function bundle({ outDir = './temp', sourcemapMode = 'inline', toBundle, toExclude }: BundleParams) {
+export async function bundle({ externalImports = [], outDir = './temp', sourcemapMode = 'inline', toBundle, toExclude }: BundleParams) {
   const toCopy = new GlobManager();
   const excludePaths = new Set(toExclude?.paths ?? []);
   for (const globGroup of toBundle.globGroups) {
@@ -16,6 +17,7 @@ export async function bundle({ outDir = './temp', sourcemapMode = 'inline', toBu
       if (!excludePaths.has(pathGroup.path)) {
         const { outputs, success } = await Bun.build({
           entrypoints: [pathGroup.path],
+          external: externalImports,
           minify: false,
           sourcemap: sourcemapMode,
           splitting: false,
@@ -31,33 +33,35 @@ export async function bundle({ outDir = './temp', sourcemapMode = 'inline', toBu
   return toCopy;
 }
 
-// interface CompileParams {
-//   outDir?: string;
-//   sourcemapMode?: Parameters<typeof Bun.build>[0]['sourcemap'];
-//   toCompile: GlobManager;
-//   toExclude?: GlobManager;
-// }
-// export async function compile({ outDir = './temp', sourcemapMode = 'inline', toCompile, toExclude }: CompileParams) {
-//   // TODO: use Bun.Transpiler
-//   const excludePaths = new Set(toExclude?.paths ?? []);
-//   for (const globGroup of toCompile.globGroups) {
-//     for (const pathGroup of globGroup.pathGroups) {
-//       if (!excludePaths.has(pathGroup.path)) {
-//         const { outputs, success } = await Bun.build({
-//           entrypoints: [pathGroup.path],
-//           minify: false,
-//           sourcemap: sourcemapMode,
-//           splitting: false,
-//           target: 'browser',
-//         });
-//         if (success) {
-//           await Bun.write(pathGroup.replaceBasedir(outDir).replaceExt('.js').path, outputs[0]);
-//         }
-//       }
-//     }
-//   }
-//   return new GlobManager().scan(outDir, '**/*.js');
-// }
+interface CompileParams {
+  outDir?: string;
+  sourcemapMode?: Parameters<typeof Bun.build>[0]['sourcemap'];
+  toCompile: GlobManager;
+  toExclude?: GlobManager;
+}
+export async function compile({ outDir = './temp', sourcemapMode = 'inline', toCompile, toExclude }: CompileParams) {
+  const toCopy = new GlobManager();
+  const excludePaths = new Set(toExclude?.paths ?? []);
+
+  const transpiler = new Bun.Transpiler({
+    loader: 'tsx',
+    minifyWhitespace: false,
+    target: 'browser',
+  });
+
+  for (const globGroup of toCompile.globGroups) {
+    for (const pathGroup of globGroup.pathGroups) {
+      if (!excludePaths.has(pathGroup.path)) {
+        try {
+          const output = await transpiler.transform(await Bun.file(pathGroup.path).text());
+          await Bun.write(pathGroup.replaceBasedir(outDir).replaceExt('.js').path, output);
+          toCopy.scan(outDir, pathGroup.replaceBasedir('').replaceExt('.js').path);
+        } catch (error) {}
+      }
+    }
+  }
+  return toCopy;
+}
 
 interface CopyParams {
   outDir?: string;

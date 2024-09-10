@@ -14,15 +14,14 @@ const tempDir = NormalizePath('./temp') + '/';
 await CleanDirectory(buildDir);
 await CleanDirectory(tempDir);
 
-const toCopy = new GlobManager() // generally, we want to copy all source files
-  .scan(sourceDir, '**/*');
+const toCopy = new GlobManager().scan(sourceDir, '**/*');
+// generally, we want to copy all source files
 
-const toExclude = new GlobManager() // generally, we don't want to copy lib
-  .scan(sourceDir, 'lib/**/*') //   // files or component html files
-  .scan(sourceDir, 'components/**/*.html');
+const toExclude = new GlobManager().scan(sourceDir, 'components/**/*.html', 'lib/**/*');
+// generally, we don't want to copy lib
+// files or component html files
 
 // Process Components
-const htmlList = ['**/*.html'];
 const customComponentPreprocessor = new CustomComponentPreprocessor();
 /**
  * dot files (like .env) are usually reserved for special use cases. for one of
@@ -40,8 +39,8 @@ for (const { name, path } of new GlobManager().scanDot(sourceDir, 'components/**
 for (const { name, path } of new GlobManager().scan(sourceDir, 'components/**/*.html').pathGroups) {
   customComponentPreprocessor.registerComponentPath(name, path);
 }
-const toProcess = new GlobManager() //
-  .scan(sourceDir, ...htmlList);
+const toProcessListHTML = ['**/*.html'];
+const toProcess = new GlobManager().scan(sourceDir, ...toProcessListHTML);
 toCopy.update(
   await processHTML({
     outDir: tempDir,
@@ -50,28 +49,22 @@ toCopy.update(
     preprocessors: [customComponentPreprocessor.preprocess],
   }),
 );
-toExclude.scan(sourceDir, ...htmlList);
+toExclude.scan(sourceDir, ...toProcessListHTML);
+// report processed counts
 for (const [tag, count] of customComponentPreprocessor.componentUsageCount) {
   ConsoleLog(count === 1 ? '1 copy' : count + ' copies', 'of', tag);
 }
 
 // Bundle
-const tsList = ['**/*.ts'];
-const toBundle = new GlobManager() // the individual compiler script is not yet
-  .scan(sourceDir, ...tsList); // ready, so we just bundle each typescript file
-//                             // that isn't being excluded. they will show up
-//                             // in their respective subdirectories under the
-//                             // build folder.
-
-// processed files are stored in tempDir, so their paths are added to the toCopy set
-toCopy.update(
-  await bundle({
-    outDir: tempDir,
-    toBundle,
-    toExclude,
-  }),
-);
-toExclude.scan(sourceDir, ...tsList);
+const toBundleList = ['**/*.ts'];
+const toBundle = new GlobManager().scan(sourceDir, ...toBundleList);
+await bundle({
+  externalImports: ['*.module.js'],
+  outDir: buildDir,
+  toBundle,
+  toExclude,
+});
+toExclude.scan(sourceDir, ...toBundleList);
 
 // Exclude
 toExclude
@@ -114,3 +107,5 @@ await copy({
 // Cleanup
 // if you ever want to inspect tempDir folder, just comment out this line
 await DeleteDirectory(tempDir);
+
+console.log('---');

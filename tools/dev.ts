@@ -10,12 +10,13 @@ const runBuild = Debounce(async () => {
 runBuild();
 
 try {
-  const watcher = new Watcher('./src', 250);
-  watcher.observe(() => {
-    runBuild();
-  });
+  const watcher_src = new Watcher('./src', 250);
+  const watcher_tools = new Watcher('./tools', 250);
   ConsoleLog();
-  await watcher.done;
+  watcher_src.observe(() => runBuild());
+  watcher_tools.observe(() => runBuild());
+  await watcher_src.done;
+  await watcher_tools.done;
 } catch (error) {
   ConsoleError(error);
 }
