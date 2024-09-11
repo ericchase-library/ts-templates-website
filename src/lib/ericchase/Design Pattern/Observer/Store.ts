@@ -1,7 +1,7 @@
 export type SubscriptionCallback<Value> = (value: Value, unsubscribe: () => void) => void;
 export type UpdateCallback<Value> = (value: Value) => Value;
 
-export class Const<Value> {
+export class ConstantStore<Value> {
   protected subscriptionSet = new Set<SubscriptionCallback<Value>>();
   constructor(protected value?: Value) {}
   subscribe(callback: SubscriptionCallback<Value>): () => void {
@@ -32,6 +32,30 @@ export class Const<Value> {
         });
       }
     }
+  }
+}
+
+export class OptionalStore<Value> {
+  protected store: Store<Value | undefined>;
+  constructor(notifyOnChangeOnly = false) {
+    this.store = new Store<Value | undefined>(undefined, notifyOnChangeOnly);
+  }
+  subscribe(callback: SubscriptionCallback<Value | undefined>): () => void {
+    return this.store.subscribe(callback);
+  }
+  get(): Promise<Value | undefined> {
+    return new Promise<Value | undefined>((resolve) => {
+      this.subscribe((value, unsubscribe) => {
+        unsubscribe();
+        resolve(value);
+      });
+    });
+  }
+  set(value: Value | undefined): void {
+    this.store.set(value);
+  }
+  update(callback: UpdateCallback<Value | undefined>): void {
+    this.store.update(callback);
   }
 }
 
@@ -74,31 +98,7 @@ export class Store<Value> {
   }
 }
 
-export class Optional<Value> {
-  protected store: Store<Value | undefined>;
-  constructor(notifyOnChangeOnly = false) {
-    this.store = new Store<Value | undefined>(undefined, notifyOnChangeOnly);
-  }
-  subscribe(callback: SubscriptionCallback<Value | undefined>): () => void {
-    return this.store.subscribe(callback);
-  }
-  get(): Promise<Value | undefined> {
-    return new Promise<Value | undefined>((resolve) => {
-      this.subscribe((value, unsubscribe) => {
-        unsubscribe();
-        resolve(value);
-      });
-    });
-  }
-  set(value: Value | undefined): void {
-    this.store.set(value);
-  }
-  update(callback: UpdateCallback<Value | undefined>): void {
-    this.store.update(callback);
-  }
-}
-
-export function CompoundSubscription<T extends any[]>(stores: { [K in keyof T]: Store<T[K]> | Optional<T[K]> }, callback: SubscriptionCallback<{ [K in keyof T]: T[K] | undefined }>): () => void {
+export function CompoundSubscription<T extends any[]>(stores: { [K in keyof T]: Store<T[K]> | OptionalStore<T[K]> }, callback: SubscriptionCallback<{ [K in keyof T]: T[K] | undefined }>): () => void {
   const unsubs: (() => void)[] = [];
   const unsubscribe = () => {
     for (const unsub of unsubs) {
@@ -121,4 +121,21 @@ export function CompoundSubscription<T extends any[]>(stores: { [K in keyof T]: 
     });
   }
   return unsubscribe;
+}
+
+export function Once<Value, T extends { subscribe(callback: SubscriptionCallback<Value>): () => void }>(subscribable: T) {
+  return new Promise<Value>((resolve, reject) => {
+    try {
+      let once = false;
+      subscribable.subscribe((value, unsubscribe) => {
+        if (once === true) {
+          unsubscribe();
+          return resolve(value);
+        }
+        once = true;
+      });
+    } catch (error) {
+      return reject(error);
+    }
+  });
 }

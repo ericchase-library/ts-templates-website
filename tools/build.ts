@@ -107,5 +107,3 @@ await copy({
 // Cleanup
 // if you ever want to inspect tempDir folder, just comment out this line
 await DeleteDirectory(tempDir);
-
-console.log('---');
