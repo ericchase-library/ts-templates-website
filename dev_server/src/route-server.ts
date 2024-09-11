@@ -1,5 +1,6 @@
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
+import { ConsoleLog } from './lib/Console.js';
 
 export namespace server {
   export async function getConsole(): Promise<void | Response> {
