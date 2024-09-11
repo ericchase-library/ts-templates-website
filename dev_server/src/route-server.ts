@@ -8,12 +8,12 @@ export namespace server {
   export async function get(pathname: string): Promise<void | Response> {
     switch (pathname) {
       case '/server/restart':
-        console.log('Restarting...');
+        ConsoleLog('Restarting...');
         setTimeout(() => process.exit(1), 100);
         return new Response('Restarting server.');
 
       case '/server/shutdown':
-        console.log('Shutting down...');
+        ConsoleLog('Shutting down...');
         setTimeout(() => process.exit(2), 100);
         return new Response('Shutting down server.');
 

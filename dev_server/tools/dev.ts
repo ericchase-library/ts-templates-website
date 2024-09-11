@@ -1,5 +1,6 @@
 import type { Subprocess } from 'bun';
 
+import { ConsoleError, ConsoleLog } from '../src/lib/Console.js';
 import { Broadcast } from './lib/Broadcast.js';
 import { Watcher } from './lib/Watch.js';
 
@@ -14,20 +15,20 @@ const pipe = new Broadcast<string>();
     let restart = false;
     pipe.wait('restart').then(() => {
       restart = true;
-      console.log('Dev:Restart...');
+      ConsoleLog('Dev:Restart...');
       proc?.kill();
     });
     await proc.exited;
     const code = restart ? 1 : proc.exitCode;
     switch (code) {
       case 1:
-        console.log('Exit Code [1]:Restart');
+        ConsoleLog('Exit Code [1]:Restart');
         break;
       case 2:
-        console.log('Exit Code [2]:Shutdown');
+        ConsoleLog('Exit Code [2]:Shutdown');
         process.exit(0);
       default:
-        console.log(`Exit Code [${code}]`);
+        ConsoleLog(`Exit Code [${code}]`);
         process.stdout.write('Restart? (y/n)');
         for await (const line of console) {
           if (line.trim() === 'y') break;
@@ -35,7 +36,7 @@ const pipe = new Broadcast<string>();
         }
         break;
     }
-    console.log('\n');
+    ConsoleLog('\n');
   }
 })();
 
@@ -47,6 +48,6 @@ while (true) {
     });
     await watcher.done;
   } catch (error) {
-    console.error(error);
+    ConsoleError(error);
   }
 }

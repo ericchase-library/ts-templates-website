@@ -1,10 +1,11 @@
 import path from 'node:path';
 import { server } from './route-server.js';
+import { ConsoleLog } from './lib/Console.js';
 
 export async function get(req: Request): Promise<void | Response> {
   const url = new URL(req.url);
   const pathname = decodeURIComponent(url.pathname);
-  console.log(`GET      ${pathname}`);
+  ConsoleLog(`GET      ${pathname}`);
 
   // server api
   if (url.pathname === '/console') return server.getConsole();

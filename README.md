@@ -87,7 +87,11 @@ You can literally do anything you want, which is the point of this library. Thes
 
 The scripts under `./tools/` also use modules from this library (from `./src/`). To reiterate, the goal of these scripts is not to produce a package; though, you can do that if you want to! For new projects, you would ideally copy the library files from `./src/` (or `./src-stripped` if you don't want the test files and example) into your project's `./src/lib/ericchase/` folder (you can use `ericchase` to distinguish that the folder is from this library, or choose whatever folder name you want), then update the import statements in your project's copy of `./tools/` to match the new location. This is already done for you in the various `ts-templates-` repositories.
 
-### ./local_server/
+### ./dev_database/
+
+A local database for database testing. I've prepared a standard PostgreSQL docker container with some minimal example code in the dev server.
+
+### ./dev_server/
 
 A local web server for testing the website. It is configured to serve files from the `./build/` folder and works like a typical web server.
 

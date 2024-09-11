@@ -14,11 +14,11 @@ try {
   const watcher_tools = new Watcher('./tools', 250);
   ConsoleLog();
   watcher_src.observe(() => {
-    console.log('---');
+    ConsoleLog('---');
     builder.run();
   });
   watcher_tools.observe(() => {
-    console.log('---');
+    ConsoleLog('---');
     builder.run();
   });
   await watcher_src.done;

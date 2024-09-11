@@ -1,4 +1,5 @@
 import type { Subprocess } from 'bun';
+import { ConsoleLog } from '../src/lib/Console.js';
 
 Bun.spawnSync(['bun', 'install']);
 
@@ -8,13 +9,13 @@ while (true) {
   await proc.exited;
   switch (proc.exitCode) {
     case 1:
-      console.log('Exit Code [1]:Restart');
+      ConsoleLog('Exit Code [1]:Restart');
       break;
     case 2:
-      console.log('Exit Code [2]:Shutdown');
+      ConsoleLog('Exit Code [2]:Shutdown');
       process.exit(0);
     default:
-      console.log(`Exit Code [${proc.exitCode}]`);
+      ConsoleLog(`Exit Code [${proc.exitCode}]`);
       process.stdout.write('Restart? (y/n)');
       for await (const line of console) {
         if (line.trim() === 'y') break;
@@ -22,5 +23,5 @@ while (true) {
       }
       break;
   }
-  console.log('\n');
+  ConsoleLog('\n');
 }

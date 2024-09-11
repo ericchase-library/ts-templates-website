@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { ConsoleLog } from './lib/Console.js';
 import { get } from './router.get.js';
 import { options } from './router.options.js';
 import { post } from './router.post.js';
@@ -25,10 +26,10 @@ function createServer(hostname: string, port: number) {
             return response;
           }
         }
-      } catch (err) {
-        console.log();
-        console.log(err);
-        console.log();
+      } catch (error) {
+        ConsoleLog();
+        ConsoleLog(error);
+        ConsoleLog();
       }
       return new Response('404', { status: 404 });
     },
@@ -49,34 +50,34 @@ function getMethodHandler(req: Request): void | ((req: Request) => Promise<void 
 function tryStartServer(hostname: string, port: number) {
   try {
     const server = createServer(hostname, port);
-    console.log('Serving at', `http://${server.hostname === '0.0.0.0' ? 'localhost' : server.hostname}:${server.port}/`);
-    console.log();
-  } catch (err) {
+    ConsoleLog('Serving at', `http://${server.hostname === '0.0.0.0' ? 'localhost' : server.hostname}:${server.port}/`);
+    ConsoleLog();
+  } catch (error) {
     let error_code: 'EADDRINUSE' | 'EBADHOST' | undefined = undefined;
 
-    if (err !== null && typeof err === 'object') {
-      if ('code' in err && err.code === 'EADDRINUSE') error_code = 'EADDRINUSE';
-      if ('message' in err && err.message === 'Failed to start server. Is port 8000 in use?') error_code = 'EADDRINUSE';
+    if (error !== null && typeof error === 'object') {
+      if ('code' in error && error.code === 'EADDRINUSE') error_code = 'EADDRINUSE';
+      if ('message' in error && error.message === 'Failed to start server. Is port 8000 in use?') error_code = 'EADDRINUSE';
     }
 
     if (error_code === 'EADDRINUSE') {
       if (testLocalhostServer(port)) {
         error_code = 'EBADHOST';
       } else {
-        console.log(`${chalk.red(error_code)}${chalk.gray(`: Failed to start server. Is port 8000 in use?`)}`);
-        console.log(`Trying port ${port + 1} next.`);
+        ConsoleLog(`${chalk.red(error_code)}${chalk.gray(`: Failed to start server. Is port 8000 in use?`)}`);
+        ConsoleLog(`Trying port ${port + 1} next.`);
         setTimeout(() => tryStartServer(hostname, port + 1), 0);
         return;
       }
     }
 
     if (error_code === 'EBADHOST') {
-      console.log(`${chalk.red(error_code)}${chalk.gray(`: Hostname ${hostname} may be invalid.`)}`);
-      console.log(`Please try another hostname or use localhost (127.0.0.1) to serve locally.`);
+      ConsoleLog(`${chalk.red(error_code)}${chalk.gray(`: Hostname ${hostname} may be invalid.`)}`);
+      ConsoleLog(`Please try another hostname or use localhost (127.0.0.1) to serve locally.`);
       return;
     }
 
-    console.log(err);
+    ConsoleLog(error);
   }
 }
 
@@ -90,7 +91,7 @@ function testLocalhostServer(port: number) {
     });
     server.stop();
     return true;
-  } catch (err) {
+  } catch (error) {
     return false;
   }
 }
