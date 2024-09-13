@@ -1,8 +1,6 @@
 import { ConsoleLog } from './lib/Console.js';
 
-export async function options(req: Request): Promise<void | Response> {
-  const url = new URL(req.url);
-  const pathname = decodeURIComponent(url.pathname);
+export async function options(req: Request, url: URL, pathname: string): Promise<void | Response> {
   ConsoleLog(`OPTIONS  ${pathname}`);
 
   // custom routing here

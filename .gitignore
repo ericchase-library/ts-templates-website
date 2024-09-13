@@ -32,3 +32,4 @@ yarn-error.log*
 **/debug/*
 **/src-tauri/target
 sync.ffs_db
+tools/cache

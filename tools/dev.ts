@@ -1,28 +1,35 @@
 import { Debouncer } from '../src/lib/ericchase/Algorithm/Debounce.js';
-import { Run } from '../src/lib/ericchase/Platform/Bun/Process.js';
 import { Watcher } from '../src/lib/ericchase/Platform/Node/Watch.js';
-import { ConsoleError, ConsoleLog } from '../src/lib/ericchase/Utility/Console.js';
+import { ConsoleError } from '../src/lib/ericchase/Utility/Console.js';
+import { server_http } from '../src/server.js';
+import { buildClear, buildSteps, onLog } from './build.js';
 
 const builder = new Debouncer(async () => {
-  await Run('bun run build');
-}, 250);
+  await buildSteps(true);
+}, 100);
+const reloader = new Debouncer(async () => {
+  await fetch(server_http + '/server/reload');
+}, 200);
 
-builder.run();
+await buildClear();
+await builder.run();
 
 try {
-  const watcher_src = new Watcher('./src', 250);
-  const watcher_tools = new Watcher('./tools', 250);
-  ConsoleLog();
-  watcher_src.observe(() => {
-    ConsoleLog('---');
-    builder.run();
+  await fetch(server_http);
+  ConsoleError('Hot Reloading ON');
+  onLog.subscribe(() => {
+    reloader.run();
   });
-  watcher_tools.observe(() => {
-    ConsoleLog('---');
-    builder.run();
+} catch (error) {
+  ConsoleError('Hot Reloading OFF. Is server running? (`bun run serve`)');
+}
+
+try {
+  const watcher_src = new Watcher('./src', 100);
+  watcher_src.observe(async () => {
+    await builder.run();
   });
   await watcher_src.done;
-  await watcher_tools.done;
 } catch (error) {
   ConsoleError(error);
 }

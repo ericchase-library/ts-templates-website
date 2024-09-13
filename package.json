@@ -1,6 +1,5 @@
 {
   "scripts": {
-    "all": "bun ./tools/all.ts",
     "build": "bun ./tools/build.ts",
     "dev": "bun ./tools/dev.ts",
     "serve": "bun ./tools/serve.ts",

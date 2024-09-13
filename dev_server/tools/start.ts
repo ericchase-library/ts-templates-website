@@ -1,7 +1,8 @@
 import type { Subprocess } from 'bun';
 import { ConsoleLog } from '../src/lib/Console.js';
 
-Bun.spawnSync(['bun', 'install']);
+Bun.spawnSync(['bun', 'update']);
+Bun.spawnSync(['bun', 'run', 'format']);
 
 let proc: Subprocess<'ignore', 'inherit', 'inherit'> | undefined = undefined;
 while (true) {

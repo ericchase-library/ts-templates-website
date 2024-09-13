@@ -1,12 +1,25 @@
+import { server_http, server_ws } from './server.js';
+
 import { DatabaseDriver } from './database-drivers/dbdriver.module.js';
 import { ConsoleError } from './lib/ericchase/Utility/Console.js';
 import { NodeRef } from './lib/ericchase/Web API/Node_Utility.js';
 
 //                                                                          \\
 //
+// Hot Reload
+
+const socket = new WebSocket(server_ws);
+socket.addEventListener('message', (event) => {
+  if (event.data === 'reload') {
+    window.location.reload();
+  }
+});
+
+//                                                                          \\
+//
 // Postgres Queries
 
-const db_query = DatabaseDriver.getLocalhost();
+const db_query = DatabaseDriver.getLocalhost(server_http);
 
 async function DatabaseConnected(): Promise<boolean> {
   try {

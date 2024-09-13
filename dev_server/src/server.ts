@@ -15,13 +15,25 @@ Bun.env.PUBLIC_PATH = PUBLIC_PATH;
 
 tryStartServer(PREFERRED_HOSTNAME, PREFERRED_PORT);
 
+type WebSocketData = {};
 function createServer(hostname: string, port: number) {
-  const server = Bun.serve({
+  const server = Bun.serve<WebSocketData>({
     async fetch(req) {
       try {
-        const handler = getMethodHandler(req);
+        const method = req.method;
+        const url = new URL(req.url);
+        const pathname = decodeURIComponent(url.pathname);
+
+        if (server.upgrade(req)) {
+          return;
+        }
+        if (method === 'GET' && pathname === '/server/reload') {
+          server.publish('ws', 'reload');
+          return new Response('OK', { status: 204 });
+        }
+        const handler = getMethodHandler(method);
         if (handler) {
-          const response = await handler(req);
+          const response = await handler(req, url, pathname);
           if (response) {
             return response;
           }
@@ -35,16 +47,26 @@ function createServer(hostname: string, port: number) {
     },
     hostname: hostname,
     port,
+    websocket: {
+      close(ws) {
+        ws.unsubscribe('ws');
+      },
+      message(ws, message) {},
+      open(ws) {
+        ws.subscribe('ws');
+      },
+      perMessageDeflate: false,
+    },
   });
   return server;
 }
 
-function getMethodHandler(req: Request): void | ((req: Request) => Promise<void | Response>) {
+function getMethodHandler(method: string): void | ((req: Request, url: URL, pathname: string) => Promise<void | Response>) {
   return {
     GET: get,
     OPTIONS: options,
     POST: post,
-  }[req.method.toUpperCase()];
+  }[method.toUpperCase()];
 }
 
 function tryStartServer(hostname: string, port: number) {

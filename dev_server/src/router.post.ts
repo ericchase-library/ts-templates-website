@@ -1,9 +1,7 @@
 import { query } from './db.js';
 import { ConsoleLog } from './lib/Console.js';
 
-export async function post(req: Request): Promise<void | Response> {
-  const url = new URL(req.url);
-  const pathname = decodeURIComponent(url.pathname);
+export async function post(req: Request, url: URL, pathname: string): Promise<void | Response> {
   ConsoleLog(`POST     ${pathname}`);
 
   // ConsoleLog(`HEADERS`);

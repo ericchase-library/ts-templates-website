@@ -4,7 +4,8 @@ import { ConsoleError, ConsoleLog } from '../src/lib/Console.js';
 import { Broadcast } from './lib/Broadcast.js';
 import { Watcher } from './lib/Watch.js';
 
-Bun.spawnSync(['bun', 'install']);
+Bun.spawnSync(['bun', 'update']);
+Bun.spawnSync(['bun', 'run', 'format']);
 
 const pipe = new Broadcast<string>();
 

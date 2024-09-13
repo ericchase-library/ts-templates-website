@@ -1,6 +1,5 @@
-async function localhost_query(text: string, params: any[]): Promise<any> {
-  const local_address = 'http://127.0.0.1:8000';
-  const response = await fetch(local_address + '/database/query', {
+async function localhost_query(address: string, text: string, params: any[]): Promise<any> {
+  const response = await fetch(address + '/database/query', {
     method: 'POST',
     body: JSON.stringify({ text, params }),
   });
@@ -11,7 +10,7 @@ async function localhost_query(text: string, params: any[]): Promise<any> {
 }
 
 export const DatabaseDriver = {
-  getLocalhost() {
-    return localhost_query;
+  getLocalhost(address: string) {
+    return localhost_query.bind(localhost_query, address);
   },
 };

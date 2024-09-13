@@ -2,10 +2,11 @@ import { type NodeHTMLParser, ParseHTML } from '../../src/lib/ericchase/Platform
 import { LazyTask } from '../../src/lib/ericchase/Utility/Task.js';
 import type { HTMLPreprocessor } from './build.js';
 
-export class CustomComponentPreprocessor {
-  componentUsageCount = new Map<string, number>();
+export class CustomComponentPreprocessor implements HTMLPreprocessor {
   componentLoaders = new Map<string, LazyTask<string | undefined>>();
-  get preprocess(): HTMLPreprocessor {
+  componentPaths = new Set<string>();
+  componentUsageCount = new Map<string, number>();
+  get preprocess() {
     return async (root: NodeHTMLParser.HTMLElement) => {
       for (const [tag, loader] of this.componentLoaders) {
         const targetElements = root.querySelectorAll(tag);
@@ -63,7 +64,6 @@ export class CustomComponentPreprocessor {
   }
   registerComponentPath(tag: string, path: string, as_is = false) {
     if (!this.componentLoaders.has(tag)) {
-      this.componentUsageCount.set(tag, 0);
       this.componentLoaders.set(
         tag,
         new LazyTask(async () => {
@@ -77,6 +77,8 @@ export class CustomComponentPreprocessor {
           } catch (error) {}
         }),
       );
+      this.componentPaths.add(path);
+      this.componentUsageCount.set(tag, 0);
     }
     return this;
   }

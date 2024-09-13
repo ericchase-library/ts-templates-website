@@ -13,5 +13,7 @@
     "strict": true,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true
-  }
+  },
+  "include": ["src", "tools"],
+  "exclude": ["dev_server"]
 }

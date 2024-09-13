@@ -1,4 +1,4 @@
-import node_path from 'node:path';
+import { default as node_path } from 'node:path';
 
 export class PathGroup {
   constructor(
@@ -6,8 +6,12 @@ export class PathGroup {
     public readonly dir: string,
     public readonly name: string,
     public readonly ext: string,
-  ) {}
-  static new(basedir: string, path: string) {
+  ) {
+    if (ext.length > 0) {
+      this.ext = '.' + ext.slice(ext.lastIndexOf('.') + 1);
+    }
+  }
+  static new({ basedir = '', path = '' }: { basedir?: string; path?: string }) {
     const { dir, name, ext } = node_path.parse(node_path.normalize(path));
     return new PathGroup(basedir, dir, name, ext);
   }
@@ -28,6 +32,34 @@ export class PathGroup {
   }
 }
 
+export class PathManager {
+  constructor(public readonly pathGroupSet = new Set<PathGroup>()) {}
+  get pathGroups() {
+    return this.pathGroup_iterator();
+  }
+  get paths() {
+    return this.path_iterator();
+  }
+  add({ basedir = '', path = '' }: { basedir?: string; path?: string }) {
+    this.pathGroupSet.add(PathGroup.new({ basedir, path }));
+    return this;
+  }
+  addGroup(pathGroup: PathGroup) {
+    this.pathGroupSet.add(pathGroup);
+    return this;
+  }
+  *pathGroup_iterator() {
+    for (const pathGroup of this.pathGroupSet) {
+      yield pathGroup;
+    }
+  }
+  *path_iterator() {
+    for (const pathGroup of this.pathGroupSet) {
+      yield pathGroup.path;
+    }
+  }
+}
+
 export class GlobGroup {
   constructor(
     public readonly basedir: string,
@@ -38,7 +70,7 @@ export class GlobGroup {
     basedir = node_path.normalize(basedir);
     const pathGroupSet = new Set<PathGroup>();
     for (const path of new Bun.Glob(pattern).scanSync({ cwd: basedir, dot })) {
-      pathGroupSet.add(PathGroup.new(basedir, path));
+      pathGroupSet.add(PathGroup.new({ basedir, path }));
     }
     return new GlobGroup(basedir, pattern, pathGroupSet);
   }
