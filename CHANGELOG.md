@@ -1,4 +1,4 @@
-### 2024-09-13
+## 2024-09-13
 
 **dev_server**
 
@@ -27,7 +27,7 @@
 
 will update this later if i missed anything
 
-### 2024-09-11
+## 2024-09-11
 
 **dev_database**
 
