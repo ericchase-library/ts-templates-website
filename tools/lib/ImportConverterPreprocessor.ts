@@ -1,5 +1,5 @@
 import { PathGroup } from '../../src/lib/ericchase/Platform/Bun/Path.js';
-import { type NodeHTMLParser } from '../../src/lib/ericchase/Platform/Web/HTML/ParseHTML.js';
+import type { NodeHTMLParser } from '../../src/lib/ericchase/Platform/Web/HTML/ParseHTML.js';
 import type { HTMLPreprocessor } from './build.js';
 
 export class ImportConverterPreprocessor implements HTMLPreprocessor {

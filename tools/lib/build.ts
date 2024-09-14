@@ -3,7 +3,7 @@ import type { Subprocess } from 'bun';
 import { AsyncLineReader } from '../../src/lib/ericchase/Algorithm/Stream/AsyncReader.js';
 import { Broadcast } from '../../src/lib/ericchase/Design Pattern/Observer/Broadcast.js';
 import { CopyFile } from '../../src/lib/ericchase/Platform/Bun/Fs.js';
-import { GlobManager, PathGroup, PathManager } from '../../src/lib/ericchase/Platform/Bun/Path.js';
+import { type GlobManager, PathGroup, PathManager } from '../../src/lib/ericchase/Platform/Bun/Path.js';
 import { type NodeHTMLParser, ParseHTML } from '../../src/lib/ericchase/Platform/Web/HTML/ParseHTML.js';
 import { CacheIsModified } from './cache.js';
 
@@ -37,7 +37,7 @@ export class BuildRunner {
       process.kill();
     }
   }
-  build({ entry, externalImports = ['*.module.js'], outDir = 'out', sourcemapMode = 'linked', watch = false }: BuildParams): Subprocess<'ignore', 'pipe', 'pipe'> | void {
+  build({ entry, externalImports = ['*.module.js'], outDir = 'out', sourcemapMode = 'linked', watch = false }: BuildParams): Subprocess<'ignore', 'pipe', 'pipe'> | undefined {
     if (this.subprocessMap.has(entry.path)) {
       return;
     }
@@ -45,7 +45,7 @@ export class BuildRunner {
     for (const pattern of externalImports) {
       args.push('--external', pattern);
     }
-    args.push('--sourcemap=' + sourcemapMode);
+    args.push(`--sourcemap=${sourcemapMode}`);
     args.push('--target', 'browser');
     if (watch === true) {
       args.push('--watch');
@@ -63,8 +63,14 @@ export class BuildRunner {
     })();
     return process;
   }
-  watch({ entry, externalImports = ['*.module.js'], outDir = 'out', sourcemapMode = 'linked' }: BuildParams): Subprocess<'ignore', 'pipe', 'pipe'> | void {
-    return this.build({ entry, externalImports, outDir, sourcemapMode, watch: true });
+  watch({ entry, externalImports = ['*.module.js'], outDir = 'out', sourcemapMode = 'linked' }: BuildParams): Subprocess<'ignore', 'pipe', 'pipe'> | undefined {
+    return this.build({
+      entry,
+      externalImports,
+      outDir,
+      sourcemapMode,
+      watch: true,
+    });
   }
 }
 

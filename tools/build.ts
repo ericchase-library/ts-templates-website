@@ -65,7 +65,7 @@ export async function buildSteps(watch = false) {
   }
   for (const [tag, count] of customComponentPreprocessor.componentUsageCount) {
     // report component copy counters
-    Log(`${count === 1 ? '1 copy' : count + ' copies'} of ${tag}`);
+    Log(`${count === 1 ? '1 copy' : `${count} copies`} of ${tag}`);
   }
 
   // Build Typescript Bundles
@@ -123,8 +123,9 @@ export async function buildClear() {
 
 if (Bun.argv[1] === __filename) {
   await Run('bun update');
+  await Run('bun run format-silent');
   await buildClear();
   await buildSteps();
-  await Run('bun run format');
+  await Run('bun run format-silent');
   // await Run('bun test');
 }

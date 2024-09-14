@@ -24,10 +24,10 @@ export class RegionHighlighter {
   draw(this: RegionHighlighter) {
     const { x, y, width, height } = this.rect;
     if (width > 15 && height > 15) {
-      this.element.style.left = x + 'px';
-      this.element.style.top = y + 'px';
-      this.element.style.width = width + 'px';
-      this.element.style.height = height + 'px';
+      this.element.style.left = `${x}px`;
+      this.element.style.top = `${y}px`;
+      this.element.style.width = `${width}px`;
+      this.element.style.height = `${height}px`;
       this.show();
     } else {
       this.element.style.left = '0';

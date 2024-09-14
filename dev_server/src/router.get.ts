@@ -2,7 +2,7 @@ import path from 'node:path';
 import { ConsoleLog } from './lib/Console.js';
 import { server } from './route-server.js';
 
-export async function get(req: Request, url: URL, pathname: string): Promise<void | Response> {
+export async function get(req: Request, url: URL, pathname: string): Promise<Response | undefined> {
   ConsoleLog(`GET      ${pathname}`);
 
   // server api
@@ -11,14 +11,15 @@ export async function get(req: Request, url: URL, pathname: string): Promise<voi
 
   // custom routing here
   switch (pathname) {
-    case '/':
+    case '/': {
       return getPublicResource('index.html');
+    }
   }
 
   return getPublicResource(pathname);
 }
 
-async function getPublicResource(pathname: string): Promise<void | Response> {
+async function getPublicResource(pathname: string): Promise<Response | undefined> {
   if (Bun.env.PUBLIC_PATH) {
     const public_path = path.normalize(Bun.env.PUBLIC_PATH);
     const resource_path = path.join(public_path, path.normalize(pathname));

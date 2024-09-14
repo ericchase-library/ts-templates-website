@@ -2,7 +2,7 @@ import { Client } from 'pg';
 import { ConsoleError } from './lib/Console.js';
 
 const getClient = (() => {
-  let client: Client | undefined = undefined;
+  const client: Client | undefined = undefined;
   return async (): Promise<Client> => {
     try {
       if (client === undefined) {

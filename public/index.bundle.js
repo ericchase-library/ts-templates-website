@@ -1,9 +1,3 @@
-// src/server.ts
-var host = '127.0.0.1';
-var port = '8000';
-var server_ws = `ws://${host}:${port}`;
-var server_http = `http://${host}:${port}`;
-
 // src/index.bundle.ts
 import { DatabaseDriver } from './database-drivers/dbdriver.module.js';
 
@@ -27,20 +21,20 @@ class CNodeRef {
     }
     this.node = node;
   }
-  as(constructor) {
-    if (this.node instanceof constructor) return this.node;
-    throw new TypeError(`Reference node is not ${constructor}`);
+  as(constructor_ref) {
+    if (this.node instanceof constructor_ref) return this.node;
+    throw new TypeError(`Reference node is not ${constructor_ref}`);
   }
-  is(constructor) {
-    return this.node instanceof constructor;
+  is(constructor_ref) {
+    return this.node instanceof constructor_ref;
   }
-  passAs(constructor, fn) {
-    if (this.node instanceof constructor) {
+  passAs(constructor_ref, fn) {
+    if (this.node instanceof constructor_ref) {
       fn(this.node);
     }
   }
-  tryAs(constructor) {
-    if (this.node instanceof constructor) {
+  tryAs(constructor_ref) {
+    if (this.node instanceof constructor_ref) {
       return this.node;
     }
   }
@@ -57,25 +51,35 @@ class CNodeRef {
     return this.as(HTMLElement).getAttribute(qualifiedName);
   }
   setAttribute(qualifiedName, value) {
-    return this.as(HTMLElement).setAttribute(qualifiedName, value);
+    this.as(HTMLElement).setAttribute(qualifiedName, value);
   }
   getStyleProperty(property) {
     return this.as(HTMLElement).style.getPropertyValue(property);
   }
   setStyleProperty(property, value, priority) {
-    return this.as(HTMLElement).style.setProperty(property, value, priority);
+    this.as(HTMLElement).style.setProperty(property, value, priority);
   }
 }
 
+// src/server/server.ts
+function EnableHotReload() {
+  const socket = new WebSocket(server_ws);
+  socket.addEventListener('message', (event) => {
+    if (event.data === 'reload') {
+      window.location.reload();
+    }
+  });
+}
+var host = '127.0.0.1';
+var port = '8000';
+var server_ws = `ws://${host}:${port}`;
+var server_http = `http://${host}:${port}`;
+
 // src/index.bundle.ts
 async function DatabaseConnected() {
-  try {
-    const q = `SELECT 1`;
-    await db_query(q, []);
-    return true;
-  } catch (error) {
-    throw error;
-  }
+  const q = 'SELECT 1';
+  await db_query(q, []);
+  return true;
 }
 async function CreateTable(name) {
   const q = `
@@ -103,23 +107,17 @@ async function EnsureTableExists(name) {
   try {
     if ((await TableExists(name)) === true) {
       return { created: false, exists: true };
-    } else {
-      await CreateTable(name);
-      if ((await TableExists(name)) === true) {
-        return { created: true, exists: true };
-      }
+    }
+    await CreateTable(name);
+    if ((await TableExists(name)) === true) {
+      return { created: true, exists: true };
     }
   } catch (error) {
     ConsoleError(error);
   }
   return { created: false, exists: false };
 }
-var socket = new WebSocket(server_ws);
-socket.addEventListener('message', (event) => {
-  if (event.data === 'reload') {
-    window.location.reload();
-  }
-});
+EnableHotReload();
 var db_query = DatabaseDriver.getLocalhost(server_http);
 
 class Page {
@@ -159,5 +157,5 @@ try {
   page.addMessage('Is server running? Check api endpoint.');
 }
 
-//# debugId=5F21858A30270DC764756E2164756E21
+//# debugId=2DF844628A24AE1264756E2164756E21
 //# sourceMappingURL=index.bundle.js.map

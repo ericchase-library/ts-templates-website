@@ -1,7 +1,7 @@
 import { query } from './db.js';
 import { ConsoleLog } from './lib/Console.js';
 
-export async function post(req: Request, url: URL, pathname: string): Promise<void | Response> {
+export async function post(req: Request, url: URL, pathname: string): Promise<Response | undefined> {
   ConsoleLog(`POST     ${pathname}`);
 
   // ConsoleLog(`HEADERS`);

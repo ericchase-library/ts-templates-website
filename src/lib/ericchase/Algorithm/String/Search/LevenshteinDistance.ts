@@ -22,72 +22,65 @@
 
 // https://github.com/gustf/js-levenshtein
 
-'use strict';
-
 function _min(d0: number, d1: number, d2: number, bx: number, ay: number): number {
   return d0 < d1 || d2 < d1 ? (d0 > d2 ? d2 + 1 : d0 + 1) : bx === ay ? d1 : d1 + 1;
 }
 
 export function levenshtein_distance(a: string, b: string): number {
+  let tmp = a;
   if (a === b) {
     return 0;
   }
-
   if (a.length > b.length) {
-    var tmp = a;
+    tmp = a;
+    // biome-ignore lint: string are literal
     a = b;
+    // biome-ignore lint: string are literal
     b = tmp;
   }
-
-  var la = a.length;
-  var lb = b.length;
-
+  let la = a.length;
+  let lb = b.length;
   while (la > 0 && a.charCodeAt(la - 1) === b.charCodeAt(lb - 1)) {
     la--;
     lb--;
   }
-
-  var offset = 0;
-
+  let offset = 0;
   while (offset < la && a.charCodeAt(offset) === b.charCodeAt(offset)) {
     offset++;
   }
-
   la -= offset;
   lb -= offset;
-
   if (la === 0 || lb < 3) {
     return lb;
   }
-
-  var x = 0;
-  var y: number;
-  var d0: number;
-  var d1: number;
-  var d2: number;
-  var d3: number;
-  var dd: number = 0;
-  var dy: number;
-  var ay: number;
-  var bx0: number;
-  var bx1: number;
-  var bx2: number;
-  var bx3: number;
-
-  var vector: number[] = [];
-
+  let x = 0;
+  let y: number;
+  let d0: number;
+  let d1: number;
+  let d2: number;
+  let d3: number;
+  let dd = 0;
+  let dy: number;
+  let ay: number;
+  let bx0: number;
+  let bx1: number;
+  let bx2: number;
+  let bx3: number;
+  const vector: number[] = [];
   for (y = 0; y < la; y++) {
     vector.push(y + 1);
     vector.push(a.charCodeAt(offset + y));
   }
-
-  var len = vector.length - 1;
-
-  for (; x < lb - 3; ) {
-    bx0 = b.charCodeAt(offset + (d0 = x));
-    bx1 = b.charCodeAt(offset + (d1 = x + 1));
-    bx2 = b.charCodeAt(offset + (d2 = x + 2));
-    bx3 = b.charCodeAt(offset + (d3 = x + 3));
+  const len = vector.length - 1;
+  while (x < lb - 3) {
+    bx0 = b.charCodeAt(offset + x);
+    bx1 = b.charCodeAt(offset + x + 1);
+    bx2 = b.charCodeAt(offset + x + 2);
+    bx3 = b.charCodeAt(offset + x + 3);
+    d0 = x;
+    d1 = x + 1;
+    d2 = x + 2;
+    d3 = x + 3;
     dd = x += 4;
     for (y = 0; y < len; y += 2) {
       dy = vector[y];
@@ -103,9 +96,9 @@ export function levenshtein_distance(a: string, b: string): number {
       d0 = dy;
     }
   }
-
-  for (; x < lb; ) {
-    bx0 = b.charCodeAt(offset + (d0 = x));
+  while (x < lb) {
+    bx0 = b.charCodeAt(offset + x);
+    d0 = x;
     dd = ++x;
     for (y = 0; y < len; y += 2) {
       dy = vector[y];
@@ -113,6 +106,5 @@ export function levenshtein_distance(a: string, b: string): number {
       d0 = dy;
     }
   }
-
   return dd;
 }

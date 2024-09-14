@@ -1,51 +1,51 @@
-export type SubscriptionCallback = () => { abort: boolean } | void;
+export type SubscriptionCallback = () => { abort: boolean } | undefined;
 
 export interface WebRequest {
   bodyDetails?: chrome.webRequest.WebRequestBodyDetails;
   headersDetails?: chrome.webRequest.WebRequestHeadersDetails;
 }
 
-export class WebRequestCache {
-  static RequestIdToRequestMap = new Map<string, WebRequest>();
-  static TabIdToRequestMap = new Map<number, WebRequest>();
-  static AddBody(details: chrome.webRequest.WebRequestBodyDetails) {
-    const webRequest = this.RequestIdToRequestMap.get(details.requestId);
+export namespace WebRequestCache {
+  export const RequestIdToRequestMap = new Map<string, WebRequest>();
+  export const SubscriptionSet = new Set<SubscriptionCallback>();
+  export const TabIdToRequestMap = new Map<number, WebRequest>();
+  export function AddBody(details: chrome.webRequest.WebRequestBodyDetails) {
+    const webRequest = WebRequestCache.RequestIdToRequestMap.get(details.requestId);
     if (webRequest) {
       webRequest.bodyDetails = details;
     } else {
       const webRequest: WebRequest = { bodyDetails: details };
-      this.RequestIdToRequestMap.set(details.requestId, webRequest);
-      this.TabIdToRequestMap.set(details.tabId, webRequest);
+      WebRequestCache.RequestIdToRequestMap.set(details.requestId, webRequest);
+      WebRequestCache.TabIdToRequestMap.set(details.tabId, webRequest);
     }
   }
-  static AddHeaders(details: chrome.webRequest.WebRequestHeadersDetails) {
-    const webRequest = this.RequestIdToRequestMap.get(details.requestId);
+  export function AddHeaders(details: chrome.webRequest.WebRequestHeadersDetails) {
+    const webRequest = WebRequestCache.RequestIdToRequestMap.get(details.requestId);
     if (webRequest) {
       webRequest.headersDetails = details;
     } else {
       const webRequest: WebRequest = { headersDetails: details };
-      this.RequestIdToRequestMap.set(details.requestId, webRequest);
-      this.TabIdToRequestMap.set(details.tabId, webRequest);
+      WebRequestCache.RequestIdToRequestMap.set(details.requestId, webRequest);
+      WebRequestCache.TabIdToRequestMap.set(details.tabId, webRequest);
     }
-    this.Notify();
+    WebRequestCache.Notify();
   }
-  static SubscriptionSet = new Set<SubscriptionCallback>();
-  static Subscribe(callback: SubscriptionCallback): () => void {
-    this.SubscriptionSet.add(callback);
+  export function Notify() {
+    for (const callback of WebRequestCache.SubscriptionSet) {
+      if (callback()?.abort === true) {
+        WebRequestCache.SubscriptionSet.delete(callback);
+      }
+    }
+  }
+  export function Subscribe(callback: SubscriptionCallback): () => undefined {
+    WebRequestCache.SubscriptionSet.add(callback);
     if (callback()?.abort === true) {
-      this.SubscriptionSet.delete(callback);
+      WebRequestCache.SubscriptionSet.delete(callback);
       return () => {};
     }
     return () => {
-      this.SubscriptionSet.delete(callback);
+      WebRequestCache.SubscriptionSet.delete(callback);
     };
-  }
-  static Notify() {
-    for (const callback of this.SubscriptionSet) {
-      if (callback()?.abort === true) {
-        this.SubscriptionSet.delete(callback);
-      }
-    }
   }
 }
 

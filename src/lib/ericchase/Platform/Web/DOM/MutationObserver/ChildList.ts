@@ -7,7 +7,10 @@ export class ChildListObserver {
         this.send(record);
       }
     });
-    this.mutationObserver.observe(source, { childList: true, subtree: options.subtree ?? true });
+    this.mutationObserver.observe(source, {
+      childList: true,
+      subtree: options.subtree ?? true,
+    });
   }
   public subscribe(callback: SubscriptionCallback): () => void {
     this.subscriptionSet.add(callback);

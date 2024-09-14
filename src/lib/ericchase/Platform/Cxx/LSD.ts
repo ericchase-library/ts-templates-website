@@ -105,7 +105,7 @@ export async function FilterDirectoryTree(
     for (const entry of stdout.split('\n') ?? []) {
       if (entry.length > 0) {
         const entry_name = entry.slice(2);
-        const entry_path = directories[i] + '/' + entry_name;
+        const entry_path = `${directories[i]}/${entry_name}`;
         if (entry[0] === 'D') {
           if (options.ignore_paths?.length === 0 || !options.ignore_paths?.some((ignore) => entry_path.includes(ignore))) {
             directories.push(entry_path);

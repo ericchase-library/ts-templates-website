@@ -1,5 +1,5 @@
 import { Database } from 'bun:sqlite';
-import fs from 'fs';
+import fs from 'node:fs';
 
 import { CreateDirectory } from '../../src/lib/ericchase/Platform/Node/Fs.js';
 import { NormalizePath } from '../../src/lib/ericchase/Platform/Node/Path.js';

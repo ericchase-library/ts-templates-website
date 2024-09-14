@@ -1,4 +1,4 @@
-import { HTMLElement as NodeHTMLParser_HTMLElement, parse, type Options } from 'node-html-parser';
+import { type HTMLElement as NodeHTMLParser_HTMLElement, parse, type Options } from 'node-html-parser';
 
 export namespace NodeHTMLParser {
   export type HTMLElement = NodeHTMLParser_HTMLElement;

@@ -1,7 +1,17 @@
 export type SubscriptionCallback = (element: Element, unsubscribe: () => void) => void;
 
 export class ElementAddedObserver {
-  constructor({ source = document.documentElement, options = { subtree: true }, selector, includeExistingElements = true }: { source?: Node & { querySelectorAll?: Function }; options?: { subtree?: boolean }; selector: string; includeExistingElements?: boolean }) {
+  constructor({
+    source = document.documentElement,
+    options = { subtree: true },
+    selector,
+    includeExistingElements = true,
+  }: {
+    source?: Node;
+    options?: { subtree?: boolean };
+    selector: string;
+    includeExistingElements?: boolean;
+  }) {
     this.mutationObserver = new MutationObserver((mutationRecords: MutationRecord[]) => {
       for (const record of mutationRecords) {
         if (record.target instanceof Element && record.target.matches(selector)) {
@@ -15,8 +25,10 @@ export class ElementAddedObserver {
         }
       }
     });
-    this.mutationObserver.observe(source, { childList: true, subtree: options.subtree ?? true });
-
+    this.mutationObserver.observe(source, {
+      childList: true,
+      subtree: options.subtree ?? true,
+    });
     if (includeExistingElements === true) {
       const treeWalker = document.createTreeWalker(document, NodeFilter.SHOW_ELEMENT);
       while (treeWalker.nextNode()) {

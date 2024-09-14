@@ -1,11 +1,11 @@
 import { ConsoleLog } from './lib/Console.js';
 
-export async function options(req: Request, url: URL, pathname: string): Promise<void | Response> {
+export async function options(req: Request, url: URL, pathname: string): Promise<Response | undefined> {
   ConsoleLog(`OPTIONS  ${pathname}`);
 
   // custom routing here
   switch (pathname) {
-    case '/database':
+    case '/database': {
       // Example case of dealing with a public database?
       // For this example, the client might request content-type of JSON,
       //  so the "content-type" header should be allowed.
@@ -21,5 +21,6 @@ export async function options(req: Request, url: URL, pathname: string): Promise
         },
         status: 204, // 204 No Content
       });
+    }
   }
 }

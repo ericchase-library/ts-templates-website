@@ -1,4 +1,3 @@
-//! use Bun.HTMLRewriter instead
 import * as Parser from 'node-html-parser';
 import node_fs from 'node:fs/promises';
 import { ParseHTML } from './ParseHTML.js';
@@ -8,7 +7,7 @@ export async function LoadHtmlFile(filePath: string) {
     const html = await node_fs.readFile(filePath, { encoding: 'utf8' });
     return ParseHTML(html);
   } catch (err) {
-    throw 'Could not open file: ' + filePath;
+    throw `Could not open file: ${filePath}`;
   }
 }
 export async function SaveHtmlFile(root: Parser.HTMLElement, filePath: string) {
@@ -25,26 +24,25 @@ export async function LoadIncludeFile(includeName: string, includePath: string) 
     includeMap.set(includeName, html);
     return html;
   } catch (err) {
-    throw 'Could not open file: ' + includePath;
+    throw `Could not open file: ${includePath}`;
   }
 }
 async function getInclude(includeName: string) {
   const html = includeMap.get(includeName);
   if (html) {
     return ParseHTML(html);
-  } else {
-    try {
-      return ParseHTML(await LoadIncludeFile(includeName, includeName + '.html'));
-    } catch (err) {
-      throw 'Could not load include: ' + includeName;
-    }
+  }
+  try {
+    return ParseHTML(await LoadIncludeFile(includeName, `${includeName}.html`));
+  } catch (err) {
+    throw `Could not load include: ${includeName}`;
   }
 }
 
 export async function ProcessTemplateNode(root: Parser.HTMLElement) {
   const stack = toReversed(root.childNodes);
   while (stack.length > 0) {
-    const node = stack.pop()!;
+    const node = stack.pop();
     if (node instanceof Parser.HTMLElement) {
       if (node.tagName === 'INCLUDE') {
         const newNode = await processInclude(node);
@@ -65,7 +63,7 @@ async function processInclude(oldItem: Parser.HTMLElement) {
   const includeName = Object.keys(oldItem.attributes)[0];
   oldItem.removeAttribute(includeName);
   const root = await getInclude(includeName);
-  const newItem = (function () {
+  const newItem = (() => {
     const childNodes = trimNodelist(root.childNodes);
     if (childNodes.length === 1) {
       oldItem.replaceWith(childNodes[0]);
@@ -106,7 +104,7 @@ async function processInclude(oldItem: Parser.HTMLElement) {
 function findSlot(root: Parser.HTMLElement) {
   const stack = toReversed(root.childNodes);
   while (stack.length > 0) {
-    const item = stack.pop()!;
+    const item = stack.pop();
     if (item instanceof Parser.HTMLElement) {
       if (item.tagName === 'SLOT') {
         return item;

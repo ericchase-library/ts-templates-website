@@ -1,19 +1,9 @@
-import { server_http, server_ws } from './server.js';
-
 import { DatabaseDriver } from './database-drivers/dbdriver.module.js';
 import { ConsoleError } from './lib/ericchase/Utility/Console.js';
 import { NodeRef } from './lib/ericchase/Web API/Node_Utility.js';
+import { EnableHotReload, server_http } from './server/server.js';
 
-//                                                                          \\
-//
-// Hot Reload
-
-const socket = new WebSocket(server_ws);
-socket.addEventListener('message', (event) => {
-  if (event.data === 'reload') {
-    window.location.reload();
-  }
-});
+EnableHotReload();
 
 //                                                                          \\
 //
@@ -22,13 +12,9 @@ socket.addEventListener('message', (event) => {
 const db_query = DatabaseDriver.getLocalhost(server_http);
 
 async function DatabaseConnected(): Promise<boolean> {
-  try {
-    const q = `SELECT 1`;
-    await db_query(q, []);
-    return true;
-  } catch (error) {
-    throw error;
-  }
+  const q = 'SELECT 1';
+  await db_query(q, []);
+  return true;
 }
 
 async function CreateTable(name: string): Promise<void> {
@@ -62,11 +48,10 @@ async function EnsureTableExists(name: string): Promise<{ created: boolean; exis
   try {
     if ((await TableExists(name)) === true) {
       return { created: false, exists: true };
-    } else {
-      await CreateTable(name);
-      if ((await TableExists(name)) === true) {
-        return { created: true, exists: true };
-      }
+    }
+    await CreateTable(name);
+    if ((await TableExists(name)) === true) {
+      return { created: true, exists: true };
     }
   } catch (error) {
     ConsoleError(error);

@@ -3,22 +3,22 @@ import path from 'node:path';
 import { ConsoleLog } from './lib/Console.js';
 
 export namespace server {
-  export async function getConsole(): Promise<void | Response> {
+  export async function getConsole(): Promise<Response | undefined> {
     return new Response(Bun.file('./console.html'));
   }
-  export async function get(pathname: string): Promise<void | Response> {
+  export async function get(pathname: string): Promise<Response | undefined> {
     switch (pathname) {
-      case '/server/restart':
+      case '/server/restart': {
         ConsoleLog('Restarting...');
         setTimeout(() => process.exit(1), 100);
         return new Response('Restarting server.');
-
-      case '/server/shutdown':
+      }
+      case '/server/shutdown': {
         ConsoleLog('Shutting down...');
         setTimeout(() => process.exit(2), 100);
         return new Response('Shutting down server.');
-
-      case '/server/list':
+      }
+      case '/server/list': {
         const entries: string[] = [];
         if (Bun.env.PUBLIC_PATH) {
           const public_path = path.normalize(Bun.env.PUBLIC_PATH);
@@ -33,6 +33,7 @@ export namespace server {
           }
         }
         return new Response(JSON.stringify(entries.sort()));
+      }
     }
   }
 }

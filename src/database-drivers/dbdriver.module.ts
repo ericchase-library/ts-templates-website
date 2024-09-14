@@ -1,5 +1,5 @@
 async function localhost_query(address: string, text: string, params: any[]): Promise<any> {
-  const response = await fetch(address + '/database/query', {
+  const response = await fetch(`${address}/database/query`, {
     method: 'POST',
     body: JSON.stringify({ text, params }),
   });

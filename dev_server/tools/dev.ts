@@ -9,7 +9,7 @@ Bun.spawnSync(['bun', 'run', 'format']);
 
 const pipe = new Broadcast<string>();
 
-(async function () {
+(async () => {
   let proc: Subprocess<'ignore', 'inherit', 'inherit'> | undefined = undefined;
   while (true) {
     proc = Bun.spawn(['bun', './src/server.ts'], { stdout: 'inherit' });
@@ -28,6 +28,7 @@ const pipe = new Broadcast<string>();
       case 2:
         ConsoleLog('Exit Code [2]:Shutdown');
         process.exit(0);
+        break;
       default:
         ConsoleLog(`Exit Code [${code}]`);
         process.stdout.write('Restart? (y/n)');

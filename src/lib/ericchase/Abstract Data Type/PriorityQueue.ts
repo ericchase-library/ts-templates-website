@@ -1,38 +1,28 @@
 import { BinaryHeap, type IBinaryHeap } from '../Data Structure/BinaryHeap.js';
 
-export type IPriorityQueue<T> = IBinaryHeap<T>;
-
-class Keyed<T> {
-  constructor(
-    public key: number,
-    public data: T,
-  ) {}
-}
-
-export abstract class PriorityQueue<T> implements IPriorityQueue<T> {
-  constructor(public isOrdered: (a: T, b: T) => boolean = (a: T, b: T) => a < b) {
-    this.queue = new BinaryHeap<Keyed<T>>((a: Keyed<T>, b: Keyed<T>) => this.isOrdered(a.data, b.data) || (!this.isOrdered(b.data, a.data) && a.key < b.key));
+export class PriorityQueue<T> extends BinaryHeap<T> implements IBinaryHeap<T> {
+  constructor(mustComeBefore = (a: T, b: T) => a < b) {
+    super((a: T, b: T) => mustComeBefore(a, b) || (!mustComeBefore(b, a) && this.getInsertOrder(a) < this.getInsertOrder(b)));
   }
-  get length(): number {
-    return this.queue.length;
-  }
-  get top(): T | undefined {
-    return this.queue.top?.data;
-  }
-  private key: number = 0;
   insert(value: T): void {
-    this.queue.insert(new Keyed(this.key++, value));
+    this.setInsertOrder(value);
+    super.insert(value);
   }
-  remove(): T | undefined {
-    return this.queue.remove()?.data;
+  protected getInsertOrder(value: T) {
+    return this.insertOrderMap.get(value) ?? 0;
   }
-  protected queue: IBinaryHeap<Keyed<T>>;
+  protected setInsertOrder(value: T) {
+    this.insertOrderMap.set(value, this.insertOrderKey);
+    this.insertOrderKey++;
+  }
+  protected insertOrderMap = new Map<T, number>();
+  protected insertOrderKey = 0;
 }
 
-export class MaxPriorityQueue<T> extends PriorityQueue<T> implements IPriorityQueue<T> {
-  constructor(isOrdered: (a: T, b: T) => boolean = (a: T, b: T) => a < b) {
-    super((a: T, b: T) => !isOrdered(a, b) && isOrdered(b, a));
+export class MaxPriorityQueue<T> extends PriorityQueue<T> implements IBinaryHeap<T> {
+  constructor(mustComeBefore = (a: T, b: T) => a > b) {
+    super(mustComeBefore);
   }
 }
 
-export class MinPriorityQueue<T> extends PriorityQueue<T> implements IPriorityQueue<T> {}
+export class MinPriorityQueue<T> extends PriorityQueue<T> implements IBinaryHeap<T> {}

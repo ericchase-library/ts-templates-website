@@ -2,9 +2,9 @@
   "version": 3,
   "sources": ["..\\..\\src\\database-drivers\\dbdriver.module.ts"],
   "sourcesContent": [
-    "async function localhost_query(address: string, text: string, params: any[]): Promise<any> {\n  const response = await fetch(address + '/database/query', {\n    method: 'POST',\n    body: JSON.stringify({ text, params }),\n  });\n  if (response.status < 200 || response.status > 299) {\n    throw await response.json();\n  }\n  return await response.json();\n}\n\nexport const DatabaseDriver = {\n  getLocalhost(address: string) {\n    return localhost_query.bind(localhost_query, address);\n  },\n};\n"
+    "async function localhost_query(address: string, text: string, params: any[]): Promise<any> {\n  const response = await fetch(`${address}/database/query`, {\n    method: 'POST',\n    body: JSON.stringify({ text, params }),\n  });\n  if (response.status < 200 || response.status > 299) {\n    throw await response.json();\n  }\n  return await response.json();\n}\n\nexport const DatabaseDriver = {\n  getLocalhost(address: string) {\n    return localhost_query.bind(localhost_query, address);\n  },\n};\n"
   ],
-  "mappings": ";AAAA,eAAe,eAAe,CAAC,SAAiB,MAAc,QAA6B;AACzF,QAAM,WAAW,MAAM,MAAM,UAAU,mBAAmB;AAAA,IACxD,QAAQ;AAAA,IACR,MAAM,KAAK,UAAU,EAAE,MAAM,OAAO,CAAC;AAAA,EACvC,CAAC;AACD,MAAI,SAAS,SAAS,OAAO,SAAS,SAAS,KAAK;AAClD,UAAM,MAAM,SAAS,KAAK;AAAA,EAC5B;AACA,SAAO,MAAM,SAAS,KAAK;AAAA;AAGtB,IAAM,iBAAiB;AAAA,EAC5B,YAAY,CAAC,SAAiB;AAC5B,WAAO,gBAAgB,KAAK,iBAAiB,OAAO;AAAA;AAExD;",
-  "debugId": "128235ED3E2A4DF464756E2164756E21",
+  "mappings": ";AAAA,eAAe,eAAe,CAAC,SAAiB,MAAc,QAA6B;AACzF,QAAM,WAAW,MAAM,MAAM,GAAG,0BAA0B;AAAA,IACxD,QAAQ;AAAA,IACR,MAAM,KAAK,UAAU,EAAE,MAAM,OAAO,CAAC;AAAA,EACvC,CAAC;AACD,MAAI,SAAS,SAAS,OAAO,SAAS,SAAS,KAAK;AAClD,UAAM,MAAM,SAAS,KAAK;AAAA,EAC5B;AACA,SAAO,MAAM,SAAS,KAAK;AAAA;AAGtB,IAAM,iBAAiB;AAAA,EAC5B,YAAY,CAAC,SAAiB;AAC5B,WAAO,gBAAgB,KAAK,iBAAiB,OAAO;AAAA;AAExD;",
+  "debugId": "959E8DF08929C2D464756E2164756E21",
   "names": []
 }

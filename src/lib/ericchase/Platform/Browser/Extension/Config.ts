@@ -24,7 +24,7 @@ export class Config {
           continue;
         }
         for (const key in source) {
-          if (source.hasOwnProperty(key)) {
+          if (Object.hasOwn(source, key)) {
             if (typeof source[key] === 'object' && Array.isArray(source[key]) === false) {
               dest[key] = merge_objects(dest[key], source[key]);
             } else {

@@ -11,20 +11,20 @@ export class CNodeRef {
     this.node = node;
   }
 
-  as<T extends abstract new (...args: any) => any>(constructor: T): InstanceType<T> {
-    if (this.node instanceof constructor) return this.node as InstanceType<T>;
-    throw new TypeError(`Reference node is not ${constructor}`);
+  as<T extends abstract new (...args: any) => any>(constructor_ref: T): InstanceType<T> {
+    if (this.node instanceof constructor_ref) return this.node as InstanceType<T>;
+    throw new TypeError(`Reference node is not ${constructor_ref}`);
   }
-  is<T extends abstract new (...args: any) => any>(constructor: T): boolean {
-    return this.node instanceof constructor;
+  is<T extends abstract new (...args: any) => any>(constructor_ref: T): boolean {
+    return this.node instanceof constructor_ref;
   }
-  passAs<T extends abstract new (...args: any) => any>(constructor: T, fn: (reference: InstanceType<T>) => void): void {
-    if (this.node instanceof constructor) {
+  passAs<T extends abstract new (...args: any) => any>(constructor_ref: T, fn: (reference: InstanceType<T>) => void): void {
+    if (this.node instanceof constructor_ref) {
       fn(this.node as InstanceType<T>);
     }
   }
-  tryAs<T extends abstract new (...args: any) => any>(constructor: T): InstanceType<T> | undefined {
-    if (this.node instanceof constructor) {
+  tryAs<T extends abstract new (...args: any) => any>(constructor_ref: T): InstanceType<T> | undefined {
+    if (this.node instanceof constructor_ref) {
       return this.node as InstanceType<T>;
     }
   }
@@ -43,13 +43,13 @@ export class CNodeRef {
     return this.as(HTMLElement).getAttribute(qualifiedName);
   }
   setAttribute(qualifiedName: string, value: string): void {
-    return this.as(HTMLElement).setAttribute(qualifiedName, value);
+    this.as(HTMLElement).setAttribute(qualifiedName, value);
   }
   getStyleProperty(property: string): string {
     return this.as(HTMLElement).style.getPropertyValue(property);
   }
   setStyleProperty(property: string, value: string | null, priority?: string): void {
-    return this.as(HTMLElement).style.setProperty(property, value, priority);
+    this.as(HTMLElement).style.setProperty(property, value, priority);
   }
 }
 export function NodeRef(node?: Node | null): CNodeRef {
@@ -72,13 +72,13 @@ export class CNodeListRef extends Array<CNodeRef> {
     }
   }
 
-  as<T extends abstract new (...args: any) => any>(constructor: T): Array<InstanceType<T>> {
-    return this.filter((ref) => ref.is(constructor)).map((ref) => ref.as(constructor));
+  as<T extends abstract new (...args: any) => any>(constructor_ref: T): Array<InstanceType<T>> {
+    return this.filter((ref) => ref.is(constructor_ref)).map((ref) => ref.as(constructor_ref));
   }
 
-  passEachAs<T extends abstract new (...args: any) => any>(constructor: T, fn: (reference: InstanceType<T>) => void): void {
+  passEachAs<T extends abstract new (...args: any) => any>(constructor_ref: T, fn: (reference: InstanceType<T>) => void): void {
     for (const ref of this) {
-      ref.passAs(constructor, fn);
+      ref.passAs(constructor_ref, fn);
     }
   }
 }

@@ -1,3 +1,24 @@
+## 2024-09-14
+
+- switch from Prettier to Biome as formatter and linter
+  - https://biomejs.dev/
+- apply linter fixes everywhere
+- update .gitignore and package.json
+
+**src/lib/ericchase**
+
+- fix PriorityQueue and BinaryHeap implementations with testing
+  - /Abstract Data Type/
+  - /Data Structure/
+- remove DOM utility files around HTMLElements in favor of Node_Utility.ts
+  - /Platform/Web/DOM/Element/\*
+  - /Web API/Node_Utility.ts
+
+**src**
+
+- move server.ts to own folder
+- move hot reloading code into own function
+
 ## 2024-09-13
 
 **dev_server**

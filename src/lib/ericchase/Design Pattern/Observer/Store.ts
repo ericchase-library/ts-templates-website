@@ -64,7 +64,7 @@ export class Store<Value> {
   protected subscriptionSet = new Set<SubscriptionCallback<Value>>();
   constructor(
     protected initialValue: Value,
-    protected notifyOnChangeOnly: boolean = false,
+    protected notifyOnChangeOnly = false,
   ) {
     this.currentValue = initialValue;
   }

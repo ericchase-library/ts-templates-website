@@ -1,52 +1,72 @@
 export interface IBinaryHeap<T> {
-  get length(): number;
-  get top(): T | undefined;
+  clear(): void;
+  get size(): number;
+  get top(): T;
   insert(value: T): void;
-  remove(): T | undefined;
+  mustComeBefore: (a: T, b: T) => boolean;
+  pop(): T;
 }
 
 export class BinaryHeap<T> implements IBinaryHeap<T> {
-  constructor(public isOrdered: (a: T, b: T) => boolean = (a: T, b: T) => a < b) {}
-  get length(): number {
-    return this.heap.length;
+  constructor(public mustComeBefore: (a: T, b: T) => boolean = (a: T, b: T) => a < b) {}
+  clear(): void {
+    this.buffer.length = 0;
   }
-  get top(): T | undefined {
-    if (this.heap.length === 0) {
-      return undefined;
-    }
-    return this.heap[0];
+  get size(): number {
+    return this.buffer.length;
+  }
+  get top(): T {
+    return this.buffer[0];
   }
   insert(value: T): void {
-    this.heap.push(value);
-    this.siftUp(this.heap.length - 1);
+    this.buffer.push(value);
+    this.siftUp(this.buffer.length - 1);
   }
-  remove(): T | undefined {
+  pop(): T {
     const top = this.top;
-    const bot = this.heap.pop();
-    if (this.heap.length > 0) {
-      this.heap[0] = bot!;
+    if (this.buffer.length > 1) {
+      this.buffer[0] = this.buffer[this.buffer.length - 1];
       this.siftDown(0);
     }
+    this.buffer.pop();
     return top;
   }
-  protected getLeftChildIndex(index: number): number {
+  toArray(): T[] {
+    const temp = new BinaryHeap<T>(this.mustComeBefore);
+    temp.buffer = this.buffer.slice();
+    const items: T[] = [];
+    while (temp.size > 0) {
+      items.push(temp.pop());
+    }
+    return items;
+  }
+  static GetLeftChildIndex(index: number): number {
     return index * 2 + 1;
   }
-  protected getParentIndex(index: number): number {
+  static GetParentIndex(index: number): number {
     return Math.floor((index - 1) / 2);
   }
-  protected getRightChildIndex(index: number): number {
+  static GetRightChildIndex(index: number): number {
     return index * 2 + 2;
   }
-  protected siftDown(index: number): void {
-    const leftChildIndex = this.getLeftChildIndex(index);
-    const rightChildIndex = this.getRightChildIndex(index);
-    let orderedIndex = index;
-    if (leftChildIndex < this.heap.length && this.isOrdered(this.heap[leftChildIndex], this.heap[orderedIndex])) {
-      orderedIndex = leftChildIndex;
+  static ToArray<T>(heap: BinaryHeap<T>): T[] {
+    const temp = new BinaryHeap<T>(heap.mustComeBefore);
+    temp.buffer = heap.buffer.slice();
+    const items: T[] = [];
+    while (temp.size > 0) {
+      items.push(temp.pop());
     }
-    if (rightChildIndex < this.heap.length && this.isOrdered(this.heap[rightChildIndex], this.heap[orderedIndex])) {
-      orderedIndex = rightChildIndex;
+    return items;
+  }
+  protected siftDown(index: number): void {
+    const iL = BinaryHeap.GetLeftChildIndex(index);
+    const iR = BinaryHeap.GetRightChildIndex(index);
+    let orderedIndex = index;
+    if (iL < this.buffer.length && this.mustComeBefore(this.buffer[iL], this.buffer[orderedIndex])) {
+      orderedIndex = iL;
+    }
+    if (iR < this.buffer.length && this.mustComeBefore(this.buffer[iR], this.buffer[orderedIndex])) {
+      orderedIndex = iR;
     }
     if (orderedIndex !== index) {
       this.swap(orderedIndex, index);
@@ -57,21 +77,21 @@ export class BinaryHeap<T> implements IBinaryHeap<T> {
     if (index === 0) {
       return;
     }
-    const parentIndex = this.getParentIndex(index);
-    if (!this.isOrdered(this.heap[parentIndex], this.heap[index])) {
-      this.swap(parentIndex, index);
-      this.siftUp(parentIndex);
+    const iP = BinaryHeap.GetParentIndex(index);
+    if (!this.mustComeBefore(this.buffer[iP], this.buffer[index])) {
+      this.swap(iP, index);
+      this.siftUp(iP);
     }
   }
   protected swap(index1: number, index2: number): void {
-    [this.heap[index1], this.heap[index2]] = [this.heap[index2], this.heap[index1]];
+    [this.buffer[index1], this.buffer[index2]] = [this.buffer[index2], this.buffer[index1]];
   }
-  protected heap: T[] = [];
+  protected buffer: T[] = [];
 }
 
 export class MaxBinaryHeap<T> extends BinaryHeap<T> implements IBinaryHeap<T> {
-  constructor(isOrdered: (a: T, b: T) => boolean = (a: T, b: T) => a < b) {
-    super((a: T, b: T) => !isOrdered(a, b) && isOrdered(b, a));
+  constructor(mustComeBefore: (a: T, b: T) => boolean = (a: T, b: T) => a > b) {
+    super(mustComeBefore);
   }
 }
 

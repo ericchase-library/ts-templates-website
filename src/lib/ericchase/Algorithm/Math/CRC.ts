@@ -16,11 +16,11 @@ for (let n = 0; n < 256; n++) {
   crc_table[n] = c;
 }
 
-export class CRC {
-  static Init(bytes: Uint8Array) {
+export namespace CRC {
+  export function Init(bytes: Uint8Array) {
     return (CRC.Update(0xffffffff >>> 0, bytes) ^ (0xffffffff >>> 0)) >>> 0;
   }
-  static Update(crc: number, bytes: Uint8Array) {
+  export function Update(crc: number, bytes: Uint8Array) {
     let c = crc >>> 0;
     for (let n = 0; n < bytes.length; n++) {
       c = crc_table[(c ^ bytes[n]) & 0xff] ^ (c >>> 8);

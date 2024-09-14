@@ -1,4 +1,3 @@
-//! use Bun.Glob instead
 export function GlobSearch(text: string, query: string) {
   const parts = query.split('*');
   // check start

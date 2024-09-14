@@ -15,6 +15,7 @@ while (true) {
     case 2:
       ConsoleLog('Exit Code [2]:Shutdown');
       process.exit(0);
+      break;
     default:
       ConsoleLog(`Exit Code [${proc.exitCode}]`);
       process.stdout.write('Restart? (y/n)');

@@ -1,6 +1,6 @@
 // src/database-drivers/dbdriver.module.ts
 async function localhost_query(address, text, params) {
-  const response = await fetch(address + '/database/query', {
+  const response = await fetch(`${address}/database/query`, {
     method: 'POST',
     body: JSON.stringify({ text, params }),
   });
@@ -16,5 +16,5 @@ var DatabaseDriver = {
 };
 export { DatabaseDriver };
 
-//# debugId=128235ED3E2A4DF464756E2164756E21
+//# debugId=959E8DF08929C2D464756E2164756E21
 //# sourceMappingURL=dbdriver.module.js.map
