@@ -1,3 +1,20 @@
+## 2024-09-16
+
+- add specific versions for some packages
+  - biome, node-html-parser, prettier
+
+**src**
+
+- move database drivers to lib
+  - /lib/database-drivers/dbdriver-localhost.ts
+- move database functions to own folder
+  - /database/queries.module.ts
+
+**tools**
+
+- add prettier back in for formatting html/md files
+  - /format.ts
+
 ## 2024-09-14
 
 - switch from Prettier to Biome as formatter and linter

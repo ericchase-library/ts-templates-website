@@ -1,5 +1,5 @@
 // src/index.bundle.ts
-import { DatabaseDriver } from './database-drivers/dbdriver.module.js';
+import { DatabaseConnected, EnsureTableExists } from './database/queries.module.js';
 
 // src/lib/ericchase/Utility/Console.ts
 function ConsoleError(...items) {
@@ -76,49 +76,7 @@ var server_ws = `ws://${host}:${port}`;
 var server_http = `http://${host}:${port}`;
 
 // src/index.bundle.ts
-async function DatabaseConnected() {
-  const q = 'SELECT 1';
-  await db_query(q, []);
-  return true;
-}
-async function CreateTable(name) {
-  const q = `
-      CREATE TABLE ${name} (
-        id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL
-      );
-    `;
-  await db_query(q, []);
-}
-async function TableExists(name) {
-  const q = `
-    SELECT EXISTS (
-      SELECT 1 
-      FROM information_schema.tables 
-      WHERE table_schema = 'public' 
-      AND table_name = \$1
-    );
-  `;
-  const { exists } = (await db_query(q, [name]))[0];
-  return exists ?? false;
-}
-async function EnsureTableExists(name) {
-  try {
-    if ((await TableExists(name)) === true) {
-      return { created: false, exists: true };
-    }
-    await CreateTable(name);
-    if ((await TableExists(name)) === true) {
-      return { created: true, exists: true };
-    }
-  } catch (error) {
-    ConsoleError(error);
-  }
-  return { created: false, exists: false };
-}
 EnableHotReload();
-var db_query = DatabaseDriver.getLocalhost(server_http);
 
 class Page {
   divMessages;
@@ -157,5 +115,5 @@ try {
   page.addMessage('Is server running? Check api endpoint.');
 }
 
-//# debugId=2DF844628A24AE1264756E2164756E21
+//# debugId=EE4AFBD58D9ED96564756E2164756E21
 //# sourceMappingURL=index.bundle.js.map

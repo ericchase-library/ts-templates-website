@@ -85,3 +85,8 @@ export class CNodeListRef extends Array<CNodeRef> {
 export function NodeListRef(nodes?: NodeList | Node[] | null): CNodeListRef {
   return new CNodeListRef(nodes);
 }
+
+// API designed by NOOB (https://github.com/NOOB2868)
+export function SelectElements(...selectors: string[]) {
+  return NodeListRef(document.querySelectorAll(selectors.join(',')));
+}

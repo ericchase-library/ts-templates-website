@@ -1,65 +1,9 @@
-import { DatabaseDriver } from './database-drivers/dbdriver.module.js';
+import { DatabaseConnected, EnsureTableExists } from './database/queries.module.js';
 import { ConsoleError } from './lib/ericchase/Utility/Console.js';
 import { NodeRef } from './lib/ericchase/Web API/Node_Utility.js';
-import { EnableHotReload, server_http } from './server/server.js';
+import { EnableHotReload } from './server/server.js';
 
 EnableHotReload();
-
-//                                                                          \\
-//
-// Postgres Queries
-
-const db_query = DatabaseDriver.getLocalhost(server_http);
-
-async function DatabaseConnected(): Promise<boolean> {
-  const q = 'SELECT 1';
-  await db_query(q, []);
-  return true;
-}
-
-async function CreateTable(name: string): Promise<void> {
-  const q = `
-      CREATE TABLE ${name} (
-        id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL
-      );
-    `;
-  await db_query(q, []);
-}
-async function TableExists(name: string): Promise<boolean> {
-  const q = `
-    SELECT EXISTS (
-      SELECT 1 
-      FROM information_schema.tables 
-      WHERE table_schema = 'public' 
-      AND table_name = $1
-    );
-  `;
-  const { exists } = (await db_query(q, [name]))[0];
-  return exists ?? false;
-}
-
-//                                                                          \\
-//
-// Database Functions
-
-async function EnsureTableExists(name: string): Promise<{ created: boolean; exists: boolean }> {
-  try {
-    if ((await TableExists(name)) === true) {
-      return { created: false, exists: true };
-    }
-    await CreateTable(name);
-    if ((await TableExists(name)) === true) {
-      return { created: true, exists: true };
-    }
-  } catch (error) {
-    ConsoleError(error);
-  }
-  return { created: false, exists: false };
-}
-
-//                                                                          \\
 
 class Page {
   divMessages: HTMLDivElement;

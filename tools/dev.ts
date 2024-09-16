@@ -11,6 +11,7 @@ const builder = new Debouncer(async () => {
 await buildClear();
 await builder.run();
 
+// TODO: add a way to toggle hot reloading
 try {
   await fetch(server_http);
   ConsoleError('Hot Reloading ONLINE');

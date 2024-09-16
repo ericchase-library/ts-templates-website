@@ -12,9 +12,7 @@
   "scripts": {
     "dev": "bun ./tools/dev.ts",
     "start": "bun ./tools/start.ts",
-    "format-debug": "biome format --files-ignore-unknown true --verbose .",
-    "format-silent": "biome format --files-ignore-unknown true --write .",
-    "format": "biome format --files-ignore-unknown true --write --verbose .",
+    "format": "biome format --files-ignore-unknown true --write .",
     "lint": "biome lint --error-on-warnings --write ."
   }
 }

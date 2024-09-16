@@ -1,11 +1,12 @@
 {
   "dependencies": {},
   "devDependencies": {
-    "@biomejs/biome": "latest",
+    "@biomejs/biome": "^1.9.1",
     "@types/bun": "latest",
     "@types/chrome": "latest",
     "@types/node": "latest",
-    "node-html-parser": "latest"
+    "node-html-parser": "^6.1.13",
+    "prettier": "^3.3.3"
   },
   "scripts": {
     "build": "bun ./tools/build.ts",
@@ -13,9 +14,7 @@
     "serve": "bun ./tools/serve.ts",
     "db-up": "bun ./tools/docker-db.ts start",
     "db-down": "bun ./tools/docker-db.ts stop",
-    "format-debug": "biome format --files-ignore-unknown true --verbose .",
-    "format-silent": "biome format --files-ignore-unknown true --write .",
-    "format": "biome format --files-ignore-unknown true --write --verbose .",
+    "format": "bun ./tools/format.ts",
     "lint": "biome lint --error-on-warnings --write ."
   }
 }

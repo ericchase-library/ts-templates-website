@@ -123,9 +123,9 @@ export async function buildClear() {
 
 if (Bun.argv[1] === __filename) {
   await Run('bun update');
-  await Run('bun run format-silent');
+  await Run('bun run format silent');
   await buildClear();
   await buildSteps();
-  await Run('bun run format-silent');
+  await Run('bun run format silent');
   // await Run('bun test');
 }
