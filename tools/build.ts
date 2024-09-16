@@ -126,6 +126,6 @@ if (Bun.argv[1] === __filename) {
   await Run('bun run format silent');
   await buildClear();
   await buildSteps();
-  await Run('bun run format silent');
+  await Run('bun run format');
   // await Run('bun test');
 }
