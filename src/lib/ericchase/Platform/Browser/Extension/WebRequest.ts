@@ -1,4 +1,4 @@
-export type SubscriptionCallback = () => { abort: boolean } | undefined;
+export type SubscriptionCallback = () => { abort: boolean } | void;
 
 export interface WebRequest {
   bodyDetails?: chrome.webRequest.WebRequestBodyDetails;
@@ -37,7 +37,7 @@ export namespace WebRequestCache {
       }
     }
   }
-  export function Subscribe(callback: SubscriptionCallback): () => undefined {
+  export function Subscribe(callback: SubscriptionCallback): () => void {
     WebRequestCache.SubscriptionSet.add(callback);
     if (callback()?.abort === true) {
       WebRequestCache.SubscriptionSet.delete(callback);

@@ -44,7 +44,11 @@
       "complexity": {
         "noUselessTernary": "off"
       },
+      "style": {
+        "useConst": "off"
+      },
       "suspicious": {
+        "noConfusingVoidType": "off",
         "noExplicitAny": "off"
       }
     }

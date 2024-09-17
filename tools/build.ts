@@ -4,10 +4,10 @@ import { Run } from '../src/lib/ericchase/Platform/Bun/Process.js';
 import { CleanDirectory } from '../src/lib/ericchase/Platform/Node/Fs.js';
 import { NormalizePath } from '../src/lib/ericchase/Platform/Node/Path.js';
 import { ConsoleLog } from '../src/lib/ericchase/Utility/Console.js';
-import { BuildRunner, copy, processHTML } from './lib/build.js';
-import { CacheClear } from './lib/cache.js';
 import { CustomComponentPreprocessor } from './lib/CustomComponentPreprocessor.js';
 import { ImportConverterPreprocessor } from './lib/ImportConverterPreprocessor.js';
+import { BuildRunner, copy, processHTML } from './lib/build.js';
+import { CacheClear } from './lib/cache.js';
 
 export const onLog = new Broadcast<void>();
 export function Log(data: string) {
@@ -63,9 +63,11 @@ export async function buildSteps(watch = false) {
   for (const path of processedHTMLPaths.paths) {
     Log(path);
   }
-  for (const [tag, count] of customComponentPreprocessor.componentUsageCount) {
-    // report component copy counters
-    Log(`${count === 1 ? '1 copy' : `${count} copies`} of ${tag}`);
+  if (watch === false) {
+    for (const [tag, count] of customComponentPreprocessor.componentUsageCount) {
+      // report component copy counters
+      Log(`${count === 1 ? '1 copy' : `${count} copies`} of ${tag}`);
+    }
   }
 
   // Build Typescript Bundles
