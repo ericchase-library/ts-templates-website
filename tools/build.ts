@@ -4,10 +4,10 @@ import { Run } from '../src/lib/ericchase/Platform/Bun/Process.js';
 import { CleanDirectory } from '../src/lib/ericchase/Platform/Node/Fs.js';
 import { Path } from '../src/lib/ericchase/Platform/Node/Path.js';
 import { ConsoleLog } from '../src/lib/ericchase/Utility/Console.js';
-import { CustomComponentPreprocessor } from './lib/HTMLPreprocessor_CustomComponent.js';
-import { ImportConverterPreprocessor } from './lib/HTMLPreprocessor_ImportConverter.js';
 import { BuildRunner, copy, processHTML } from './lib/build.js';
 import { CacheClear } from './lib/cache.js';
+import { CustomComponentPreprocessor } from './lib/HTMLPreprocessor_CustomComponent.js';
+import { ImportConverterPreprocessor } from './lib/HTMLPreprocessor_ImportConverter.js';
 
 const out_dir = new Path('public');
 const src_dir = new Path('src');
@@ -19,7 +19,7 @@ const component_patterns = ['components/**/*.html'];
 const dot_component_patterns = ['components/**/.*.html']; // not included in regular scans
 const lib_patterns = ['lib/**/*'];
 
-const bun_bundler = new BuildRunner(Log);
+const bun_bundler = new BuildRunner(onLog);
 
 export async function buildStep_Clean() {
   bun_bundler.killAll();
@@ -65,32 +65,32 @@ export async function buildStep_ProcessHTMLFiles(watch = false) {
     custom_component_preprocessor.registerComponentPath(name.slice(1), path, true);
   }
 
-  const processedHTMLPaths = await processHTML({
+  const processed_html_paths = await processHTML({
     out_dir,
     to_process: new GlobManager().scan(src_dir, '**/*.html'),
     to_exclude: new GlobManager().scan(src_dir, ...component_patterns, ...lib_patterns),
     preprocessors: [import_converter_preprocessor, custom_component_preprocessor],
   });
-  for (const path of processedHTMLPaths.paths) {
-    Log(`ProcessHTMLFile: ${path}`);
+  for (const path of processed_html_paths.paths) {
+    onLog(`ProcessHTMLFile: ${path}`);
   }
 
   if (watch === false) {
     for (const [tag, count] of custom_component_preprocessor.component_usage_count) {
       // report component copy counters
-      Log(`${count === 1 ? '1 copy' : `${count} copies`} of ${tag}`);
+      onLog(`${count === 1 ? '1 copy' : `${count} copies`} of ${tag}`);
     }
   }
 }
 
 export async function buildStep_Copy() {
-  const copiedPaths = await copy({
+  const copied_paths = await copy({
     out_dir,
     to_copy: new GlobManager().scan(src_dir, '**/*'),
     to_exclude: new GlobManager().scan(src_dir, ...script_extensions.map((ext) => `**/*${ext}`), ...bundle_patterns, ...component_patterns, ...lib_patterns),
   });
-  for (const path of copiedPaths.paths) {
-    Log(`Copy: ${path}`);
+  for (const path of copied_paths.paths) {
+    onLog(`Copy: ${path}`);
   }
 }
 
@@ -124,7 +124,7 @@ export async function buildStep_Move() {
 }
 
 export const on_log = new Broadcast<void>();
-export function Log(data: string) {
+export function onLog(data: string) {
   ConsoleLog(`${new Date().toLocaleTimeString()} > ${data}`);
   on_log.send();
 }
@@ -137,5 +137,4 @@ if (Bun.argv[1] === __filename) {
   await buildStep_ProcessHTMLFiles();
   await buildStep_Copy();
   await Run('bun run format');
-  // await Run('bun test');
 }

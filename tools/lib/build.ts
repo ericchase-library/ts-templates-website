@@ -1,10 +1,9 @@
 import type { Subprocess } from 'bun';
-
 import { AsyncLineReader } from '../../src/lib/ericchase/Algorithm/Stream/AsyncReader.js';
 import { Broadcast } from '../../src/lib/ericchase/Design Pattern/Observer/Broadcast.js';
 import { CopyFile } from '../../src/lib/ericchase/Platform/Bun/Fs.js';
 import type { GlobManager } from '../../src/lib/ericchase/Platform/Bun/Glob.js';
-import { Path, type PathGroup, PathGroupSet } from '../../src/lib/ericchase/Platform/Node/Path.js';
+import { type PathGroup, Path, PathGroupSet } from '../../src/lib/ericchase/Platform/Node/Path.js';
 import { type NodeHTMLParser, ParseHTML } from '../../src/lib/ericchase/Platform/Web/HTML/ParseHTML.js';
 import { CacheIsModified } from './cache.js';
 

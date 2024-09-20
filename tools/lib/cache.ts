@@ -1,6 +1,5 @@
 import { Database } from 'bun:sqlite';
 import fs from 'node:fs';
-
 import { CreateDirectory } from '../../src/lib/ericchase/Platform/Node/Fs.js';
 import { Path, type PathGroup } from '../../src/lib/ericchase/Platform/Node/Path.js';
 
