@@ -1,8 +1,8 @@
 import type { Subprocess } from 'bun';
 
 import { ConsoleError, ConsoleLog } from '../src/lib/Console.js';
-import { Broadcast } from './lib/Broadcast.js';
-import { Watcher } from './lib/Watch.js';
+import { Broadcast } from '../src/lib/Broadcast.js';
+import { Watcher } from '../src/lib/Watch.js';
 
 Bun.spawnSync(['bun', 'update']);
 Bun.spawnSync(['bun', 'run', 'format']);

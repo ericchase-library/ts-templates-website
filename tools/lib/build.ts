@@ -3,25 +3,26 @@ import type { Subprocess } from 'bun';
 import { AsyncLineReader } from '../../src/lib/ericchase/Algorithm/Stream/AsyncReader.js';
 import { Broadcast } from '../../src/lib/ericchase/Design Pattern/Observer/Broadcast.js';
 import { CopyFile } from '../../src/lib/ericchase/Platform/Bun/Fs.js';
-import { type GlobManager, PathGroup, PathManager } from '../../src/lib/ericchase/Platform/Bun/Path.js';
+import type { GlobManager } from '../../src/lib/ericchase/Platform/Bun/Glob.js';
+import { Path, type PathGroup, PathGroupSet } from '../../src/lib/ericchase/Platform/Node/Path.js';
 import { type NodeHTMLParser, ParseHTML } from '../../src/lib/ericchase/Platform/Web/HTML/ParseHTML.js';
 import { CacheIsModified } from './cache.js';
 
 // watching multiple files results in building each file when a change occurs
 // in any. confirmed on windows via modification dates. this isn't the desired
 // result. as an alternative, we can run separate builds for each target file.
-// subprocesses.push(Bun.spawn(['bun', 'build', ...toBundle.paths, '--outdir', 'out/', '--external', '*.module.js', '--watch'], { stdout: 'pipe', stderr: 'pipe' }));
+// subprocesses.push(Bun.spawn(['bun', 'build', ...toBundle.paths, '--outdir', 'out/', '--external', '*.module.js', '--watch'], { stdout: 'pipe', stderr: 'inherit' }));
 interface BuildParams {
   entry: PathGroup;
-  externalImports?: string[];
-  outDir?: string;
-  sourcemapMode?: Parameters<typeof Bun.build>[0]['sourcemap'];
+  external_imports?: string[];
+  out_dir?: Path;
+  sourcemap_mode?: Parameters<typeof Bun.build>[0]['sourcemap'];
   watch?: boolean;
 }
 export class BuildRunner {
   broadcast = new Broadcast<void>();
   lines: string[] = [];
-  subprocessMap = new Map<string, Subprocess<'ignore', 'pipe', 'pipe'>>();
+  subprocess_map = new Map<string, Subprocess<'ignore', 'pipe', 'inherit'>>();
   constructor(output: (data: string) => void) {
     let index = 0;
     this.broadcast.subscribe(() => {
@@ -32,26 +33,21 @@ export class BuildRunner {
       }
     });
   }
-  abort() {
-    for (const [_, process] of this.subprocessMap) {
-      process.kill();
-    }
-  }
-  build({ entry, externalImports = ['*.module.js'], outDir = 'out', sourcemapMode = 'linked', watch = false }: BuildParams): Subprocess<'ignore', 'pipe', 'pipe'> | undefined {
-    if (this.subprocessMap.has(entry.path)) {
+  add({ entry, external_imports = ['*.module.js'], out_dir = new Path('out'), sourcemap_mode = 'linked', watch = false }: BuildParams): Subprocess<'ignore', 'pipe', 'inherit'> | undefined {
+    if (this.subprocess_map.has(entry.path)) {
       return;
     }
-    const args = ['bun', 'build', entry.path, '--outdir', PathGroup.new({ basedir: outDir, path: entry.dir }).path];
-    for (const pattern of externalImports) {
+    const args = ['bun', 'build', entry.path, '--outdir', entry.newOrigin(out_dir).newBase('').path];
+    for (const pattern of external_imports) {
       args.push('--external', pattern);
     }
-    args.push(`--sourcemap=${sourcemapMode}`);
+    args.push(`--sourcemap=${sourcemap_mode}`);
     args.push('--target', 'browser');
     if (watch === true) {
       args.push('--watch');
     }
-    const process = Bun.spawn(args, { stdout: 'pipe', stderr: 'pipe' });
-    this.subprocessMap.set(entry.path, process);
+    const process = Bun.spawn(args, { stdout: 'pipe', stderr: 'inherit' });
+    this.subprocess_map.set(entry.path, process);
     (async () => {
       for await (const lines of AsyncLineReader(process.stdout)) {
         for (const line of lines) {
@@ -59,151 +55,123 @@ export class BuildRunner {
         }
         this.broadcast.send();
       }
-      this.subprocessMap.delete(entry.path);
+      this.subprocess_map.delete(entry.path);
     })();
     return process;
   }
-  watch({ entry, externalImports = ['*.module.js'], outDir = 'out', sourcemapMode = 'linked' }: BuildParams): Subprocess<'ignore', 'pipe', 'pipe'> | undefined {
-    return this.build({
-      entry,
-      externalImports,
-      outDir,
-      sourcemapMode,
-      watch: true,
-    });
+  killAll() {
+    for (const [_, process] of this.subprocess_map) {
+      process.kill();
+    }
+    this.subprocess_map.clear();
   }
 }
 
-//
-//
-//
-
 interface BundleParams {
-  externalImports?: string[];
-  outDir?: string;
-  sourcemapMode?: Parameters<typeof Bun.build>[0]['sourcemap'];
-  toBundle: GlobManager;
-  toExclude?: GlobManager;
+  external_imports?: string[];
+  out_dir?: Path;
+  sourcemap_mode?: Parameters<typeof Bun.build>[0]['sourcemap'];
+  to_bundle: GlobManager;
+  to_exclude?: GlobManager;
 }
-export async function bundle({ externalImports = [], outDir = './temp', sourcemapMode = 'linked', toBundle, toExclude }: BundleParams) {
-  const processedPaths = new PathManager();
-  const excludePaths = new Set(toExclude?.paths ?? []);
-  for (const globGroup of toBundle.globGroups) {
-    for (const pathGroup of globGroup.pathGroups) {
-      const srcPath = pathGroup.path;
-      const outPath = pathGroup.replaceBasedir(outDir).replaceExt('.js').path;
-      if (await shouldProcess({ excludePaths, srcPath, outPath })) {
-        const { outputs, success } = await Bun.build({
-          entrypoints: [srcPath],
-          external: externalImports,
-          minify: false,
-          sourcemap: sourcemapMode,
-          splitting: false,
-          target: 'browser',
-        });
-        if (success) {
-          await Bun.write(outPath, outputs[0]);
-          processedPaths.addGroup(pathGroup);
-        }
+export async function bundle({ external_imports = [], out_dir = new Path('temp'), sourcemap_mode = 'linked', to_bundle, to_exclude }: BundleParams) {
+  const processed_paths = new PathGroupSet();
+  const exclude_paths = new Set(to_exclude?.paths ?? []);
+  for (const path_group of to_bundle.path_groups) {
+    if (await shouldProcess({ exclude_paths, src_path: path_group })) {
+      const { outputs, success } = await Bun.build({
+        entrypoints: [path_group.path],
+        external: external_imports,
+        minify: false,
+        sourcemap: sourcemap_mode,
+        splitting: false,
+        target: 'browser',
+      });
+      if (success) {
+        await Bun.write(path_group.newOrigin(out_dir).newExt('.js').path, outputs[0]);
+        processed_paths.add(path_group);
       }
     }
   }
-  return processedPaths;
+  return processed_paths;
 }
 
 interface CompileParams {
-  outDir?: string;
-  toCompile: GlobManager;
-  toExclude?: GlobManager;
+  out_dir?: Path;
+  to_compile: GlobManager;
+  to_exclude?: GlobManager;
 }
-export async function compile({ outDir = './temp', toCompile, toExclude }: CompileParams) {
-  const processedPaths = new PathManager();
-  const excludePaths = new Set(toExclude?.paths ?? []);
+export async function compile({ out_dir = new Path('temp'), to_compile, to_exclude }: CompileParams) {
+  const processed_paths = new PathGroupSet();
+  const exclude_paths = new Set(to_exclude?.paths ?? []);
   const transpiler = new Bun.Transpiler({
     loader: 'tsx',
     minifyWhitespace: false,
     target: 'browser',
   });
-  for (const globGroup of toCompile.globGroups) {
-    for (const pathGroup of globGroup.pathGroups) {
-      const srcPath = pathGroup.path;
-      const outPath = pathGroup.replaceBasedir(outDir).replaceExt('.js').path;
-      if (await shouldProcess({ excludePaths, srcPath, outPath })) {
-        try {
-          const output = await transpiler.transform(await Bun.file(srcPath).text());
-          await Bun.write(outPath, output);
-          processedPaths.addGroup(pathGroup);
-        } catch (error) {}
-      }
+  for (const path_group of to_compile.path_groups) {
+    if (await shouldProcess({ exclude_paths, src_path: path_group })) {
+      try {
+        const output = await transpiler.transform(await Bun.file(path_group.path).text());
+        await Bun.write(path_group.newOrigin(out_dir).newExt('.js').path, output);
+        processed_paths.add(path_group);
+      } catch (error) {}
     }
   }
-  return processedPaths;
+  return processed_paths;
 }
 
 interface CopyParams {
-  outDir?: string;
-  toCopy: GlobManager;
-  toExclude?: GlobManager;
+  out_dir?: Path;
+  to_copy: GlobManager;
+  to_exclude?: GlobManager;
 }
-export async function copy({ outDir = './build', toCopy, toExclude }: CopyParams) {
-  const processedPaths = new PathManager();
-  const excludePaths = new Set(toExclude?.paths ?? []);
-  for (const pathGroup of toCopy.pathGroups) {
-    const srcPath = pathGroup.path;
-    const outPath = pathGroup.replaceBasedir(outDir).path;
-    if (await shouldProcess({ excludePaths, srcPath, outPath })) {
-      await CopyFile({
-        from: srcPath,
-        to: outPath,
-      });
-      processedPaths.addGroup(pathGroup);
+export async function copy({ out_dir = new Path('build'), to_copy, to_exclude }: CopyParams) {
+  const processed_paths = new PathGroupSet();
+  const exclude_paths = new Set(to_exclude?.paths ?? []);
+  for (const path_group of to_copy.path_groups) {
+    if (await shouldProcess({ exclude_paths, src_path: path_group })) {
+      await CopyFile({ from: path_group.path, to: path_group.newOrigin(out_dir).path });
+      processed_paths.add(path_group);
     }
   }
-  return processedPaths;
+  return processed_paths;
 }
 
 export interface HTMLPreprocessor {
-  preprocess: (root: NodeHTMLParser.HTMLElement, html: string, pathGroup: PathGroup) => Promise<void>;
+  preprocess: (root: NodeHTMLParser.HTMLElement, html: string, path_group: PathGroup) => Promise<void>;
 }
 interface ProcessHTMLParams {
-  outDir?: string;
+  out_dir?: Path;
   preprocessors: HTMLPreprocessor[];
-  toExclude?: GlobManager;
-  toProcess: GlobManager;
+  to_exclude?: GlobManager;
+  to_process: GlobManager;
 }
-export async function processHTML({ outDir = './temp', preprocessors, toExclude, toProcess }: ProcessHTMLParams) {
-  const processedPaths = new PathManager();
-  const excludePaths = new Set(toExclude?.paths ?? []);
-  for (const globGroup of toProcess.globGroups) {
-    for (const pathGroup of globGroup.pathGroups) {
-      const srcPath = pathGroup.path;
-      const outPath = pathGroup.replaceBasedir(outDir).path;
-      if (await shouldProcess({ excludePaths, srcPath, outPath })) {
-        const html = await Bun.file(srcPath).text();
-        const root = ParseHTML(html, { convert_tagnames_to_lowercase: true, self_close_void_tags: true });
-        for (const preprocessor of preprocessors) {
-          await preprocessor.preprocess(root, html, pathGroup);
-        }
-        await Bun.write(outPath, root.toString());
-        processedPaths.addGroup(pathGroup);
+export async function processHTML({ out_dir = new Path('temp'), preprocessors, to_exclude, to_process }: ProcessHTMLParams) {
+  const processed_paths = new PathGroupSet();
+  const exclude_paths = new Set(to_exclude?.paths ?? []);
+  for (const path_group of to_process.path_groups) {
+    if (await shouldProcess({ exclude_paths, src_path: path_group })) {
+      const html = await Bun.file(path_group.path).text();
+      const root = ParseHTML(html, { convert_tagnames_to_lowercase: true, self_close_void_tags: true });
+      for (const preprocessor of preprocessors) {
+        await preprocessor.preprocess(root, html, path_group);
       }
+      await Bun.write(path_group.newOrigin(out_dir).path, root.toString());
+      processed_paths.add(path_group);
     }
   }
-  return processedPaths;
+  return processed_paths;
 }
 
-async function shouldProcess({ excludePaths, outPath, srcPath }: { excludePaths: Set<string>; outPath: string; srcPath: string }): Promise<boolean> {
+async function shouldProcess({ exclude_paths, src_path }: { exclude_paths: Set<string>; src_path: Path | PathGroup }): Promise<boolean> {
   // condition order matters
   // skip any excluded paths right away
-  if (excludePaths.has(srcPath) === true) {
+  if (exclude_paths.has(src_path.path) === true) {
     return false;
   }
   // source file is modified, process it
-  if (CacheIsModified(srcPath) === true) {
-    return true;
-  }
-  // out file doesn't exist, process it
-  if ((await Bun.file(outPath).exists()) === false) {
+  if (CacheIsModified(src_path) === true) {
     return true;
   }
   // skip it

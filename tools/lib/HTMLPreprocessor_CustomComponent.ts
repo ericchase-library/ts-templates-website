@@ -3,23 +3,23 @@ import { LazyTask } from '../../src/lib/ericchase/Utility/Task.js';
 import type { HTMLPreprocessor } from './build.js';
 
 export class CustomComponentPreprocessor implements HTMLPreprocessor {
-  componentLoaders = new Map<string, LazyTask<string | undefined>>();
-  componentPaths = new Set<string>();
-  componentUsageCount = new Map<string, number>();
+  component_loaders = new Map<string, LazyTask<string | undefined>>();
+  component_paths = new Set<string>();
+  component_usage_count = new Map<string, number>();
   get preprocess() {
     return async (root: NodeHTMLParser.HTMLElement) => {
-      for (const [tag, loader] of this.componentLoaders) {
-        const targetElements = root.querySelectorAll(tag);
-        if (targetElements.length > 0) {
-          this.componentUsageCount.set(tag, (this.componentUsageCount.get(tag) ?? 0) + 1);
-          const componentHTML = await loader.get;
-          if (componentHTML) {
+      for (const [tag, loader] of this.component_loaders) {
+        const target_elements = root.querySelectorAll(tag);
+        if (target_elements.length > 0) {
+          this.component_usage_count.set(tag, (this.component_usage_count.get(tag) ?? 0) + 1);
+          const component_html = await loader.get;
+          if (component_html) {
             for (const element of root.querySelectorAll(tag)) {
               // Steps
               //
               // 1. Create new component element
               //
-              element.insertAdjacentHTML('afterend', componentHTML);
+              element.insertAdjacentHTML('afterend', component_html);
               const component = element.nextElementSibling;
               if (!component) continue;
               //
@@ -56,15 +56,15 @@ export class CustomComponentPreprocessor implements HTMLPreprocessor {
     };
   }
   registerComponentBody(tag: string, body: string) {
-    if (!this.componentLoaders.has(tag)) {
-      this.componentUsageCount.set(tag, 0);
-      this.componentLoaders.set(tag, new LazyTask(async () => body));
+    if (!this.component_loaders.has(tag)) {
+      this.component_usage_count.set(tag, 0);
+      this.component_loaders.set(tag, new LazyTask(async () => body));
     }
     return this;
   }
   registerComponentPath(tag: string, path: string, as_is = false) {
-    if (!this.componentLoaders.has(tag)) {
-      this.componentLoaders.set(
+    if (!this.component_loaders.has(tag)) {
+      this.component_loaders.set(
         tag,
         new LazyTask(async () => {
           try {
@@ -77,8 +77,8 @@ export class CustomComponentPreprocessor implements HTMLPreprocessor {
           } catch (error) {}
         }),
       );
-      this.componentPaths.add(path);
-      this.componentUsageCount.set(tag, 0);
+      this.component_paths.add(path);
+      this.component_usage_count.set(tag, 0);
     }
     return this;
   }

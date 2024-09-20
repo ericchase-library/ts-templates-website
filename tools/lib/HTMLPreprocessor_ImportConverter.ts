@@ -1,4 +1,4 @@
-import { PathGroup } from '../../src/lib/ericchase/Platform/Bun/Path.js';
+import { Path } from '../../src/lib/ericchase/Platform/Node/Path.js';
 import type { NodeHTMLParser } from '../../src/lib/ericchase/Platform/Web/HTML/ParseHTML.js';
 import type { HTMLPreprocessor } from './build.js';
 
@@ -16,13 +16,13 @@ export class ImportConverterPreprocessor implements HTMLPreprocessor {
           if (src) {
             try {
               const url = new URL(src);
-              const pathGroup = PathGroup.new({ path: url.pathname });
-              if (pathGroup.ext === pathGroup.replaceExt(from).ext) {
+              const path = new Path(url.pathname);
+              if (path.ext === path.newExt(from).ext) {
                 element.setAttribute('src', src.slice(0, src.lastIndexOf(from)) + to);
               }
             } catch (_) {
-              const pathGroup = PathGroup.new({ path: src });
-              if (pathGroup.ext === pathGroup.replaceExt(from).ext) {
+              const path = new Path(src);
+              if (path.ext === path.newExt(from).ext) {
                 element.setAttribute('src', src.slice(0, src.lastIndexOf(from)) + to);
               }
             }

@@ -1,3 +1,34 @@
+## 2024-09-19
+
+- update packages
+
+**dev_server**
+
+- insignificant file movement
+- update packages
+
+**src**
+
+- rename `server` to `dev_server` as `server` is a special api path for the actual dev server
+- rename `server/server.ts` to `dev_server/server-data.ts`
+- add `dev_server/hotreload.bundle.ts` to completely isolate hot reloading logic
+- add script tag for `hotreload.bundle.ts` in `index.html`
+- commented out database code for `index.bundle.ts`
+
+**src/lib/ericchase**
+
+- separate Glob (Bun) and Path (Node) utility into own files and into proper directories
+  - Platform/Bun/Glob.ts
+  - Platform/Node/Path.ts
+
+**tools**
+
+- update scripts to use new Glob and Path utility logic
+- rewrite `build.ts` to use a step system for more control
+- rename the html processor files
+- add a file to isolate hot reloading logic
+- update `dev.ts` to use new build step system and add logic for listening to keypresses
+
 ## 2024-09-16
 
 - add specific versions for some packages

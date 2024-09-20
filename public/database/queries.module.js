@@ -19,7 +19,7 @@ function ConsoleError(...items) {
   console['error'](...items);
 }
 
-// src/server/server.ts
+// src/dev_server/server-data.ts
 var host = '127.0.0.1';
 var port = '8000';
 var server_ws = `ws://${host}:${port}`;
@@ -70,5 +70,5 @@ async function EnsureTableExists(name) {
 var db = getLocalhost(server_http);
 export { TableExists, EnsureTableExists, DatabaseConnected, CreateTable };
 
-//# debugId=A128695379BF6D9C64756E2164756E21
+//# debugId=CF72A717524642F264756E2164756E21
 //# sourceMappingURL=queries.module.js.map

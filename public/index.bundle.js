@@ -1,6 +1,3 @@
-// src/index.bundle.ts
-import { DatabaseConnected, EnsureTableExists } from './database/queries.module.js';
-
 // src/lib/ericchase/Utility/Console.ts
 function ConsoleError(...items) {
   console['error'](...items);
@@ -61,23 +58,7 @@ class CNodeRef {
   }
 }
 
-// src/server/server.ts
-function EnableHotReload() {
-  const socket = new WebSocket(server_ws);
-  socket.addEventListener('message', (event) => {
-    if (event.data === 'reload') {
-      window.location.reload();
-    }
-  });
-}
-var host = '127.0.0.1';
-var port = '8000';
-var server_ws = `ws://${host}:${port}`;
-var server_http = `http://${host}:${port}`;
-
 // src/index.bundle.ts
-EnableHotReload();
-
 class Page {
   divMessages;
   constructor() {
@@ -98,22 +79,6 @@ class Page {
   }
 }
 var page = new Page();
-try {
-  if (await DatabaseConnected()) {
-    const tableName = 'test';
-    const { created, exists } = await EnsureTableExists(tableName);
-    if (created) {
-      page.addMessage('Table created.');
-    } else if (exists) {
-      page.addMessage('Table exists.');
-    } else {
-      page.addMessage('Table creation failed.');
-    }
-  }
-} catch (error) {
-  page.addMessage(error);
-  page.addMessage('Is server running? Check api endpoint.');
-}
 
-//# debugId=EE4AFBD58D9ED96564756E2164756E21
+//# debugId=025850BD90AD035164756E2164756E21
 //# sourceMappingURL=index.bundle.js.map

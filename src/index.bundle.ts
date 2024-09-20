@@ -1,9 +1,5 @@
-import { DatabaseConnected, EnsureTableExists } from './database/queries.module.js';
 import { ConsoleError } from './lib/ericchase/Utility/Console.js';
 import { NodeRef } from './lib/ericchase/Web API/Node_Utility.js';
-import { EnableHotReload } from './server/server.js';
-
-EnableHotReload();
 
 class Page {
   divMessages: HTMLDivElement;
@@ -28,19 +24,19 @@ class Page {
 
 const page = new Page();
 
-try {
-  if (await DatabaseConnected()) {
-    const tableName = 'test';
-    const { created, exists } = await EnsureTableExists(tableName);
-    if (created) {
-      page.addMessage('Table created.');
-    } else if (exists) {
-      page.addMessage('Table exists.');
-    } else {
-      page.addMessage('Table creation failed.');
-    }
-  }
-} catch (error: any) {
-  page.addMessage(error);
-  page.addMessage('Is server running? Check api endpoint.');
-}
+// try {
+//   if (await DatabaseConnected()) {
+//     const tableName = 'test';
+//     const { created, exists } = await EnsureTableExists(tableName);
+//     if (created) {
+//       page.addMessage('Table created.');
+//     } else if (exists) {
+//       page.addMessage('Table exists.');
+//     } else {
+//       page.addMessage('Table creation failed.');
+//     }
+//   }
+// } catch (error: any) {
+//   page.addMessage(error);
+//   page.addMessage('Is server running? Check api endpoint.');
+// }
