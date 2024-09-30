@@ -2,19 +2,21 @@
   "dependencies": {},
   "devDependencies": {
     "@biomejs/biome": "^1.9.2",
-    "@types/bun": "^1.1.9",
+    "@types/bun": "^1.1.10",
     "@types/chrome": "^0.0.271",
-    "@types/node": "^22.5.5",
+    "@types/node": "^22.7.4",
     "node-html-parser": "^6.1.13",
     "prettier": "^3.3.3"
   },
   "scripts": {
-    "build": "bun ./tools/build.ts",
-    "dev": "bun ./tools/dev.ts",
-    "serve": "bun ./tools/serve.ts",
-    "db-up": "bun ./tools/docker-db.ts start",
-    "db-down": "bun ./tools/docker-db.ts stop",
-    "format": "bun ./tools/format.ts",
-    "lint": "biome lint --error-on-warnings --write ."
+    "archive": "bun tools/dev.ts archive",
+    "build": "bun tools/dev.ts build",
+    "dev": "bun tools/dev.ts",
+    "format": "bun tools/dev.ts format",
+    "lint": "biome lint --error-on-warnings --write .",
+    "package": "bun tools/dev.ts archive",
+    "serve": "bun tools/dev.ts serve",
+    "watch": "bun tools/dev.ts watch",
+    "zip": "bun tools/dev.ts archive"
   }
 }

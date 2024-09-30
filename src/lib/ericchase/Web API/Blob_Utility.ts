@@ -1,5 +1,5 @@
-import { U8 } from '../Algorithm/Array/Uint8Array.js';
-import { U8StreamReadSome } from '../Algorithm/Stream/ReadSome.js';
+import { U8StreamReadSome } from '../Algorithm/Stream.js';
+import { U8 } from '../Algorithm/Uint8Array.js';
 import { Compat_Blob } from './Blob.js';
 
 export function ReadSome(blob: Blob, count: number): Promise<Uint8Array> {

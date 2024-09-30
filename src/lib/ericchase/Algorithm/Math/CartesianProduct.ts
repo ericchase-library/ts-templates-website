@@ -1,21 +1,27 @@
-export function* CartesianProduct<T_a extends readonly any[], T_b extends readonly any[]>(array_a: T_a, array_b: T_b): Generator<[T_a, T_b], void, unknown> {
-  for (let i = 0; i < array_a.length; ++i) {
-    for (let j = 0; j < array_b.length; ++j) {
+export function* CartesianProduct<A extends readonly unknown[], B extends readonly unknown[]>(array_a: A, array_b: B): Generator<[A[number], B[number]], void, unknown> {
+  for (let i = 0; i < array_a.length; i++) {
+    for (let j = 0; j < array_b.length; j++) {
       yield [array_a[i], array_b[j]];
     }
   }
 }
 
-export function* ConsecutiveCartesianProduct<T extends readonly any[]>(...arrays: { [K in keyof T]: T[K][] }): Generator<[...T], void, unknown> {
-  for (const item of arrays.reduce((sum, cur) => Array.from(CartesianProduct(sum, cur)).map((_) => _.flat(1)), [[]])) {
-    yield item;
-  }
-}
-
-export function* SelfCartesianProduct<T extends readonly any[]>(array: T): Generator<[T, T], void, unknown> {
-  for (let i = 0; i < array.length; ++i) {
-    for (let j = i + 1; j < array.length; ++j) {
-      yield [array[i], array[j]];
+export function* nCartesianProduct<T extends unknown[][]>(...arrays: T): Generator<{ [K in keyof T]: T[K][number] }> {
+  const count = arrays.reduce((product, arr) => product * BigInt(arr.length), 1n);
+  const out = arrays.map((arr) => arr[0]) as { [K in keyof T]: T[K][number] };
+  const indices: number[] = new Array(arrays.length).fill(0);
+  const lengths: number[] = arrays.map((arr) => arr.length);
+  for (let c = 0n; c < count; c++) {
+    yield out.slice() as { [K in keyof T]: T[K][number] };
+    let i = arrays.length - 1;
+    for (let j = 0; j < arrays.length; j++, i--) {
+      indices[i]++;
+      if (indices[i] < lengths[i]) {
+        out[i] = arrays[i][indices[i]];
+        break;
+      }
+      indices[i] = 0;
+      out[i] = arrays[i][0];
     }
   }
 }

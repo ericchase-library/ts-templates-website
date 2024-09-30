@@ -1,11 +1,12 @@
-const cache = [1, 1];
-export function Factorial(n: number) {
-  if (!(n in cache)) {
-    let res = cache[cache.length - 1];
-    for (let i = cache.length; i < n; ++i) {
-      cache[i] = res *= i;
+const factorial_cache = [BigInt(1), BigInt(1)];
+export function Factorial(n: number): bigint {
+  if (!(n in factorial_cache)) {
+    let fact = factorial_cache[factorial_cache.length - 1];
+    for (let i = factorial_cache.length; i < n; i++) {
+      fact *= BigInt(i);
+      factorial_cache[i] = fact;
     }
-    cache[n] = res * n;
+    factorial_cache[n] = fact * BigInt(n);
   }
-  return cache[n];
+  return factorial_cache[n];
 }

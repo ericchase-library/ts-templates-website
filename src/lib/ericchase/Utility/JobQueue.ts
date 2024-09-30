@@ -74,7 +74,9 @@ export class JobQueue<Result = void, Tag = void> {
   protected run() {
     if (this.aborted === false && this.queueIndex < this.queue.length) {
       const { fn, tag } = this.queue[this.queueIndex++];
+      /* eslint-disable @typescript-eslint/no-floating-promises */
       (async () => {
+        /* eslint-enable @typescript-eslint/no-floating-promises */
         this.runningCount.update((count) => {
           return count + 1;
         });
@@ -111,3 +113,5 @@ export class JobQueue<Result = void, Tag = void> {
     }
   }
 }
+
+new JobQueue(0);

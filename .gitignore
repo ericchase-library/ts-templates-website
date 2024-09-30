@@ -91,7 +91,6 @@ web_modules/
 
 # Next.js build output
 .next
-out
 
 # Nuxt.js build / generate output
 .nuxt
@@ -138,8 +137,6 @@ dist
 # Finder (MacOS) folder config
 .DS_Store
 
-
-
 ##
 ## Chase
 ##
@@ -167,13 +164,12 @@ dist
 
 # build folders
 # build/
+# out/
 debug/
 src-tauri/target/
 
 # freefilesync database
 sync.ffs_db
-
-
 
 ##
 ## Repo Specific

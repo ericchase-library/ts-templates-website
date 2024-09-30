@@ -49,7 +49,7 @@ export namespace WebRequestCache {
   }
 }
 
-export async function RebuildAndSendRequest(webRequest: WebRequest) {
+export function RebuildAndSendRequest(webRequest: WebRequest): Promise<Response> | undefined {
   const { bodyDetails, headersDetails } = webRequest;
   const requestUrl = bodyDetails?.url ?? headersDetails?.url;
   if (requestUrl) {

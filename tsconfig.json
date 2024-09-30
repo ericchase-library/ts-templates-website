@@ -14,5 +14,10 @@
     "skipLibCheck": true,
     "strict": true
   },
-  "exclude": ["public/", "dev_server/"]
+  "exclude": [
+    "node_modules", //
+    "**/node_modules/*",
+    "public/",
+    "dev_server/"
+  ]
 }

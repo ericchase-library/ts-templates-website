@@ -1,10 +1,12 @@
-export class LazyTask<T> {
-  protected results?: Promise<T>;
-  constructor(protected fn: () => Promise<T>) {}
-  get get() {
-    if (!this.results) {
-      this.results = this.fn();
+import type { SyncAsync } from './Types.js';
+
+export class LazyTask<ReturnType> {
+  $result?: SyncAsync<ReturnType>;
+  constructor(public $task: () => SyncAsync<ReturnType>) {}
+  get result() {
+    if (!this.$result) {
+      this.$result = this.$task();
     }
-    return this.results;
+    return this.$result;
   }
 }

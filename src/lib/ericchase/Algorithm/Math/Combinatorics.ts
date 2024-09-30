@@ -1,109 +1,115 @@
 import { Factorial } from './Factorial.js';
 
-/**
- * The npr formula is used to find the number of ways in which r different
- * things can be selected and arranged out of n different things. This is also
- * known as the permutations formula. The nPr formula is, P(n, r) = n! / (n−r)!.
- */
-export function nPr(n: number, r: number): number {
-  return Factorial(n) / Factorial(n - r);
-}
-export function nCr(n: number, r: number): number {
+// These functions generate combinations and permutations of R items from a
+// source array of N items. Use the nCr and nPr functions to quickly count the
+// number of combinations or permutations that would be produced.
+
+export function nCr(n: number, r: number, repetitions = false): bigint {
+  if (repetitions === true) {
+    return Factorial(n + r - 1) / (Factorial(r) * Factorial(n - 1));
+  }
   return Factorial(n) / (Factorial(r) * Factorial(n - r));
 }
 
-export function nChooseRPermutations<T>(choices: T[], r: number): T[][] {
-  function incrementIndices(indices: number[], n: number): void {
-    // start with last index
-    const last = indices.length - 1;
-    // increment last index
-    ++indices[last];
-
-    // work backwards
-    let i = last;
-    while (i >= 0) {
-      // increment index again if equal to a higher index
-      while (indices.slice(0, i).includes(indices[i])) {
-        ++indices[i]; // increment index
-      }
-
-      const end = n;
-      // check if index is still less than end
-      if (indices[i] < end) {
-        // reset lower index if necessary
-        if (++i < indices.length) {
-          indices[i] = 0;
-        } else {
-          // done
-          break;
-        }
-      } else {
-        // move to higher index and increment it
-        ++indices[--i];
-      }
-    }
+export function nPr(n: number, r: number, repetitions = false): bigint {
+  if (repetitions === true) {
+    return BigInt(n) ** BigInt(r);
   }
-
-  // P(n, r) = n!/(n-r)!
-  const n = choices.length;
-  const permutationCount = nPr(n, r);
-
-  const indexList = Array.from(new Array(r).keys());
-  const permutations = new Array<T[]>(permutationCount);
-
-  for (let c = 0; c < permutationCount; ++c) {
-    // Create new permutation
-    // - Map indices to actual values
-    permutations[c] = indexList.map((i) => choices[i]);
-
-    // Increment the indices
-    incrementIndices(indexList, n);
-  }
-
-  return permutations;
+  return Factorial(n) / Factorial(n - r);
 }
-export function nChooseRCombinations<T>(choices: T[], r: number): T[][] {
-  function incrementIndices(indices: number[], n: number): void {
-    // start with last index
-    const last = indices.length - 1;
-    // increment last index
-    ++indices[last];
 
-    // work backwards
-    let i = last;
-    while (i >= 0) {
-      const end = i < last ? indices[i + 1] : n;
-      // check if index is still less than end
-      if (indices[i] < end) {
-        // reset lower index if necessary
-        if (++i < indices.length) {
-          indices[i] = indices[i - 1] + 1;
-        } else {
-          // done
+export function* nChooseRCombinations<T>(choices: T[], r: number, repetitions = false): Generator<T[]> {
+  const count = nCr(choices.length, r, repetitions);
+  if (repetitions === true) {
+    const out: T[] = new Array(r).fill(choices[0]);
+    const indices: number[] = new Array(r).fill(0);
+    for (let c = typeof count === 'bigint' ? 0n : 0; c < count; c++) {
+      yield out.slice();
+      let i = r - 1;
+      for (let j = 0; j < r; j++, i--) {
+        indices[i]++;
+        if (indices[i] < choices.length /* - j */) {
+          out[i] = choices[indices[i]];
           break;
         }
-      } else {
-        // move to higher index and increment it
-        ++indices[--i];
+      }
+      for (i++; i < r; i++) {
+        indices[i] = indices[i - 1] /* + 1 */;
+        out[i] = choices[indices[i]];
+      }
+    }
+  } else {
+    const out: T[] = choices.slice(0, r);
+    const indices = [...out.keys()];
+    for (let c = typeof count === 'bigint' ? 0n : 0; c < count; c++) {
+      yield out.slice();
+      let i = r - 1;
+      for (let j = 0; j < r; j++, i--) {
+        indices[i]++;
+        if (indices[i] < choices.length - j) {
+          out[i] = choices[indices[i]];
+          break;
+        }
+      }
+      for (i++; i < r; i++) {
+        indices[i] = indices[i - 1] + 1;
+        out[i] = choices[indices[i]];
       }
     }
   }
+}
 
-  // C(n, r) = n!/(r!(n-r)!)
-  const n = choices.length;
-  const combinationCount = nCr(n, r);
-
-  const indexList = Array.from(new Array(r).keys());
-  const combinations = new Array<T[]>(combinationCount);
-
-  for (let c = 0; c < combinationCount; ++c) {
-    // Create new permutation
-    // - Map indices to actual values
-    combinations[c] = indexList.map((i) => choices[i]);
-
-    // Increment the indices
-    incrementIndices(indexList, n);
+export function* nChooseRPermutations<T>(choices: T[], r: number, repetitions = false): Generator<T[]> {
+  const count = nPr(choices.length, r, repetitions);
+  if (repetitions === true) {
+    const out: T[] = new Array(r).fill(choices[0]);
+    const indices: number[] = new Array(r).fill(0);
+    for (let c = typeof count === 'bigint' ? 0n : 0; c < count; c++) {
+      yield out.slice();
+      let i = r - 1;
+      for (let j = 0; j < r; j++, i--) {
+        indices[i]++;
+        if (indices[i] < choices.length) {
+          out[i] = choices[indices[i]];
+          break;
+        }
+        indices[i] = 0;
+        out[i] = choices[0];
+      }
+    }
+  } else {
+    const out: T[] = choices.slice(0, r);
+    const indices: number[] = [...out.keys()];
+    const imap: number[] = new Array(choices.length).fill(0);
+    for (let i = 0; i < r; i++) {
+      imap[i] = 1;
+    }
+    for (let c = typeof count === 'bigint' ? 0n : 0; c < count; c++) {
+      yield out.slice();
+      let i = r - 1;
+      for (let j = 0; j < r; j++, i--) {
+        imap[indices[i]] = 0;
+        indices[i]++;
+        while (imap[indices[i]] === 1) {
+          indices[i]++;
+        }
+        if (indices[i] < choices.length) {
+          imap[indices[i]] = 1;
+          out[i] = choices[indices[i]];
+          break;
+        }
+      }
+      for (; i < r; i++) {
+        if (indices[i] < choices.length) {
+          continue;
+        }
+        indices[i] = 0;
+        while (imap[indices[i]] === 1) {
+          indices[i]++;
+        }
+        imap[indices[i]] = 1;
+        out[i] = choices[indices[i]];
+      }
+    }
   }
-
-  return combinations;
 }

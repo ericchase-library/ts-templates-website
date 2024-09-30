@@ -1,68 +1,120 @@
-import { Debouncer } from '../src/lib/ericchase/Algorithm/Debounce.js';
-import { Watcher } from '../src/lib/ericchase/Platform/Node/Watch.js';
-import { ConsoleError } from '../src/lib/ericchase/Utility/Console.js';
-import { buildStep_Bundle, buildStep_Clean, buildStep_Copy, buildStep_ProcessHTMLFiles } from './build.js';
-import { HotReloader } from './lib/Feature_HotReload.js';
+import { JSONGet } from '../src/lib/ericchase/Algorithm/JSON.js';
+import { RunSync } from '../src/lib/ericchase/Platform/Bun/Child Process.js';
+import { Path } from '../src/lib/ericchase/Platform/Node/Path.js';
+import { StdinRawModeReader } from '../src/lib/ericchase/Platform/Node/Process.js';
+import { KEYS } from '../src/lib/ericchase/Platform/Node/Shell.js';
+import { ConsoleError, GetConsoleMark } from '../src/lib/ericchase/Utility/Console.js';
+import { PrepareMessage } from '../src/lib/ericchase/Utility/PrepareMessage.js';
+import { TryLock } from './lib/cache/LockCache.js';
 
-process.stdin.setRawMode(true); // Enable raw mode (capture keypresses one at a time)
-process.stdin.resume(); // Start reading input from stdin
-process.stdin.setEncoding('utf8'); // Set encoding to UTF-8
+export const scripts_dir = new Path('./tools/scripts/');
 
-const CTRL_C = '\u0003';
-const UP = '\x1b\x5b\x41';
-const DOWN = '\x1b\x5b\x42';
-const LEFT = '\x1b\x5b\x44';
-const RIGHT = '\x1b\x5b\x43';
+export const command_map = {
+  build: 'build.ts',
+  dev: 'dev.ts',
+  format: 'format.ts',
+  watch: 'watch.ts',
+  // dev server
+  database: 'database.ts',
+  db: 'database.ts',
+  serve: 'serve.ts',
+};
 
-try {
-  await buildStep_Clean();
+if (Bun.argv[1] === __filename) {
+  const command = Bun.argv.at(2);
+  const command_args = Bun.argv.slice(3);
 
-  const build = new Debouncer(async () => {
-    await buildStep_Bundle(true);
-    await buildStep_ProcessHTMLFiles(true);
-    await buildStep_Copy();
-  }, 100);
-  await build.run();
+  if (command === undefined || command.trim() === 'watch') {
+    const stdin = new StdinRawModeReader();
 
-  const hotreloader = new HotReloader(100);
-  hotreloader.enable();
-
-  const watcher_src = new Watcher('./src', 100);
-  watcher_src.observe(async () => {
-    await build.run();
-  });
-
-  const onData = async (buf: string) => {
-    switch (buf) {
-      case CTRL_C:
+    // CLI: Force Quit Watcher
+    stdin.addHandler(async (text) => {
+      if (text === KEYS.SIGINT) {
+        await stdin.stop();
+        watcher_process.stdin.write(`${KEYS.SIGINT}`);
+        await Bun.sleep(25);
+        watcher_process.kill();
+        await watcher_process.exited;
         process.exit();
-        break;
-      case 'h':
-        hotreloader.toggle();
-        break;
-      case 'r':
-        await buildStep_Clean();
-        await build.run();
-        ConsoleError('Full Rebuild');
-        hotreloader.enable();
-        break;
-      // case UP:
-      //   console.log('up');
-      //   break;
-      // case DOWN:
-      //   console.log('down');
-      //   break;
-      // case LEFT:
-      //   console.log('left');
-      //   break;
-      // case RIGHT:
-      //   console.log('right');
-      //   break;
-    }
-  };
-  process.stdin.addListener('data', onData);
+      }
+    });
 
-  await watcher_src.done;
-} catch (error) {
-  ConsoleError(error);
+    TryLock(command_map.dev);
+
+    function run_watcher() {
+      return Bun.spawn(['bun', scripts_dir.appendSegment(command_map.watch).path], { stdin: 'pipe', stdout: 'inherit' });
+    }
+
+    let watcher_process = run_watcher();
+
+    stdin.addHandler(async (text, actions) => {
+      const q = text === 'q';
+      const r = text === 'r';
+      const b = text === 'b';
+
+      if (q || r || b) {
+        ConsoleError('Waiting for Watcher to Exit');
+        actions.stopHandlerChain();
+        watcher_process.stdin.write(`${KEYS.SIGINT}`);
+        await watcher_process.exited;
+      }
+
+      switch (text) {
+        // CLI: Safe Shutdown
+        case 'q': {
+          await stdin.stop();
+          process.exit();
+          break;
+        }
+        // CLI: Restart Watcher
+        case 'r': {
+          ConsoleError('Starting Watcher');
+          watcher_process = run_watcher();
+          break;
+        }
+        // CLI: Run Full Build
+        case 'b': {
+          ConsoleError('Full Rebuild');
+          RunSync.BunRun('build');
+          ConsoleError('Starting Watcher');
+          watcher_process = run_watcher();
+          break;
+        }
+        default: {
+          printHelp();
+          break;
+        }
+      }
+    });
+
+    // CLI: Send Remaining Keys Through
+    stdin.addHandler((text) => {
+      watcher_process.stdin.write(text);
+    });
+
+    stdin.start();
+  } else {
+    const script = JSONGet(command_map, command);
+    if (script) {
+      RunSync.Bun(scripts_dir.appendSegment(script).path, ...command_args);
+    } else {
+      ConsoleError(`Invalid Command > ${command}`);
+    }
+  }
+}
+
+let console_mark = { updated: true };
+function printHelp() {
+  const help = `
+    Keypress Commands:
+      'q' to quit
+      'r' to restart the watcher
+      'b' to restart the watcher after a full rebuild
+
+    SIGINT [Ctrl-C] Will Force Quit.
+  `;
+  if (console_mark.updated) {
+    ConsoleError(PrepareMessage(help, 4, 1, 1));
+    console_mark = GetConsoleMark();
+  }
 }

@@ -1,3 +1,27 @@
+## 2024-09-30
+
+**src/lib/ericchase**
+
+- add more utilities
+  - JSON utility functions
+  - new Handler class
+  - file running functions (needs better api)
+  - stdin readers
+  - menu and shell menu classes
+  - PrepareHelpMessage function
+  - assertion functions
+  - string manipulation functions
+  - console utility functions
+  - GeneratorArray class
+
+**tools**
+
+- complete overhaul of the dev system
+  - fix handling of the file modification cache
+  - add locking system to prevent running different build scripts at the same time
+  - add capability to interact with dev script, (`q` to quit and `r` to restart watcher, `b` for full rebuild)
+  - many bug fixes
+
 ## 2024-09-19
 
 - update packages
