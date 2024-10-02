@@ -16,6 +16,6 @@ export class IIFEWrapperPreprocessor implements FilePreprocessor {
     return false;
   }
   preprocess(bytes: Uint8Array) {
-    return { bytes: EncodeText(`(function () {\n${DecodeText(bytes)}})();`) };
+    return { bytes: EncodeText(`(() => {\n${DecodeText(bytes)}})();`) };
   }
 }
