@@ -151,19 +151,19 @@ export async function copy({ out_dirs, preprocessors = [], to_copy, to_exclude }
   const exclude_paths = new Set(to_exclude?.paths ?? []);
   for (const path_group of to_copy.path_groups) {
     if (await shouldProcess({ exclude_paths, src_path: path_group })) {
-      let content = await Bun.file(path_group.path).text();
+      let bytes = await Bun.file(path_group.path).bytes();
       for (const preprocessor of preprocessors) {
         try {
           if (preprocessor.pathMatches(path_group)) {
-            const result = await preprocessor.preprocess(content);
-            content = result.content;
+            const result = await preprocessor.preprocess(bytes);
+            bytes = result.bytes;
           }
         } catch (error) {
           ConsoleError(error);
         }
       }
       for (const out_dir of out_dirs) {
-        await Bun.write(path_group.newOrigin(out_dir).path, content);
+        await Bun.write(path_group.newOrigin(out_dir).path, bytes);
       }
       processed_paths.add(path_group);
     }

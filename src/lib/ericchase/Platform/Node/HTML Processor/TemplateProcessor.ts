@@ -1,6 +1,6 @@
 import * as Parser from 'node-html-parser';
 import node_fs from 'node:fs';
-import { Path, PathGroup } from '../Path.js';
+import { Path, type PathGroup } from '../Path.js';
 import { ParseHTML } from './ParseHTML.js';
 
 export async function LoadHtmlFile(filePath: Path | PathGroup) {

@@ -1,4 +1,5 @@
 import type { Path, PathGroup } from '../../../src/lib/ericchase/Platform/Node/Path.js';
+import { DecodeText, EncodeText } from '../../../src/lib/ericchase/Utility/TextCodec.js';
 import type { FilePreprocessor } from './FilePreprocessor.js';
 
 export class IIFEWrapperPreprocessor implements FilePreprocessor {
@@ -14,7 +15,7 @@ export class IIFEWrapperPreprocessor implements FilePreprocessor {
     }
     return false;
   }
-  preprocess(content: string) {
-    return { content: `(function () {\n${content}})();` };
+  preprocess(bytes: Uint8Array) {
+    return { bytes: EncodeText(`(function () {\n${DecodeText(bytes)}})();`) };
   }
 }

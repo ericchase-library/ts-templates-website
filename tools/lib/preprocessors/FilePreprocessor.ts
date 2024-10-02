@@ -3,5 +3,5 @@ import type { SyncAsync } from '../../../src/lib/ericchase/Utility/Types.js';
 
 export interface FilePreprocessor {
   pathMatches(path: Path | PathGroup): boolean;
-  preprocess(content: string): SyncAsync<{ content: string }>;
+  preprocess(bytes: Uint8Array): SyncAsync<{ bytes: Uint8Array }>;
 }
