@@ -63,7 +63,7 @@ export async function buildStep_Clean() {
   bundler.killAll();
   Cache_FileStats_Reset();
   await CleanDirectory(out_dir);
-  // await CleanDirectory(tmp_dir.path);
+  // await CleanDirectory(tmp_dir);
 }
 
 // step: setup bundler
@@ -181,7 +181,7 @@ export async function buildStep_Rename() {
 export const on_log = new Broadcast<void>();
 export function onLog(data: string) {
   if (build_mode.silent === false) {
-    ConsoleLogWithDate(`> ${data}`);
+    ConsoleLogWithDate(data);
     on_log.send();
   }
 }
@@ -195,20 +195,16 @@ if (Bun.argv[1] === __filename) {
   RunSync.BunRun('format', 'silent');
   TryLock(command_map.format);
 
+  ConsoleNewline();
   if (Cache_FileStats_Lock()) {
-    ConsoleNewline();
     await buildStep_Clean();
-    ConsoleNewline();
     await buildStep_SetupBundler();
-    ConsoleNewline();
     await buildStep_ProcessHTMLFiles();
-    ConsoleNewline();
     await buildStep_Copy();
-    ConsoleNewline();
     await buildStep_Rename();
-    ConsoleNewline();
   }
   Cache_FileStats_Unlock();
+  ConsoleNewline();
 
   Cache_Unlock(command_map.format);
   RunSync.BunRun('format');
