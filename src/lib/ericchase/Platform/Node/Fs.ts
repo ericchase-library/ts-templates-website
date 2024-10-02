@@ -1,37 +1,35 @@
 import node_fs from 'node:fs';
-import node_path from 'node:path';
+import { Path, PathGroup } from './Path.js';
 
-export async function DeleteFile(path: string) {
-  try {
-    await node_fs.promises.unlink(path);
-  } catch (error) {}
+export async function DeleteFile(path: Path | PathGroup | URL) {
+  await node_fs.promises.unlink(path.toString());
 }
 
-export async function ReadFile(path: string) {
-  return await node_fs.promises.readFile(path, { encoding: 'utf8' });
+export async function ReadFile(path: Path | PathGroup | URL) {
+  return await node_fs.promises.readFile(path.toString(), { encoding: 'utf8' });
 }
 
-export async function RenameFile(from: string, to: string) {
-  await node_fs.promises.rename(from, to);
+export async function RenameFile(from: Path | PathGroup | URL, to: Path | PathGroup | URL) {
+  await node_fs.promises.rename(from.toString(), to.toString());
 }
 
-export async function WriteFile(path: string, text: string) {
-  await node_fs.promises.writeFile(path, text, { encoding: 'utf8' });
+export async function WriteFile(path: Path | PathGroup | URL, text: string) {
+  await node_fs.promises.writeFile(path.toString(), text, { encoding: 'utf8' });
 }
 
-export async function CleanDirectory(path: string) {
+export async function CleanDirectory(path: Path | PathGroup | URL) {
   await DeleteDirectory(path);
   await CreateDirectory(path);
 }
 
-export async function CreateDirectory(path: string, isFile = false) {
-  if (isFile === true) {
-    await node_fs.promises.mkdir(node_path.dirname(path), { recursive: true });
-  } else {
+export async function CreateDirectory(path: Path | PathGroup | URL, is_file = false) {
+  if (path instanceof URL) {
     await node_fs.promises.mkdir(path, { recursive: true });
+  } else {
+    await node_fs.promises.mkdir(is_file === true ? Path.from(path).dir : path.path, { recursive: true });
   }
 }
 
-export async function DeleteDirectory(path: string) {
-  await node_fs.promises.rm(path, { recursive: true, force: true });
+export async function DeleteDirectory(path: Path | PathGroup | URL) {
+  await node_fs.promises.rm(path.toString(), { recursive: true, force: true });
 }

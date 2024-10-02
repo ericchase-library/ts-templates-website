@@ -16,59 +16,65 @@ import type { HTMLPreprocessor } from './preprocessors/HTMLPreprocessor.js';
 // result. as an alternative, we can run separate builds for each target file.
 // subprocesses.push(Bun.spawn(['bun', 'build', ...toBundle.paths, '--outdir', 'out/', '--external', '*.module.js', '--watch'], { stdout: 'pipe', stderr: 'inherit' }));
 interface BuildParams {
-  entry: PathGroup;
-  external_imports?: string[];
-  out_dir: Path;
-  sourcemap_mode?: Parameters<typeof Bun.build>[0]['sourcemap'];
+  entrypoint: PathGroup;
+  outdir: Path;
   target?: Parameters<typeof Bun.build>[0]['target'];
+  format?: Parameters<typeof Bun.build>[0]['format'];
+  sourcemap?: Parameters<typeof Bun.build>[0]['sourcemap'];
+  minify?: Parameters<typeof Bun.build>[0]['minify'];
+  external?: Parameters<typeof Bun.build>[0]['external'];
+  define?: Record<string, any>;
   watch?: boolean;
 }
 export class BuildRunner {
   broadcast = new Broadcast<void>();
-  lines: string[] = [];
+  output: string[] = [];
   subprocess_map = new Map<string, SpawnerSubprocess>();
-  constructor(output: (data: string) => void) {
-    let index = 0;
-    this.broadcast.subscribe(() => {
-      for (; index < this.lines.length; index++) {
-        if (this.lines[index].length > 0) {
-          output(`Bundled: ${this.lines[index]}`);
-        }
-      }
-    });
-  }
-  add({ entry, external_imports = ['*.module.js'], out_dir, sourcemap_mode = 'linked', target = 'browser', watch = false }: BuildParams): SpawnerSubprocess | undefined {
-    if (this.subprocess_map.has(entry.path)) {
+  add({ entrypoint, outdir, target = 'browser', format = 'esm', sourcemap = 'none', minify = false, external = ['*.module.js'], define = {}, watch = false }: BuildParams): SpawnerSubprocess | undefined {
+    if (this.subprocess_map.has(entrypoint.path)) {
       return;
     }
-    const args = ['build', entry.path, '--outdir', entry.newOrigin(out_dir).newBase('').path];
-    for (const pattern of external_imports) {
+    const args = ['build', '--entrypoints', entrypoint.path, '--outdir', entrypoint.newOrigin(outdir).newRelativeBase('').path];
+    args.push('--target', target);
+    args.push('--format', format);
+    args.push(`--sourcemap=${sourcemap}`);
+    if (minify === true) {
+      args.push('--minify');
+    } else if (typeof minify !== 'boolean') {
+      for (const [key, value] of Object.entries(minify)) {
+        if (value === true) {
+          args.push(`--minify-${key}`);
+        }
+      }
+    }
+    for (const pattern of external) {
       args.push('--external', pattern);
     }
-    args.push(`--sourcemap=${sourcemap_mode}`);
-    args.push('--target', target);
+    for (const [key, value] of Object.entries(define)) {
+      args.push('--define', `${key}=${JSON.stringify(value)}`);
+    }
     if (watch === true) {
       args.push('--watch', '--no-clear-screen');
     }
     const child_process = Spawn.Bun(...args);
-    this.subprocess_map.set(entry.path, child_process);
+    this.subprocess_map.set(entrypoint.path, child_process);
     const stderrReader = AsyncLineReader(child_process.stderr);
     const stdoutReader = AsyncLineReader(child_process.stdout);
     Promise.allSettled([
       (async () => {
         for await (const data of stderrReader) {
-          ConsoleError('Bundler Error:', entry.path);
+          ConsoleError('Bundler Error:', entrypoint.path);
           ConsoleErrorToLines(data);
         }
       })(),
       (async () => {
         for await (const data of stdoutReader) {
-          this.lines.push(...TrimLines(data));
+          this.output.push(...TrimLines(data));
           this.broadcast.send();
         }
       })(),
     ]).then(() => {
-      this.subprocess_map.delete(entry.path);
+      this.subprocess_map.delete(entrypoint.path);
     });
     return child_process;
   }
@@ -101,7 +107,7 @@ export async function bundle({ external_imports = [], out_dir, sourcemap_mode = 
         target: 'browser',
       });
       if (success) {
-        await Bun.write(path_group.newOrigin(out_dir).newExt('.js').path, outputs[0]);
+        await Bun.write(path_group.newOrigin(out_dir).newRelativeExt('.js').path, outputs[0]);
         processed_paths.add(path_group);
       }
     }
@@ -126,7 +132,7 @@ export async function compile({ out_dir, to_compile, to_exclude }: CompileParams
     if (await shouldProcess({ exclude_paths, src_path: path_group })) {
       try {
         const output = await transpiler.transform(await Bun.file(path_group.path).text());
-        await Bun.write(path_group.newOrigin(out_dir).newExt('.js').path, output);
+        await Bun.write(path_group.newOrigin(out_dir).newRelativeExt('.js').path, output);
         processed_paths.add(path_group);
       } catch (error) {}
     }
@@ -148,7 +154,7 @@ export async function copy({ out_dirs, preprocessors = [], to_copy, to_exclude }
       let content = await Bun.file(path_group.path).text();
       for (const preprocessor of preprocessors) {
         try {
-          if (preprocessor.pathMatches(path_group.path)) {
+          if (preprocessor.pathMatches(path_group)) {
             const result = await preprocessor.preprocess(content);
             content = result.content;
           }
@@ -199,7 +205,7 @@ async function shouldProcess({ exclude_paths, src_path }: { exclude_paths: Set<s
     return false;
   }
   // source file is modified, process it
-  if (Cache_IsFileModified(src_path.path).data === true) {
+  if (Cache_IsFileModified(src_path).data === true) {
     return true;
   }
   // skip it

@@ -1,3 +1,30 @@
+## 2024-10-02
+
+- minor changes to template
+
+**src/lib/ericchase**
+
+- modify modules to utilize Path and PathGroup classes over strings
+  - src/lib/ericchase/Platform/Bun/Fs.ts
+  - src/lib/ericchase/Platform/Bun/Glob.ts
+  - src/lib/ericchase/Platform/Node/HTML Processor/TemplateProcessor.ts
+  - src/lib/ericchase/Platform/Node/Fs.ts
+  - src/lib/ericchase/Platform/Node/Path.ts
+  - src/lib/ericchase/Platform/Node/Watch.ts
+
+**tools**
+
+- modify tools to utilize Path and PathGroup classes over strings
+- move `format.ts` script into `tools/lib`
+
+> **all module changes**
+
+```
++ Utility/Console.ts
+  + ConsoleErrorWithDate
+  + ConsoleLogWithDate
+```
+
 ## 2024-09-30
 
 **src/lib/ericchase**

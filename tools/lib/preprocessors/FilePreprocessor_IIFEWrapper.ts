@@ -1,3 +1,4 @@
+import type { Path, PathGroup } from '../../../src/lib/ericchase/Platform/Node/Path.js';
 import type { FilePreprocessor } from './FilePreprocessor.js';
 
 export class IIFEWrapperPreprocessor implements FilePreprocessor {
@@ -5,9 +6,9 @@ export class IIFEWrapperPreprocessor implements FilePreprocessor {
   constructor(path_endings: string[]) {
     this.path_endings = path_endings;
   }
-  pathMatches(path: string) {
+  pathMatches(path: Path | PathGroup) {
     for (const ending of this.path_endings) {
-      if (path.endsWith(ending)) {
+      if (path.path.endsWith(ending)) {
         return true;
       }
     }

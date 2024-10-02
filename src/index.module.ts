@@ -24,6 +24,8 @@ class Page {
 
 const page = new Page();
 
+page.addMessage('Hello, Script!');
+
 // try {
 //   if (await DatabaseConnected()) {
 //     const tableName = 'test';

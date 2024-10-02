@@ -1,4 +1,5 @@
 import { type NodeHTMLParser, ParseHTML } from '../../../src/lib/ericchase/Platform/Node/HTML Processor/ParseHTML.js';
+import type { Path, PathGroup } from '../../../src/lib/ericchase/Platform/Node/Path.js';
 import type { SyncAsync } from '../../../src/lib/ericchase/Utility/Types.js';
 import type { HTMLPreprocessor } from './HTMLPreprocessor.js';
 
@@ -60,24 +61,24 @@ export class CustomComponentPreprocessor implements HTMLPreprocessor {
     }
     return this;
   }
-  registerComponentPath(tag: string, path: string, as_is = false) {
+  registerComponentPath(tag: string, path: Path | PathGroup, as_is = false) {
     if (!this.component_loaders.has(tag)) {
       if (as_is) {
         this.component_loaders.set(tag, async () => {
           try {
-            return await Bun.file(path).text();
+            return await Bun.file(path.path).text();
           } catch (error) {}
         });
       } else {
         this.component_loaders.set(tag, async () => {
           try {
-            const document = ParseHTML(await Bun.file(path).text());
+            const document = ParseHTML(await Bun.file(path.path).text());
             const body = document.querySelector('body');
             return (body ? body.querySelector('*') : document.querySelector('*'))?.toString();
           } catch (error) {}
         });
       }
-      this.component_paths.add(path);
+      this.component_paths.add(path.path);
       this.component_usage_count.set(tag, 0);
     }
     return this;

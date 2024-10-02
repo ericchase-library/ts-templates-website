@@ -1,4 +1,5 @@
 import node_fs from 'node:fs';
+import type { Path, PathGroup } from './Path.js';
 
 export type ObserverCallback = (events: node_fs.promises.FileChangeInfo<string>[], unsubscribe: () => void) => void;
 export type UnobserveFn = () => void;
@@ -9,7 +10,7 @@ export class Watcher {
    * @param recursive true
    */
   constructor(
-    path: string,
+    path: Path | PathGroup,
     public debounce_interval = 0,
     recursive = true,
   ) {
@@ -35,7 +36,7 @@ export class Watcher {
     };
     this.done = (async () => {
       try {
-        for await (const event of node_fs.promises.watch(path, {
+        for await (const event of node_fs.promises.watch(path.path, {
           recursive,
           signal: this.controller.signal,
         })) {

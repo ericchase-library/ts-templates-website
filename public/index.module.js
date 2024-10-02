@@ -92,6 +92,7 @@ class Page {
   }
 }
 var page = new Page();
+page.addMessage('Hello, Script!');
 
-//# debugId=E810BC6B02F67FC364756E2164756E21
+//# debugId=83649EC4922097D964756E2164756E21
 //# sourceMappingURL=index.module.js.map

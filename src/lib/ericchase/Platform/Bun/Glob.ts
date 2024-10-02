@@ -8,8 +8,7 @@ export class GlobGroup {
     readonly pattern: string,
     readonly path_group_set: PathGroupSet,
   ) {}
-  static build({ origin_path_or_string, pattern, dot = false }: { origin_path_or_string: Path | string; pattern: string; dot?: boolean }) {
-    const origin_path = Path.from(origin_path_or_string);
+  static build({ origin_path, pattern, dot = false }: { origin_path: Path | PathGroup; pattern: string; dot?: boolean }) {
     const path_group_set = new PathGroupSet();
     if (os.platform() === 'win32') {
       if (pattern.startsWith('/') || origin_path.path.startsWith('/')) {
@@ -26,7 +25,7 @@ export class GlobGroup {
     for (const relative_path of new Bun.Glob(pattern).scanSync({ cwd: origin_path.path, dot })) {
       path_group_set.add(new PathGroup(origin_path, new Path(relative_path)));
     }
-    return new GlobGroup(origin_path, pattern, path_group_set);
+    return new GlobGroup(Path.from(origin_path), pattern, path_group_set);
   }
   get path_groups() {
     return this.pathGroupIterator();
@@ -34,8 +33,8 @@ export class GlobGroup {
   get paths() {
     return this.pathIterator();
   }
-  newOrigin(new_origin_path_or_string: Path | string) {
-    const origin_path = Path.from(new_origin_path_or_string);
+  newOrigin(new_origin: Path | PathGroup) {
+    const origin_path = Path.from(new_origin);
     const path_group_set = new PathGroupSet();
     for (const path_group of this.path_group_set.path_groups) {
       path_group_set.add(path_group.newOrigin(origin_path));
@@ -55,11 +54,11 @@ export class GlobGroup {
 }
 
 export class GlobScanner {
-  static GetKey(origin_path_or_string: Path | string, pattern: string) {
-    return `${Path.from(origin_path_or_string).path}|${pattern}`;
+  static GetKey(origin_path: Path | PathGroup, pattern: string) {
+    return `${Path.from(origin_path).path}|${pattern}`;
   }
-  static Scan(origin_path_or_string: Path | string, pattern: string, dot = false) {
-    return GlobGroup.build({ origin_path_or_string, pattern, dot });
+  static Scan(origin_path: Path | PathGroup, pattern: string, dot = false) {
+    return GlobGroup.build({ origin_path, pattern, dot });
   }
   glob_group_map = new Map<string, GlobGroup>();
   get glob_groups() {
@@ -71,8 +70,8 @@ export class GlobScanner {
   get paths() {
     return this.pathIterator();
   }
-  getGlobGroup(origin_path_or_string: Path | string, pattern: string) {
-    return this.glob_group_map.get(GlobScanner.GetKey(origin_path_or_string, pattern));
+  getGlobGroup(origin_path: Path | PathGroup, pattern: string) {
+    return this.glob_group_map.get(GlobScanner.GetKey(origin_path, pattern));
   }
   update(other: GlobScanner) {
     for (const [key, glob_group] of other.glob_group_map) {
@@ -80,15 +79,13 @@ export class GlobScanner {
     }
     return this;
   }
-  scan(origin_path_or_string: Path | string, ...patterns: string[]) {
-    const origin_path = Path.from(origin_path_or_string);
+  scan(origin_path: Path | PathGroup, ...patterns: string[]) {
     for (const pattern of patterns) {
       this.glob_group_map.set(GlobScanner.GetKey(origin_path, pattern), GlobScanner.Scan(origin_path, pattern));
     }
     return this;
   }
-  scanDot(origin_path_or_string: Path | string, ...patterns: string[]) {
-    const origin_path = Path.from(origin_path_or_string);
+  scanDot(origin_path: Path | PathGroup, ...patterns: string[]) {
     for (const pattern of patterns) {
       this.glob_group_map.set(GlobScanner.GetKey(origin_path, pattern), GlobScanner.Scan(origin_path, pattern));
     }

@@ -2,12 +2,18 @@
 
 coverage
 docs
+examples
 
-# Lock Files
+# lock files
 bun.lockb
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
 
-# Miscellaneous
+# miscellaneous
 src/lib/ericchase
+
+**/*.js
+**/*.jsx
+**/*.ts
+**/*.tsx

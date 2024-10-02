@@ -4,7 +4,7 @@ import { Path } from '../../../src/lib/ericchase/Platform/Node/Path.js';
 
 export const cache_dir = new Path('./tools/cache');
 
-CreateDirectory(cache_dir.path);
+CreateDirectory(cache_dir);
 
 export const cache_db = new Database(cache_dir.appendSegment('cache.db').path, { create: true, strict: true });
 

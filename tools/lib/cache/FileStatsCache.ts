@@ -1,4 +1,5 @@
 import node_fs from 'node:fs';
+import type { Path, PathGroup } from '../../../src/lib/ericchase/Platform/Node/Path.js';
 import { cache_db, CreateAllQuery, CreateGetQuery, CreateRunQuery, QueryError, QueryExistsResult, type QueryResult } from './cache.js';
 import { Cache_Lock, Cache_Unlock } from './LockCache.js';
 
@@ -86,11 +87,11 @@ export function Cache_FileStats_Reset(): QueryResult<boolean> {
   }
 }
 
-export function Cache_IsFileModified(path: string): QueryResult<boolean> {
+export function Cache_IsFileModified(path: Path | PathGroup): QueryResult<boolean> {
   try {
-    const mtimeMs = node_fs.statSync(path).mtimeMs;
-    const q0 = isFileModified({ [PATH]: path, [CURRENT_MTIMEMS]: mtimeMs });
-    updateFileStatsRecord({ [PATH]: path, [MTIMEMS]: mtimeMs });
+    const mtimeMs = node_fs.statSync(path.path).mtimeMs;
+    const q0 = isFileModified({ [PATH]: path.path, [CURRENT_MTIMEMS]: mtimeMs });
+    updateFileStatsRecord({ [PATH]: path.path, [MTIMEMS]: mtimeMs });
     return { data: q0?.result === 1 };
   } catch (error) {
     return QueryError(error);

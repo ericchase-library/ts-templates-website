@@ -1,5 +1,5 @@
 import type { Subprocess, SyncSubprocess } from 'bun';
-import { ConsoleLog } from '../../Utility/Console.js';
+import { ConsoleLogWithDate } from '../../Utility/Console.js';
 
 type FlagChain<T> = {
   (...cmds: string[]): T;
@@ -30,7 +30,7 @@ type RunnerFlag = 'Bun' | 'BunRun' | 'Quiet' | 'Silent';
 type SpawnerFlag = 'Bun' | 'BunRun' | 'Silent';
 
 function logRunnerHeader(cmds: string[]) {
-  ConsoleLog(`[${new Date().toLocaleTimeString()}] > ${cmds.map((s) => (s.includes(' ') ? `"${s}"` : s)).join(' ')}`);
+  ConsoleLogWithDate(`> ${cmds.map((s) => (s.includes(' ') ? `"${s}"` : s)).join(' ')}`);
 }
 
 // Flags Parser Functions

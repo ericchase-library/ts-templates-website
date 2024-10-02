@@ -37,7 +37,7 @@ try {
   ConsoleError(error);
 }
 
-const watcher_src = new Watcher(src_dir.path, 100);
+const watcher_src = new Watcher(src_dir, 100);
 watcher_src.observe(async () => {
   try {
     await build.run();

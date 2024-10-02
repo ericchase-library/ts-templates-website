@@ -23,9 +23,23 @@ export function ConsoleError(...items: any[]) {
   updateMarks();
 }
 
+export function ConsoleErrorWithDate(...items: any[]) {
+  // biome-ignore lint: this let's us search for undesired console[error]s
+  console['error'](`[${new Date().toLocaleTimeString()}]`, ...items);
+  Console.newline_count = 0;
+  updateMarks();
+}
+
 export function ConsoleLog(...items: any[]) {
   // biome-ignore lint: this let's us search for undesired console[log]s
   console['log'](...items);
+  Console.newline_count = 0;
+  updateMarks();
+}
+
+export function ConsoleLogWithDate(...items: any[]) {
+  // biome-ignore lint: this let's us search for undesired console[log]s
+  console['log'](`[${new Date().toLocaleTimeString()}]`, ...items);
   Console.newline_count = 0;
   updateMarks();
 }

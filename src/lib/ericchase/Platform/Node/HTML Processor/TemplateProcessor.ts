@@ -1,30 +1,31 @@
 import * as Parser from 'node-html-parser';
 import node_fs from 'node:fs';
+import { Path, PathGroup } from '../Path.js';
 import { ParseHTML } from './ParseHTML.js';
 
-export async function LoadHtmlFile(filePath: string) {
+export async function LoadHtmlFile(filePath: Path | PathGroup) {
   try {
-    const html = await node_fs.promises.readFile(filePath, { encoding: 'utf8' });
+    const html = await node_fs.promises.readFile(filePath.path, { encoding: 'utf8' });
     return ParseHTML(html);
   } catch (err) {
     throw `Could not open file: ${filePath}`;
   }
 }
-export async function SaveHtmlFile(root: Parser.HTMLElement, filePath: string) {
-  await node_fs.promises.writeFile(filePath, root.toString(), { encoding: 'utf8' });
+export async function SaveHtmlFile(root: Parser.HTMLElement, path: Path | PathGroup) {
+  await node_fs.promises.writeFile(path.path, root.toString(), { encoding: 'utf8' });
 }
 
 const includeMap = new Map<string, string>();
 export function RegisterIncludeSource(includeName: string, includeHTML: string) {
   includeMap.set(includeName, includeHTML);
 }
-export async function LoadIncludeFile(includeName: string, includePath: string) {
+export async function LoadIncludeFile(includeName: string, includePath: Path | PathGroup) {
   try {
-    const html = await node_fs.promises.readFile(includePath, { encoding: 'utf8' });
+    const html = await node_fs.promises.readFile(includePath.path, { encoding: 'utf8' });
     includeMap.set(includeName, html);
     return html;
   } catch (err) {
-    throw `Could not open file: ${includePath}`;
+    throw `Could not open file: ${includePath.path}`;
   }
 }
 async function getInclude(includeName: string) {
@@ -33,7 +34,7 @@ async function getInclude(includeName: string) {
     return ParseHTML(html);
   }
   try {
-    return ParseHTML(await LoadIncludeFile(includeName, `${includeName}.html`));
+    return ParseHTML(await LoadIncludeFile(includeName, new Path(`${includeName}.html`)));
   } catch (err) {
     throw `Could not load include: ${includeName}`;
   }
@@ -54,7 +55,7 @@ export async function ProcessTemplateNode(root: Parser.HTMLElement) {
   }
   return root;
 }
-export async function ProcessTemplateFile(templatePath: string, outputPath: string) {
+export async function ProcessTemplateFile(templatePath: Path | PathGroup, outputPath: Path | PathGroup) {
   await SaveHtmlFile(await ProcessTemplateNode(await LoadHtmlFile(templatePath)), outputPath);
 }
 

@@ -83,5 +83,5 @@ async function EnsureTableExists(name) {
 var db = getLocalhost(server_http);
 export { TableExists, EnsureTableExists, DatabaseConnected, CreateTable };
 
-//# debugId=4C8054FE5201B3A464756E2164756E21
+//# debugId=4C31AC807B0253E164756E2164756E21
 //# sourceMappingURL=queries.module.js.map
