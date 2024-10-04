@@ -34,7 +34,7 @@ For continuous building as you work:
 bun run dev
 ```
 
-For one off builds:
+For final builds:
 
 ```
 bun run build
@@ -45,6 +45,8 @@ bun run build
 ```
 bun run format
 ```
+
+My build tools use the Biome (https://biomejs.dev/) toolchain for formatting and linting most source files; as well as Prettier (https://prettier.io/) for formatting html and markdown files. Formatting has always been a massive pain point in web dev, and will probably continue to be so. From time to time, I find better tools for formatting files; and the build tools may be updated accordingly.
 
 ## Project Structure
 
@@ -59,7 +61,7 @@ This folder contains _all_ of the files that are needed to build the website.
 `./src/lib/`
 
 - This folder exclusively contains TypeScript libraries and modules. This folder is ignored during the copy stage of the build process, so don't bother adding anything other than `*.ts` files here.
-- You could modify the build scripts `./tools/build.ts` to also handle `*.js` if you want, but there really isn't a reason to do so unless you want to make use of JavaScript libraries.
+- You could modify the build script `./tools/scripts/build.ts` to also handle `*.js` if you want, but there really isn't a reason to do so unless you want to make use of JavaScript libraries.
 
 ### ./build/
 
@@ -78,14 +80,14 @@ This folder contains the scripts we use to automate work flows, like:
 - building source code into a website, browser extension, or command line application;
 - performing some kind of maintenance on project files;
 - and even other operations like:
-  - opening all the source files in your project (`./tools/open-all-source-files.ts`);
-  - re-installing all the npm packages in your package.json file (`./tools/re-install-packages.ts`)
+  - opening all the source files in your project (see ts-library repo linked above)
+  - re-installing all the npm packages in your package.json (see ts-library repo linked above)
 
 You can literally do anything you want, which is the point of this library. These scripts should be easy to read, easy to write, and easy to modify. The goal isn't to produce a complete packaged build tool like Gulp, Grunt, Webpack, Makefile, etc. You can use those tools as well! The main idea here is to get away from writing clumsy npm scripts in package.json that rely on other packaged tools.
 
 **Note:**
 
-The scripts under `./tools/` also use modules from this library (from `./src/`). To reiterate, the goal of these scripts is not to produce a package; though, you can do that if you want to! For new projects, you would ideally copy the library files from `./src/` (or `./src-stripped` if you don't want the test files and example) into your project's `./src/lib/ericchase/` folder (you can use `ericchase` to distinguish that the folder is from this library, or choose whatever folder name you want), then update the import statements in your project's copy of `./tools/` to match the new location. This is already done for you in the various `ts-templates-` repositories.
+The scripts under `./tools/` also use modules from this library (from `./src/`). To reiterate, the goal of these scripts is not to produce a package; though, you can do that if you want to! For new projects, you would ideally copy the library files from `./src/` (or `./src-stripped/` if you don't want the test files and example) into your project's `./src/` folder (the library files are contained under `src/lib/ericchase` to distinguish that these files are from this library. you don't need to use this file/folder structure, but doing so will allow you to easily update your copy of the library if needed). This is already done for you in the various `ts-templates-` repositories.
 
 ### ./dev_database/
 
@@ -110,7 +112,9 @@ I've modified these files to work well with website projects. Please read over t
 - .gitignore
 - .prettierignore
 - .prettierrc
+- biome.json
 - package.json
+- tsconfig.json
 
 ## Copyright & License
 

@@ -21,7 +21,7 @@ export function AssertBoolean(value1: any): value1 is boolean {
   }
   return true;
 }
-export function AssertFunction(value1: any): value1 is Function {
+export function AssertFunction<T>(value1: any): value1 is T {
   if (typeof value1 !== 'function') {
     throw new Error(`Assertion Failed: typeof value1(${value1}) should equal function`);
   }

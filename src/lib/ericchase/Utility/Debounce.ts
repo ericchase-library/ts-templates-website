@@ -5,7 +5,7 @@ import type { SyncAsync } from './Types.js';
 export function Debounce<T extends (...args: any[]) => SyncAsync<any>>(fn: T, delay_ms: number) {
   let deferred = Defer();
   let timeout: ReturnType<typeof setTimeout>;
-  return async function (...args: Parameters<T>) {
+  return async (...args: Parameters<T>) => {
     clearTimeout(timeout);
     timeout = setTimeout(async () => {
       try {
@@ -24,7 +24,7 @@ export function Debounce<T extends (...args: any[]) => SyncAsync<any>>(fn: T, de
 export function ImmediateDebounce<T extends (...args: any[]) => SyncAsync<any>>(fn: T, delay_ms: number) {
   let deferred = Defer();
   let timeout: ReturnType<typeof setTimeout> | undefined;
-  return function (...args: Parameters<T>) {
+  return (...args: Parameters<T>) => {
     if (timeout === undefined) {
       (async () => {
         try {

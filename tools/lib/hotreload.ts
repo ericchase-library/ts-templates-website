@@ -29,7 +29,7 @@ export class HotReloader {
         await fetch(this.$host);
         this.$enabled = true;
         this.unsubscribe = on_log.subscribe(() => this.$reload());
-        ConsoleLog(`${KEYS.CSI}1;34;32m` + 'Hot Reloading Online' + `${KEYS.CSI}1;34;39m`);
+        ConsoleLog(`${KEYS.CSI}1;34;32mHot Reloading Online${KEYS.CSI}1;34;39m`);
       } catch (error) {
         ConsoleError('Hot Reloading Offline: Is server running? (`bun run serve`)');
       }
