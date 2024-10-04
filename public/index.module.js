@@ -1,20 +1,45 @@
-// src/lib/ericchase/Utility/Console.ts
-function updateMarks() {
-  for (const mark of Console.marks) {
-    Console.marks.delete(mark);
-    mark.updated = true;
+// src/lib/ericchase/Utility/UpdateMarker.ts
+class UpdateMarker {
+  $manager;
+  updated = false;
+  constructor($manager) {
+    this.$manager = $manager;
+  }
+  reset() {
+    this.$manager.resetMarker(this);
   }
 }
+
+class UpdateMarkerManager {
+  $marks = new Set();
+  extra;
+  constructor(extra) {
+    this.extra = extra;
+  }
+  getNewMarker() {
+    const marker = new UpdateMarker(this);
+    this.$marks.add(marker);
+    return marker;
+  }
+  resetMarker(mark) {
+    mark.updated = false;
+    this.$marks.add(mark);
+  }
+  updateMarkers() {
+    for (const mark of this.$marks) {
+      this.$marks.delete(mark);
+      mark.updated = true;
+    }
+  }
+}
+
+// src/lib/ericchase/Utility/Console.ts
 function ConsoleError(...items) {
   console['error'](...items);
-  Console.newline_count = 0;
-  updateMarks();
+  marker_manager.extra.newline_count = 0;
+  marker_manager.updateMarkers();
 }
-var Console;
-((Console) => {
-  Console.newline_count = 0;
-  Console.marks = new Set();
-})((Console ||= {}));
+var marker_manager = new UpdateMarkerManager({ newline_count: 0 });
 
 // src/lib/ericchase/Web API/Node_Utility.ts
 function NodeRef(node) {
@@ -94,5 +119,5 @@ class Page {
 var page = new Page();
 page.addMessage('Hello, Script!');
 
-//# debugId=83649EC4922097D964756E2164756E21
+//# debugId=1BFCFB5D3220FE7964756E2164756E21
 //# sourceMappingURL=index.module.js.map

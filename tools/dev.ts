@@ -3,7 +3,8 @@ import { RunSync } from '../src/lib/ericchase/Platform/Bun/Child Process.js';
 import { Path } from '../src/lib/ericchase/Platform/Node/Path.js';
 import { StdinRawModeReader } from '../src/lib/ericchase/Platform/Node/Process.js';
 import { KEYS } from '../src/lib/ericchase/Platform/Node/Shell.js';
-import { ConsoleError, GetConsoleMark } from '../src/lib/ericchase/Utility/Console.js';
+import { ConsoleError } from '../src/lib/ericchase/Utility/Console.js';
+import { HelpMessage } from '../src/lib/ericchase/Utility/HelpMessage.js';
 import { PrepareMessage } from '../src/lib/ericchase/Utility/PrepareMessage.js';
 import { TryLock } from './lib/cache/LockCache.js';
 
@@ -27,6 +28,16 @@ if (Bun.argv[1] === __filename) {
   const command_args = Bun.argv.slice(3);
 
   if (command === undefined || command.trim() === 'watch') {
+    const help_message = `
+      Keypress Commands:
+        'q' to quit
+        'r' to restart the watcher
+        'b' to restart the watcher after a full rebuild
+
+      SIGINT [Ctrl-C] Will Force Quit.
+    `;
+    const help = new HelpMessage(PrepareMessage(help_message, 4, 1, 1));
+
     const stdin = new StdinRawModeReader();
 
     // CLI: Force Quit Watcher
@@ -83,7 +94,7 @@ if (Bun.argv[1] === __filename) {
           break;
         }
         default: {
-          printHelp();
+          help.print();
           break;
         }
       }
@@ -102,21 +113,5 @@ if (Bun.argv[1] === __filename) {
     } else {
       ConsoleError(`Invalid Command > ${command}`);
     }
-  }
-}
-
-let console_mark = { updated: true };
-function printHelp() {
-  const help = `
-    Keypress Commands:
-      'q' to quit
-      'r' to restart the watcher
-      'b' to restart the watcher after a full rebuild
-
-    SIGINT [Ctrl-C] Will Force Quit.
-  `;
-  if (console_mark.updated) {
-    ConsoleError(PrepareMessage(help, 4, 1, 1));
-    console_mark = GetConsoleMark();
   }
 }

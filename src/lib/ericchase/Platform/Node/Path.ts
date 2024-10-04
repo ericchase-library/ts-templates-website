@@ -21,9 +21,8 @@ export function ResolvePath(path: Path | PathGroup) {
   return node_path.resolve(path.path);
 }
 
-/** Use `new Path(...).sanitize` instead. */
-export function SanitizePath(path: Path | PathGroup) {
-  return path.path.replace(/[^a-z0-9\.\_\-]/gi, '_').toLowerCase();
+export function SanitizeFileName(name: string) {
+  return name.replace(/[^a-z0-9\.\_\-]/gi, '_').toLowerCase();
 }
 
 export const PathSeparator = node_path.sep;
@@ -63,10 +62,6 @@ export class Path {
   }
   get resolve() {
     return node_path.resolve(this.path);
-  }
-  /** ! Not Tested ! */
-  get sanitize() {
-    return this.path.replace(/[^a-z0-9\.\_\-]/gi, '_').toLowerCase();
   }
   get standard_path() {
     return this.$standard_path;

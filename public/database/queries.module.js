@@ -14,23 +14,48 @@ function getLocalhost(address) {
   };
 }
 
-// src/lib/ericchase/Utility/Console.ts
-function updateMarks() {
-  for (const mark of Console.marks) {
-    Console.marks.delete(mark);
-    mark.updated = true;
+// src/lib/ericchase/Utility/UpdateMarker.ts
+class UpdateMarker {
+  $manager;
+  updated = false;
+  constructor($manager) {
+    this.$manager = $manager;
+  }
+  reset() {
+    this.$manager.resetMarker(this);
   }
 }
+
+class UpdateMarkerManager {
+  $marks = new Set();
+  extra;
+  constructor(extra) {
+    this.extra = extra;
+  }
+  getNewMarker() {
+    const marker = new UpdateMarker(this);
+    this.$marks.add(marker);
+    return marker;
+  }
+  resetMarker(mark) {
+    mark.updated = false;
+    this.$marks.add(mark);
+  }
+  updateMarkers() {
+    for (const mark of this.$marks) {
+      this.$marks.delete(mark);
+      mark.updated = true;
+    }
+  }
+}
+
+// src/lib/ericchase/Utility/Console.ts
 function ConsoleError(...items) {
   console['error'](...items);
-  Console.newline_count = 0;
-  updateMarks();
+  marker_manager.extra.newline_count = 0;
+  marker_manager.updateMarkers();
 }
-var Console;
-((Console) => {
-  Console.newline_count = 0;
-  Console.marks = new Set();
-})((Console ||= {}));
+var marker_manager = new UpdateMarkerManager({ newline_count: 0 });
 
 // src/dev_server/server-data.ts
 var host = '127.0.0.1';
@@ -83,5 +108,5 @@ async function EnsureTableExists(name) {
 var db = getLocalhost(server_http);
 export { TableExists, EnsureTableExists, DatabaseConnected, CreateTable };
 
-//# debugId=4C31AC807B0253E164756E2164756E21
+//# debugId=3567FB8F4055408164756E2164756E21
 //# sourceMappingURL=queries.module.js.map

@@ -1,42 +1,47 @@
-import { Once, OptionalStore, Store, type SubscriptionCallback } from '../Design Pattern/Observer/Store.js';
+import { Defer } from './Defer.js';
+import type { SyncAsync } from './Types.js';
 
-export class Debouncer<Output, Input = undefined> {
-  constructor(
-    protected fn: (input?: Input) => Output | undefined,
-    protected delay = 250,
-    protected queueStrategy = (inputs: (Input | undefined)[]) => {
-      return inputs.filter((_) => _).at(-1);
-    },
-  ) {}
-  async run(input?: Input): Promise<Output | undefined> {
-    if ((await this.running.get()) === false) {
-      this.currentQueue.push(input);
-      if (this.timer) {
-        clearTimeout(this.timer);
+/** debounced functions return nothing when called; by design */
+export function Debounce<T extends (...args: any[]) => SyncAsync<any>>(fn: T, delay_ms: number) {
+  let deferred = Defer();
+  let timeout: ReturnType<typeof setTimeout>;
+  return async function (...args: Parameters<T>) {
+    clearTimeout(timeout);
+    timeout = setTimeout(async () => {
+      try {
+        await fn(...args);
+        deferred.resolve();
+      } catch (error) {
+        deferred.reject(error);
       }
-      this.timer = setTimeout(() => this.timeout(), this.delay)[Symbol.toPrimitive]();
-    } else {
-      this.nextQueue.push(input);
-      await Once(this.running);
-    }
-    return Once(this.store);
-  }
-  subscribe(callback: SubscriptionCallback<Output | undefined>) {
-    this.store.subscribe(callback);
-  }
-  protected running = new Store(false, true);
-  protected store = new OptionalStore<Output>();
-  protected timer: number | undefined = undefined;
-  protected currentQueue: (Input | undefined)[] = [];
-  protected nextQueue: (Input | undefined)[] = [];
-  protected async timeout() {
-    this.running.set(true);
-    this.store.set(await this.fn(this.queueStrategy(this.currentQueue)));
-    this.running.set(false);
-    this.currentQueue = this.nextQueue;
-    this.nextQueue.length = 0;
-    if (this.currentQueue.length > 0) {
-      this.timer = setTimeout(() => this.timeout(), this.delay)[Symbol.toPrimitive]();
-    }
-  }
+      deferred = Defer();
+    }, delay_ms);
+    return deferred.promise;
+  };
 }
+
+/** debounced functions return nothing when called; by design */
+export function ImmediateDebounce<T extends (...args: any[]) => SyncAsync<any>>(fn: T, delay_ms: number) {
+  let deferred = Defer();
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  return function (...args: Parameters<T>) {
+    if (timeout === undefined) {
+      (async () => {
+        try {
+          await fn(...args);
+          deferred.resolve();
+        } catch (error) {
+          deferred.reject(error);
+        }
+      })();
+    }
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      timeout = undefined;
+      deferred = Defer();
+    }, delay_ms);
+    return deferred.promise;
+  };
+}
+
+export const LeadingEdgeDebounce = ImmediateDebounce;

@@ -1,3 +1,59 @@
+## 2024-10-04
+
+**src/lib/ericchase**
+
+- add more test cases
+- add tests for public and private apis of library
+- add new utility classes and functions
+- replace Debouncer class with Debounce functions
+
+**tools**
+
+- update tools to use new Debounce functions
+- rename hot_reload.ts to hotreload.ts
+
+> **all module changes**
+
+```
+= Platform/Node/Path.ts
+  - SanitizePath
+  + SanitizeFileName
+
++ Utility/Assert.ts
+  + AssertBigint
+  + AssertBoolean
+  + AssertFunction
+  + AssertNumber
+  + AssertObject
+  + AssertString
+  + AssertSymbol
+  + AssertUndefined
+
+= Utility/Console.ts
+  - GetConsoleMark
+  + GetConsoleMarker
+
+= Utility/Debounce.ts
+  - Debouncer
+  + Debounce
+  + ImmediateDebounce
+  + LeadingEdgeDebounce
+
++ Utility/Defer.ts
+  + Defer
+
++ Utility/HelpMessage.ts
+  + HelpMessage
+
+= Utility/TextCodec.ts
+  - DecodeText
+  + DecodeBytes
+
++ Utility/UpdateMarker.ts
+  + UpdateMarker
+  + UpdateMarkerManager
+```
+
 ## 2024-10-02
 
 - minor changes to template
