@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { ConsoleLog } from './lib/Console.js';
+import { ConsoleLog } from './lib/ericchase/Utility/Console.js';
 import { get } from './router.get.js';
 import { options } from './router.options.js';
 import { post } from './router.post.js';

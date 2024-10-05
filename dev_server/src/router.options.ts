@@ -1,4 +1,4 @@
-import { ConsoleLog } from './lib/Console.js';
+import { ConsoleLog } from './lib/ericchase/Utility/Console.js';
 
 export async function options(req: Request, url: URL, pathname: string): Promise<Response | undefined> {
   ConsoleLog(`OPTIONS  ${pathname}`);

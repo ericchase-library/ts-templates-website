@@ -25,7 +25,6 @@ export class HotReloader {
   async enable() {
     if (this.$enabled === false) {
       try {
-        console.log(this.$host);
         await fetch(this.$host);
         this.$enabled = true;
         this.unsubscribe = on_log.subscribe(() => this.$reload());

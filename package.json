@@ -9,14 +9,11 @@
     "prettier": "^3.3.3"
   },
   "scripts": {
-    "archive": "bun tools/dev.ts archive",
     "build": "bun tools/dev.ts build",
     "dev": "bun tools/dev.ts",
     "format": "bun tools/dev.ts format",
     "lint": "biome lint --error-on-warnings --write .",
-    "package": "bun tools/dev.ts archive",
     "serve": "bun tools/dev.ts serve",
-    "watch": "bun tools/dev.ts watch",
-    "zip": "bun tools/dev.ts archive"
+    "watch": "bun tools/dev.ts watch"
   }
 }

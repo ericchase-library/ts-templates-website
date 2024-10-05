@@ -13,10 +13,6 @@ export const command_map = {
   dev: new Path('tools/scripts/dev.ts').path,
   format: new Path('tools/lib/format.ts').path,
   watch: new Path('tools/scripts/watch.ts').path,
-  // archive
-  archive: new Path('tools/scripts/archive.ts').path,
-  package: new Path('tools/scripts/archive.ts').path,
-  zip: new Path('tools/scripts/archive.ts').path,
   // dev server
   database: new Path('tools/scripts/database.ts').path,
   db: new Path('tools/scripts/database.ts').path,
@@ -33,6 +29,7 @@ if (Bun.argv[1] === __filename) {
         'q' to quit
         'r' to restart the watcher
         'b' to restart the watcher after a full rebuild
+        'h' to toggle hot reloading
 
       SIGINT [Ctrl-C] Will Force Quit.
     `;
@@ -44,10 +41,10 @@ if (Bun.argv[1] === __filename) {
     stdin.addHandler(async (text) => {
       if (text === KEYS.SIGINT) {
         await stdin.stop();
-        watcher_process.stdin.write(`${KEYS.SIGINT}`);
+        watcher_process?.stdin.write(`${KEYS.SIGINT}`);
         await Bun.sleep(25);
-        watcher_process.kill();
-        await watcher_process.exited;
+        watcher_process?.kill();
+        await watcher_process?.exited;
         process.exit();
       }
     });
@@ -93,16 +90,14 @@ if (Bun.argv[1] === __filename) {
           watcher_process = run_watcher();
           break;
         }
-        default: {
+        // Passthrough Keys
+        case 'h': // Toggle Hot Reloading
+          watcher_process.stdin.write(text);
+          break;
+        default:
           help.print();
           break;
-        }
       }
-    });
-
-    // CLI: Send Remaining Keys Through
-    stdin.addHandler((text) => {
-      watcher_process.stdin.write(text);
     });
 
     stdin.start();

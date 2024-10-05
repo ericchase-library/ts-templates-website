@@ -1,5 +1,5 @@
 import { Client } from 'pg';
-import { ConsoleError } from './lib/Console.js';
+import { ConsoleError } from './lib/ericchase/Utility/Console.js';
 
 const getClient = (() => {
   const client: Client | undefined = undefined;

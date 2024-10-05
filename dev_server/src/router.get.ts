@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { ConsoleLog } from './lib/Console.js';
+import { ConsoleLog } from './lib/ericchase/Utility/Console.js';
 import { server } from './route-server.js';
 
 export async function get(req: Request, url: URL, pathname: string): Promise<Response | undefined> {

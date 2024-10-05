@@ -61,5 +61,11 @@ watcher_src.observe(async () => {
 //   }
 // });
 
+stdin.addHandler((text) => {
+  if (text.startsWith('h')) {
+    hotreloader.toggle();
+  }
+});
+
 await watcher_src.done;
 // await watcher_tmp.done;

@@ -2,10 +2,10 @@
   "version": 3,
   "sources": ["..\\..\\src\\dev_server\\server-data.ts", "..\\..\\src\\dev_server\\hotreload.module.ts"],
   "sourcesContent": [
-    "const host = '127.0.0.1';\nconst port = '8000';\n\nexport const server_ws = `ws://${host}:${port}`;\nexport const server_http = `http://${host}:${port}`;\n",
+    "export const server_hostname = '127.0.0.1';\nexport const server_port = '8000';\n\nexport const server_http = `http://${server_hostname}:${server_port}`;\nexport const server_ws = `ws://${server_hostname}:${server_port}`;\n",
     "import { server_ws } from './server-data.js';\n\nlet socket: WebSocket | undefined = undefined;\n\nfunction onMessage(event: MessageEvent<any>) {\n  if (event.data === 'reload') {\n    window.location.reload();\n  }\n}\nfunction onClose() {\n  socket_cleanup();\n}\nfunction onError() {\n  socket_cleanup();\n}\n\nfunction socket_cleanup() {\n  if (socket) {\n    socket.removeEventListener('message', onMessage);\n    socket.removeEventListener('close', onClose);\n    socket.removeEventListener('error', onError);\n    socket_restart();\n  }\n}\nfunction socket_restart() {\n  socket = new WebSocket(server_ws);\n  if (socket) {\n    socket.addEventListener('message', onMessage);\n    socket.addEventListener('close', onClose);\n    socket.addEventListener('error', onError);\n  }\n}\n\nsocket_restart();\n"
   ],
-  "mappings": ";AAAA,IAAM,OAAO;AACb,IAAM,OAAO;AAEN,IAAM,YAAY,QAAQ,QAAQ;AAClC,IAAM,cAAc,UAAU,QAAQ;;;ACA7C,SAAS,SAAS,CAAC,OAA0B;AAC3C,MAAI,MAAM,SAAS,UAAU;AAC3B,WAAO,SAAS,OAAO;AAAA,EACzB;AAAA;AAEF,SAAS,OAAO,GAAG;AACjB,iBAAe;AAAA;AAEjB,SAAS,OAAO,GAAG;AACjB,iBAAe;AAAA;AAGjB,SAAS,cAAc,GAAG;AACxB,MAAI,QAAQ;AACV,WAAO,oBAAoB,WAAW,SAAS;AAC/C,WAAO,oBAAoB,SAAS,OAAO;AAC3C,WAAO,oBAAoB,SAAS,OAAO;AAC3C,mBAAe;AAAA,EACjB;AAAA;AAEF,SAAS,cAAc,GAAG;AACxB,WAAS,IAAI,UAAU,SAAS;AAChC,MAAI,QAAQ;AACV,WAAO,iBAAiB,WAAW,SAAS;AAC5C,WAAO,iBAAiB,SAAS,OAAO;AACxC,WAAO,iBAAiB,SAAS,OAAO;AAAA,EAC1C;AAAA;AA5BF,IAAI,SAAgC;AA+BpC,eAAe;",
-  "debugId": "F847E823C631932464756E2164756E21",
+  "mappings": ";AAAO,IAAM,kBAAkB;AACxB,IAAM,cAAc;AAEpB,IAAM,cAAc,UAAU,mBAAmB;AACjD,IAAM,YAAY,QAAQ,mBAAmB;;;ACApD,SAAS,SAAS,CAAC,OAA0B;AAC3C,MAAI,MAAM,SAAS,UAAU;AAC3B,WAAO,SAAS,OAAO;AAAA,EACzB;AAAA;AAEF,SAAS,OAAO,GAAG;AACjB,iBAAe;AAAA;AAEjB,SAAS,OAAO,GAAG;AACjB,iBAAe;AAAA;AAGjB,SAAS,cAAc,GAAG;AACxB,MAAI,QAAQ;AACV,WAAO,oBAAoB,WAAW,SAAS;AAC/C,WAAO,oBAAoB,SAAS,OAAO;AAC3C,WAAO,oBAAoB,SAAS,OAAO;AAC3C,mBAAe;AAAA,EACjB;AAAA;AAEF,SAAS,cAAc,GAAG;AACxB,WAAS,IAAI,UAAU,SAAS;AAChC,MAAI,QAAQ;AACV,WAAO,iBAAiB,WAAW,SAAS;AAC5C,WAAO,iBAAiB,SAAS,OAAO;AACxC,WAAO,iBAAiB,SAAS,OAAO;AAAA,EAC1C;AAAA;AA5BF,IAAI,SAAgC;AA+BpC,eAAe;",
+  "debugId": "7BC237746F81AFBE64756E2164756E21",
   "names": []
 }

@@ -1,5 +1,10 @@
 ## 2024-10-04
 
+**dev_server**
+
+- streamline the server files
+- update hot reloading and serve scripts
+
 **src/lib/ericchase**
 
 - add more test cases

@@ -1,8 +1,8 @@
 // src/dev_server/server-data.ts
-var host = '127.0.0.1';
-var port = '8000';
-var server_ws = `ws://${host}:${port}`;
-var server_http = `http://${host}:${port}`;
+var server_hostname = '127.0.0.1';
+var server_port = '8000';
+var server_http = `http://${server_hostname}:${server_port}`;
+var server_ws = `ws://${server_hostname}:${server_port}`;
 
 // src/dev_server/hotreload.module.ts
 function onMessage(event) {
@@ -35,5 +35,5 @@ function socket_restart() {
 var socket = undefined;
 socket_restart();
 
-//# debugId=F847E823C631932464756E2164756E21
+//# debugId=7BC237746F81AFBE64756E2164756E21
 //# sourceMappingURL=hotreload.module.js.map

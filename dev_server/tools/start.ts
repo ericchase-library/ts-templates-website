@@ -1,14 +1,10 @@
-import type { Subprocess } from 'bun';
-import { ConsoleLog } from '../src/lib/Console.js';
+import { Run } from '../src/lib/ericchase/Platform/Bun/Child Process.js';
+import { ConsoleLog } from '../src/lib/ericchase/Utility/Console.js';
 
-Bun.spawnSync(['bun', 'update']);
-Bun.spawnSync(['bun', 'run', 'format']);
-
-let proc: Subprocess<'ignore', 'inherit', 'inherit'> | undefined = undefined;
 while (true) {
-  proc = Bun.spawn(['bun', './src/server.ts'], { stdout: 'inherit' });
-  await proc.exited;
-  switch (proc.exitCode) {
+  const server_process = Run.Bun('./src/server.ts');
+  await server_process.exited;
+  switch (server_process.exitCode) {
     case 1:
       ConsoleLog('Exit Code [1]:Restart');
       break;
@@ -17,7 +13,7 @@ while (true) {
       process.exit(0);
       break;
     default:
-      ConsoleLog(`Exit Code [${proc.exitCode}]`);
+      ConsoleLog(`Exit Code [${server_process.exitCode}]`);
       process.stdout.write('Restart? (y/n)');
       for await (const line of console) {
         if (line.trim() === 'y') break;

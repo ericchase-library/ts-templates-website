@@ -4,15 +4,6 @@
     "pg": "^8.13.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "latest",
-    "@types/bun": "latest",
-    "@types/node": "latest",
     "@types/pg": "^8.11.10"
-  },
-  "scripts": {
-    "dev": "bun ./tools/dev.ts",
-    "start": "bun ./tools/start.ts",
-    "format": "biome format --files-ignore-unknown true --write .",
-    "lint": "biome lint --error-on-warnings --write ."
   }
 }
