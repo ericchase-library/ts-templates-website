@@ -22,7 +22,9 @@ function socket_cleanup() {
     socket_restart();
   }
 }
-function socket_restart() {
+
+export function socket_restart() {
+  console.log('socket_restart');
   socket = new WebSocket(server_ws);
   if (socket) {
     socket.addEventListener('message', onMessage);
@@ -30,5 +32,3 @@ function socket_restart() {
     socket.addEventListener('error', onError);
   }
 }
-
-socket_restart();

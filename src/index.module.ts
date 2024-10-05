@@ -1,6 +1,9 @@
 import { ConsoleError } from './lib/ericchase/Utility/Console.js';
 import { NodeRef } from './lib/ericchase/Web API/Node_Utility.js';
 
+import { socket_restart } from './dev_server/hotreload.js';
+socket_restart();
+
 class Page {
   divMessages: HTMLDivElement;
   constructor() {
