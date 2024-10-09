@@ -1,6 +1,7 @@
 import { UpdateMarkerManager } from './UpdateMarker.js';
 
-const marker_manager = new UpdateMarkerManager<{ newline_count: number }>({ newline_count: 0 });
+const marker_manager = new UpdateMarkerManager();
+let newline_count = 0;
 
 export function GetConsoleMarker() {
   return marker_manager.getNewMarker();
@@ -9,36 +10,36 @@ export function GetConsoleMarker() {
 export function ConsoleError(...items: any[]) {
   // biome-ignore lint: this let's us search for undesired console[error]s
   console['error'](...items);
-  marker_manager.extra.newline_count = 0;
+  newline_count = 0;
   marker_manager.updateMarkers();
 }
 
 export function ConsoleErrorWithDate(...items: any[]) {
   // biome-ignore lint: this let's us search for undesired console[error]s
   console['error'](`[${new Date().toLocaleTimeString()}]`, ...items);
-  marker_manager.extra.newline_count = 0;
+  newline_count = 0;
   marker_manager.updateMarkers();
 }
 
 export function ConsoleLog(...items: any[]) {
   // biome-ignore lint: this let's us search for undesired console[log]s
   console['log'](...items);
-  marker_manager.extra.newline_count = 0;
+  newline_count = 0;
   marker_manager.updateMarkers();
 }
 
 export function ConsoleLogWithDate(...items: any[]) {
   // biome-ignore lint: this let's us search for undesired console[log]s
   console['log'](`[${new Date().toLocaleTimeString()}]`, ...items);
-  marker_manager.extra.newline_count = 0;
+  newline_count = 0;
   marker_manager.updateMarkers();
 }
 
 export function ConsoleNewline(ensure_count = 1) {
-  for (let i = marker_manager.extra.newline_count; i < ensure_count; i++) {
+  for (let i = newline_count; i < ensure_count; i++) {
     // biome-ignore lint: this let's us search for undesired console[log]s
     console['log']();
-    marker_manager.extra.newline_count++;
+    newline_count++;
   }
   marker_manager.updateMarkers();
 }

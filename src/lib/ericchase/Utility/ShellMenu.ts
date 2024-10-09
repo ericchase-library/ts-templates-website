@@ -40,6 +40,7 @@ export class ShellMenu {
     this.$parser_cache = ParseMenu();
   }
   repaint() {
+    // TODO: need to split long lines up properly
     const parse = ParseMenu(this.menu);
     const count = Math.max(parse.line_count, this.$parser_cache.line_count);
     this.$moveCursorToLine(0);

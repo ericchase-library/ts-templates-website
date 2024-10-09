@@ -5,6 +5,18 @@ import type { SyncAsync } from './Types.js';
 export type Menu = { name: string; label?: string; items: (Menu | MenuItem)[] };
 export type MenuItem = { name: string; action?: (options: MenuNavigatorSelectArgs) => SyncAsync<void> };
 
+// TODO:
+class CMenu {
+  id!: string;
+  description!: string;
+  items!: CMenu[];
+}
+class CMenuItem {
+  id!: string;
+  description!: string;
+  action!: () => void;
+}
+
 export function IsMenu(item: Menu | MenuItem): item is Menu {
   return 'name' in item && 'items' in item && 'action' in item === false;
 }
