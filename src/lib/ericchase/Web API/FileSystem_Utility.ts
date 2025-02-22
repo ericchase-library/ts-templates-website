@@ -12,14 +12,14 @@ export class FileSystemEntryIterator {
       }
     }
   }
-  *getDirectoryEntry(): Generator<FileSystemDirectoryEntry> {
+  *getDirectoryEntries(): Generator<FileSystemDirectoryEntry> {
     for (const entry of this.list) {
       if (Compat_FileSystemEntry(entry).isDirectory) {
         yield entry as FileSystemDirectoryEntry;
       }
     }
   }
-  *getFileEntry(): Generator<FileSystemFileEntry> {
+  *getFileEntries(): Generator<FileSystemFileEntry> {
     for (const entry of this.list) {
       if (Compat_FileSystemEntry(entry).isFile) {
         yield entry as FileSystemFileEntry;
@@ -39,7 +39,7 @@ export class FileSystemDirectoryEntryIterator {
       }
     }
   }
-  async *getEntry(): AsyncGenerator<FileSystemEntry> {
+  async *getEntries(): AsyncGenerator<FileSystemEntry> {
     for (const entry of this.list) {
       const reader = Compat_FileSystemDirectoryEntry(entry).createReader();
       if (reader) {

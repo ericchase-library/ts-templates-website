@@ -1,4 +1,5 @@
 import type { Subprocess, SyncSubprocess } from 'bun';
+
 import { ConsoleLogWithDate } from '../../Utility/Console.js';
 
 type FlagChain<T> = {

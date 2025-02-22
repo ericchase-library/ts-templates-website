@@ -33,9 +33,7 @@ export function levenshtein_distance(a: string, b: string): number {
   }
   if (a.length > b.length) {
     tmp = a;
-    // biome-ignore lint: string are literal
     a = b;
-    // biome-ignore lint: string are literal
     b = tmp;
   }
   let la = a.length;

@@ -1,4 +1,5 @@
 import node_path from 'node:path';
+
 import { PrepareMessage } from '../../Utility/PrepareMessage.js';
 
 /** Use `new Path(...).appendSegment(...)` instead. */
@@ -120,6 +121,9 @@ export class PathSet {
   get paths() {
     return this.pathIterator();
   }
+  get size() {
+    return this.path_map.size;
+  }
   add(pathOrString: Path | PathGroup | string) {
     const path = Path.from(pathOrString);
     this.path_map.set(path.path, path);
@@ -138,27 +142,15 @@ export class PathSet {
 
 export class PathGroup {
   readonly origin_path: Path;
-  readonly origin_dir: string; // includes root, but not dir
-  readonly root: string;
   readonly relative_path: Path;
-  readonly relative_dir: string; // does not include root
-  readonly relative_base: string; // includes name and ext
-  readonly relative_name: string;
-  readonly relative_ext: string;
   readonly $path: string;
   readonly $standard_path: string;
   constructor(origin_path: Path | PathGroup | string, relative_path: Path | PathGroup | string) {
     this.origin_path = Path.from(origin_path);
     this.relative_path = Path.from(relative_path).newRoot('');
-    this.origin_dir = this.origin_path.path;
     const final_path = Path.from(this.origin_path).appendSegment(this.relative_path);
     this.$path = final_path.path;
     this.$standard_path = final_path.standard_path;
-    this.root = final_path.root;
-    this.relative_dir = final_path.dir;
-    this.relative_base = final_path.base;
-    this.relative_name = final_path.name;
-    this.relative_ext = final_path.ext;
   }
   static build({ origin_path = '', relative_path = '' }: { origin_path?: Path | PathGroup | string; relative_path?: Path | PathGroup | string }) {
     return new PathGroup(origin_path, relative_path);
@@ -199,6 +191,9 @@ export class PathGroupSet {
   }
   get paths() {
     return this.pathIterator();
+  }
+  get size() {
+    return this.path_group_map.size;
   }
   add(path_group: PathGroup) {
     this.path_group_map.set(path_group.path, path_group);

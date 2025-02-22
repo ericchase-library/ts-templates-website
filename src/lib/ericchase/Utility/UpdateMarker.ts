@@ -8,7 +8,6 @@ export class UpdateMarker {
 
 export class UpdateMarkerManager {
   $marks = new Set<UpdateMarker>();
-  constructor() {}
   getNewMarker() {
     const marker = new UpdateMarker(this);
     this.$marks.add(marker);
@@ -36,7 +35,6 @@ export class DataSetMarker<T> {
 
 export class DataSetMarkerManager<T> {
   $marks = new Set<DataSetMarker<T>>();
-  constructor() {}
   getNewMarker() {
     const marker = new DataSetMarker<T>(this);
     this.$marks.add(marker);

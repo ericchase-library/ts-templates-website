@@ -12,10 +12,6 @@ class UpdateMarker {
 
 class UpdateMarkerManager {
   $marks = new Set();
-  extra;
-  constructor(extra) {
-    this.extra = extra;
-  }
   getNewMarker() {
     const marker = new UpdateMarker(this);
     this.$marks.add(marker);
@@ -33,18 +29,45 @@ class UpdateMarkerManager {
   }
 }
 
+class DataSetMarker {
+  $manager;
+  dataset = new Set();
+  constructor($manager) {
+    this.$manager = $manager;
+  }
+  reset() {
+    this.$manager.resetMarker(this);
+  }
+}
+
+class DataSetMarkerManager {
+  $marks = new Set();
+  getNewMarker() {
+    const marker = new DataSetMarker(this);
+    this.$marks.add(marker);
+    return marker;
+  }
+  resetMarker(mark) {
+    mark.dataset.clear();
+    this.$marks.add(mark);
+  }
+  updateMarkers(data) {
+    for (const mark of this.$marks) {
+      mark.dataset.add(data);
+    }
+  }
+}
+
 // src/lib/ericchase/Utility/Console.ts
+var marker_manager = new UpdateMarkerManager();
+var newline_count = 0;
 function ConsoleError(...items) {
   console['error'](...items);
-  marker_manager.extra.newline_count = 0;
+  newline_count = 0;
   marker_manager.updateMarkers();
 }
-var marker_manager = new UpdateMarkerManager({ newline_count: 0 });
 
 // src/lib/ericchase/Web API/Node_Utility.ts
-function NodeRef(node) {
-  return new CNodeRef(node);
-}
 class CNodeRef {
   node;
   constructor(node) {
@@ -95,6 +118,9 @@ class CNodeRef {
     this.as(HTMLElement).style.setProperty(property, value, priority);
   }
 }
+function NodeRef(node) {
+  return new CNodeRef(node);
+}
 
 // src/dev_server/server-data.ts
 var server_hostname = '127.0.0.1';
@@ -103,6 +129,7 @@ var server_http = `http://${server_hostname}:${server_port}`;
 var server_ws = `ws://${server_hostname}:${server_port}`;
 
 // src/dev_server/hotreload.ts
+var socket = undefined;
 function onMessage(event) {
   if (event.data === 'reload') {
     window.location.reload();
@@ -131,7 +158,6 @@ function socket_restart() {
     socket.addEventListener('error', onError);
   }
 }
-var socket = undefined;
 
 // src/index.module.ts
 socket_restart();
@@ -158,5 +184,5 @@ class Page {
 var page = new Page();
 page.addMessage('Hello, Script!');
 
-//# debugId=208E092C148EBF8364756E2164756E21
+//# debugId=B2B8F8315DA7A30B64756E2164756E21
 //# sourceMappingURL=index.module.js.map

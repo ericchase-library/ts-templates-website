@@ -25,3 +25,6 @@ export function* nCartesianProduct<T extends unknown[][]>(...arrays: T): Generat
     }
   }
 }
+
+// The 2-Combination is what I formerly referred as the SelfCartesianProduct
+// nChooseRCombinations([1, 2], 2)]);

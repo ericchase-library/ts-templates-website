@@ -14,19 +14,19 @@ export class DataTransferItemIterator {
       }
     }
   }
-  *getAsEntry(): Generator<FileSystemEntry> {
+  *getAsEntries(): Generator<FileSystemEntry> {
     for (const item of this.list) {
       const entry: FileSystemEntry | undefined = Compat_DataTransferItem(item).getAsEntry();
       if (entry) yield entry;
     }
   }
-  *getAsFile(): Generator<File> {
+  *getAsFiles(): Generator<File> {
     for (const item of this.list) {
       const file: File | undefined = Compat_DataTransferItem(item).getAsFile();
       if (file) yield file;
     }
   }
-  async *getAsString(): AsyncGenerator<string> {
+  async *getAsStrings(): AsyncGenerator<string> {
     for (const item of this.list) {
       const task: string | undefined = await Compat_DataTransferItem(item).getAsString();
       if (task) yield task;

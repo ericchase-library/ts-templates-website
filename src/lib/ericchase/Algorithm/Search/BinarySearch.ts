@@ -1,7 +1,7 @@
-// ? seems to work
-
 import { ArrayEndpoints } from '../Array.js';
 import { Midpoint } from '../Math.js';
+
+// ? seems to work
 
 export function BinarySearch<T>(array: T[], target: T, isOrdered: (a: T, b: T) => boolean = (a: T, b: T) => a < b): number {
   let [begin, end] = ArrayEndpoints(array);

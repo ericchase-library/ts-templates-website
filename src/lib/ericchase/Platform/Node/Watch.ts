@@ -1,4 +1,5 @@
 import node_fs from 'node:fs';
+
 import type { Path, PathGroup } from './Path.js';
 
 export type ObserverCallback = (events: node_fs.promises.FileChangeInfo<string>[], unsubscribe: () => void) => void;
