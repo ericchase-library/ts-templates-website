@@ -179,7 +179,7 @@ export class BuilderInternal {
       }, 100);
       this.$unwatchSource = this.platform.Directory.watch(this.dir.src, (event, path) => {
         event_paths.add(path.raw);
-        process_events();
+        const orphan = process_events();
       });
       ConsoleLogWithDate(`Watching "${this.dir.src.raw}"`);
     }

@@ -1,12 +1,11 @@
 import { Path } from 'src/lib/ericchase/Platform/FilePath.js';
 import { Builder } from 'tools/lib/Builder.js';
 import { BuildStep_BunInstall } from 'tools/lib/steps/Bun-Install.js';
-import { BuildStep_FSCleanDirectory } from 'tools/lib/steps/FS-CleanDirectory.js';
 import { BuildStep_FSCopyFiles } from 'tools/lib/steps/FS-Copy-Files.js';
 import { BuildStep_FSFormat } from 'tools/lib/steps/FS-Format.js';
 import { BuildStep_FSMirrorDirectory } from 'tools/lib/steps/FS-Mirror-Directory.js';
 
-const builder = new Builder(Bun.argv[2] === '--watch' ? 'watch' : 'build');
+const builder = new Builder();
 
 const template_project_path = Path('../../Project@Template');
 builder.setStartupSteps([
@@ -22,7 +21,6 @@ builder.setStartupSteps([
   // Copy Template Project Root Files
   BuildStep_FSCopyFiles({ from: Path(template_project_path, './'), to: './', include_patterns: ['.gitignore', '.prettierignore', '.prettierrc', 'LICENSE-APACHE', 'biome.json', 'tsconfig.json'], overwrite: true }),
   BuildStep_FSCopyFiles({ from: Path(template_project_path, './'), to: './', include_patterns: ['package.json'], overwrite: false }),
-  BuildStep_FSCleanDirectory([builder.dir.out]),
 
   BuildStep_FSFormat('quiet'),
   //

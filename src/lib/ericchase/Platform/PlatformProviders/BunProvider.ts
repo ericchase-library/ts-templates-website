@@ -13,7 +13,7 @@ BunProvider.Directory.globScan = async (path, pattern) => {
 BunProvider.Directory.watch = NodeProvider.Directory.watch;
 
 // File
-BunProvider.File.compare = async (from, to) => {
+BunProvider.File.compare = (from, to) => {
   return U8StreamCompare(Bun.file(from.raw).stream(), Bun.file(to.raw).stream());
 };
 BunProvider.File.copy = async (from, to, overwrite = false) => {

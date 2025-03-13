@@ -8,13 +8,13 @@ export type WatchCallback = (event: 'rename' | 'change', path: CPath) => void;
 
 export class CPlatformProvider {
   Directory = {
-    create: async (path: CPath, recursive = true): Promise<boolean> => {
+    create: (path: CPath, recursive = true): Promise<boolean> => {
       throw new Error('Not Implemented');
     },
-    delete: async (path: CPath, recursive = true): Promise<boolean> => {
+    delete: (path: CPath, recursive = true): Promise<boolean> => {
       throw new Error('Not Implemented');
     },
-    globScan: async (path: CPath, pattern: string): Promise<string[]> => {
+    globScan: (path: CPath, pattern: string): Promise<string[]> => {
       throw new Error('Not Implemented');
     },
     watch: (path: CPath, callback: WatchCallback, recursive = true): (() => void) => {
@@ -22,42 +22,42 @@ export class CPlatformProvider {
     },
   };
   File = {
-    compare: async (from: CPath, to: CPath): Promise<boolean> => {
+    compare: (from: CPath, to: CPath): Promise<boolean> => {
       throw new Error('Not Implemented');
     },
-    copy: async (from: CPath, to: CPath, overwrite = false): Promise<boolean> => {
+    copy: (from: CPath, to: CPath, overwrite = false): Promise<boolean> => {
       throw new Error('Not Implemented');
     },
-    delete: async (path: CPath): Promise<boolean> => {
+    delete: (path: CPath): Promise<boolean> => {
       throw new Error('Not Implemented');
     },
-    move: async (from: CPath, to: CPath, overwrite = false): Promise<boolean> => {
+    move: (from: CPath, to: CPath, overwrite = false): Promise<boolean> => {
       throw new Error('Not Implemented');
     },
-    readBytes: async (path: CPath): Promise<Uint8Array> => {
+    readBytes: (path: CPath): Promise<Uint8Array> => {
       throw new Error('Not Implemented');
     },
-    readText: async (path: CPath): Promise<string> => {
+    readText: (path: CPath): Promise<string> => {
       throw new Error('Not Implemented');
     },
-    writeBytes: async (path: CPath, bytes: Uint8Array, createpath = true): Promise<number> => {
+    writeBytes: (path: CPath, bytes: Uint8Array, createpath = true): Promise<number> => {
       throw new Error('Not Implemented');
     },
-    writeText: async (path: CPath, text: string, createpath = true): Promise<number> => {
+    writeText: (path: CPath, text: string, createpath = true): Promise<number> => {
       throw new Error('Not Implemented');
     },
   };
   Path = {
-    getStats: async (path: CPath): Promise<FileStats> => {
+    getStats: (path: CPath): Promise<FileStats> => {
       throw new Error('Not Implemented');
     },
-    isDirectory: async (path: CPath): Promise<boolean> => {
+    isDirectory: (path: CPath): Promise<boolean> => {
       throw new Error('Not Implemented');
     },
-    isFile: async (path: CPath): Promise<boolean> => {
+    isFile: (path: CPath): Promise<boolean> => {
       throw new Error('Not Implemented');
     },
-    isSymbolicLink: async (path: CPath): Promise<boolean> => {
+    isSymbolicLink: (path: CPath): Promise<boolean> => {
       throw new Error('Not Implemented');
     },
   };
@@ -87,9 +87,10 @@ function cleanStack(stack = '') {
   }
   return lines.join('\n');
 }
-async function callAsync<T>(stack = '', value: T) {
+
+async function callAsync<T>(stack = '', promise: Promise<T>): Promise<T> {
   try {
-    return await value;
+    return await promise;
   } catch (async_error: any) {
     if (typeof async_error === 'object') {
       throw new Error(`${async_error.message}\n${cleanStack(stack)}`);
@@ -97,18 +98,19 @@ async function callAsync<T>(stack = '', value: T) {
     throw new Error(`${async_error}\n${cleanStack(stack)}`);
   }
 }
+
 class CPlatformProviderErrorWrapper extends CPlatformProvider {
   constructor(public provider: CPlatformProvider) {
     super();
   }
   Directory = {
-    create: async (path: CPath, recursive = true): Promise<boolean> => {
+    create: (path: CPath, recursive = true): Promise<boolean> => {
       return callAsync(Error().stack, this.provider.Directory.create(path, recursive));
     },
-    delete: async (path: CPath, recursive = true): Promise<boolean> => {
+    delete: (path: CPath, recursive = true): Promise<boolean> => {
       return callAsync(Error().stack, this.provider.Directory.delete(path, recursive));
     },
-    globScan: async (path: CPath, pattern: string): Promise<string[]> => {
+    globScan: (path: CPath, pattern: string): Promise<string[]> => {
       return callAsync(Error().stack, this.provider.Directory.globScan(path, pattern));
     },
     watch: (path: CPath, callback: WatchCallback, recursive = true): (() => void) => {
@@ -116,42 +118,42 @@ class CPlatformProviderErrorWrapper extends CPlatformProvider {
     },
   };
   File = {
-    compare: async (from: CPath, to: CPath): Promise<boolean> => {
+    compare: (from: CPath, to: CPath): Promise<boolean> => {
       return callAsync(Error().stack, this.provider.File.compare(from, to));
     },
-    copy: async (from: CPath, to: CPath, overwrite = false): Promise<boolean> => {
+    copy: (from: CPath, to: CPath, overwrite = false): Promise<boolean> => {
       return callAsync(Error().stack, this.provider.File.copy(from, to, overwrite));
     },
-    delete: async (path: CPath): Promise<boolean> => {
+    delete: (path: CPath): Promise<boolean> => {
       return callAsync(Error().stack, this.provider.File.delete(path));
     },
-    move: async (from: CPath, to: CPath, overwrite = false): Promise<boolean> => {
+    move: (from: CPath, to: CPath, overwrite = false): Promise<boolean> => {
       return callAsync(Error().stack, this.provider.File.move(from, to, overwrite));
     },
-    readBytes: async (path: CPath): Promise<Uint8Array> => {
+    readBytes: (path: CPath): Promise<Uint8Array> => {
       return callAsync(Error().stack, this.provider.File.readBytes(path));
     },
-    readText: async (path: CPath): Promise<string> => {
+    readText: (path: CPath): Promise<string> => {
       return callAsync(Error().stack, this.provider.File.readText(path));
     },
-    writeBytes: async (path: CPath, bytes: Uint8Array, createpath = true): Promise<number> => {
+    writeBytes: (path: CPath, bytes: Uint8Array, createpath = true): Promise<number> => {
       return callAsync(Error().stack, this.provider.File.writeBytes(path, bytes, createpath));
     },
-    writeText: async (path: CPath, text: string, createpath = true): Promise<number> => {
+    writeText: (path: CPath, text: string, createpath = true): Promise<number> => {
       return callAsync(Error().stack, this.provider.File.writeText(path, text, createpath));
     },
   };
   Path = {
-    getStats: async (path: CPath): Promise<FileStats> => {
+    getStats: (path: CPath): Promise<FileStats> => {
       return callAsync(Error().stack, this.provider.Path.getStats(path));
     },
-    isDirectory: async (path: CPath): Promise<boolean> => {
+    isDirectory: (path: CPath): Promise<boolean> => {
       return callAsync(Error().stack, this.provider.Path.isDirectory(path));
     },
-    isFile: async (path: CPath): Promise<boolean> => {
+    isFile: (path: CPath): Promise<boolean> => {
       return callAsync(Error().stack, this.provider.Path.isFile(path));
     },
-    isSymbolicLink: async (path: CPath): Promise<boolean> => {
+    isSymbolicLink: (path: CPath): Promise<boolean> => {
       return callAsync(Error().stack, this.provider.Path.isSymbolicLink(path));
     },
   };

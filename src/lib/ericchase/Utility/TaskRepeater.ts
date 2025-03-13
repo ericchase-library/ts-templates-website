@@ -27,7 +27,7 @@ export class TaskRepeater<ReturnType> {
   start() {
     if (this.$running === false) {
       this.$running = true;
-      this.$executor();
+      const orphan = this.$executor();
     }
   }
   stop() {
