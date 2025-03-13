@@ -1,6 +1,6 @@
-import { ConsoleError } from '../../../src/lib/ericchase/Utility/Console.js';
-import { TaskRepeater } from '../../../src/lib/ericchase/Utility/TaskRepeater.js';
-import { cache_db, CreateAllQuery, CreateGetQuery, CreateRunQuery, QueryError, QueryExistsResult, type QueryResult } from './cache.js';
+import { ConsoleError } from 'src/lib/ericchase/Utility/Console.js';
+import { TaskRepeater } from 'src/lib/ericchase/Utility/TaskRepeater.js';
+import { cache_db, CreateAllQuery, CreateGetQuery, CreateRunQuery, QueryError, QueryExistsResult, QueryResult } from 'tools/lib/cache/cache.js';
 
 const TAG = 'tag';
 const PID = 'pid';
@@ -218,13 +218,13 @@ process.on('exit', () => {
   Cache_UnlockAll();
 });
 
-export function TryLock(script: string) {
+export function Cache_TryLock(script: string) {
   Cache_LockOrExit(script, (error) => {
     ConsoleError(`Another process is locking ${script}. Please wait for that process to end.`, error ?? '');
   });
 }
 
-export function TryLockEach(scripts: string[]) {
+export function Cache_TryLockEach(scripts: string[]) {
   Cache_LockEachOrExit(scripts, (script, error) => {
     ConsoleError(`Another process is locking ${script}. Please wait for that process to end.`, error ?? '');
   });

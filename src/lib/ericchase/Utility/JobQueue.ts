@@ -1,5 +1,5 @@
-import { Store } from '../Design Pattern/Observer/Store.js';
-import { ConsoleLog } from './Console.js';
+import { Store } from 'src/lib/ericchase/Design Pattern/Observer/Store.js';
+import { ConsoleLog } from 'src/lib/ericchase/Utility/Console.js';
 
 export type SubscriptionCallback<Result, Tag> = (result?: Result, error?: Error, tag?: Tag) => { abort: boolean } | void;
 

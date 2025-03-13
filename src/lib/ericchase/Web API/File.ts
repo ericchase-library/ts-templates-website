@@ -1,4 +1,4 @@
-import { HasProperty } from '../Utility/Guard.js';
+import { HasProperty } from 'src/lib/ericchase/Utility/Guard.js';
 
 export function Compat_File(file?: File) {
   return {

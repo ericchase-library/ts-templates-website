@@ -5,6 +5,7 @@
   },
   "formatter": {
     "enabled": true,
+    "ignore": ["out/", "src/lib/ericchase/", "package-lock.json"],
     "attributePosition": "auto",
     "formatWithErrors": true,
     "indentStyle": "space",
@@ -42,16 +43,20 @@
   },
   "linter": {
     "enabled": true,
-    "ignore": ["public/"],
+    "ignore": ["out/", "src/lib/ericchase/", "package-lock.json"],
     "rules": {
       "complexity": {
+        "noUselessConstructor": "off",
         "noUselessTernary": "off"
       },
       "style": {
-        "useConst": "off"
+        "noParameterAssign": "off",
+        "useConst": "off",
+        "useImportType": "off"
       },
       "suspicious": {
         "noConfusingVoidType": "off",
+        "noEmptyInterface": "off",
         "noExplicitAny": "off"
       }
     }

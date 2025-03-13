@@ -1,5 +1,5 @@
-import { ChainedHandlerCaller, type ChainedHandler } from '../../Design Pattern/Chain of Responsibility/ChainedHandler.js';
-import { Sleep } from '../../Utility/Sleep.js';
+import { ChainedHandler, ChainedHandlerCaller } from 'src/lib/ericchase/Design Pattern/Chain of Responsibility/ChainedHandler.js';
+import { Sleep } from 'src/lib/ericchase/Utility/Sleep.js';
 
 /** Don't forget to call `start()`. */
 export class StdinReader<T> {

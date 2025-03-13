@@ -1,4 +1,4 @@
-import type { SyncAsyncIterable } from './Types.js';
+import { SyncAsyncIterable } from 'src/lib/ericchase/Utility/Types.js';
 
 export class RecursiveIterator<In, Out> {
   constructor(protected fn: (value: SyncAsyncIterable<In>, push: (value: SyncAsyncIterable<In>) => void) => SyncAsyncIterable<Out>) {}

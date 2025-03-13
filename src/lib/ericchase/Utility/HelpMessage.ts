@@ -1,5 +1,5 @@
-import { ConsoleError } from './Console.js';
-import { ImmediateDebounce } from './Debounce.js';
+import { ConsoleError } from 'src/lib/ericchase/Utility/Console.js';
+import { ImmediateDebounce } from 'src/lib/ericchase/Utility/Debounce.js';
 
 export class HelpMessage {
   print: () => Promise<void>;

@@ -2,11 +2,11 @@
 
 https://github.com/ericchase-library/ts-templates-website
 
-This is a template for website projects. It is not fully complete, but it should be a good start (I am using and updating it myself).
+This is a template for website projects. Please check out https://github.com/ericchase-library/ts-library for other information.
 
-It relies on the TypeScript library in this organization.
+## Build Tools V2
 
-- https://github.com/ericchase-library/ts-library
+This template project uses the new 2.0 version of my build tools and library modules. Read more about that in the ts-library repo.
 
 ## Disclaimer
 
@@ -40,13 +40,11 @@ For final builds:
 bun run build
 ```
 
-**Format the source code**
+**Lint the source code**
 
 ```
-bun run format
+bun run lint
 ```
-
-My build tools use the Biome (https://biomejs.dev/) toolchain for formatting and linting most source files; as well as Prettier (https://prettier.io/) for formatting html and markdown files. Formatting has always been a massive pain point in web dev, and will probably continue to be so. From time to time, I find better tools for formatting files; and the build tools may be updated accordingly.
 
 ## Project Structure
 
@@ -56,65 +54,32 @@ This folder contains _all_ of the files that are needed to build the website.
 
 `*.html`
 
-- During builds, `*.html` files are processed to replace tags that look like custom elements from Web Components api by replacing them with the contents of files from `./src/components/` that have the same name. You can still use custom elements and Web Components; just don't reuse the same names.
+- During builds, `*.html` files are processed to replace tags that look like custom elements from Web Components api by replacing them with the contents of files from `./src/lib/components/` that have a filename matching the tag name. You can still use custom elements and Web Components.
 
 `./src/lib/`
 
-- This folder exclusively contains TypeScript libraries and modules. This folder is ignored during the copy stage of the build process, so don't bother adding anything other than `*.ts` files here.
-- You could modify the build script `./tools/scripts/build.ts` to also handle `*.js` if you want, but there really isn't a reason to do so unless you want to make use of JavaScript libraries.
+- This folder should contain library files and modules that your main source code depend on.
+  - If you use the HTMLCustomComponent processor, component files should be placed under `./src/lib/components`.
 
-### ./build/
+`./src/lib/ericchase/`
 
-This folder is produced during the build process and contains the final compiled source code.
-
-For this project, a final vanilla HTML, CSS, and JavaScript website is produced, along with a copy of any media files. _Any modification to the contents of this folder will be overwritten during the next build._
-
-Since the files in this folder are vanilla, you can quickly make temporary modifications like _hotfixes_ to the website without having to rebuild the project. This folder is tracked by git by default and will be pushed to the remote repository. Any modications to the folder contents **will** be marked and included as a change when committing and pushing, so your repository will contain a history of temporary modifications for future reference.
-
-If you do make any modifications to the contents of this folder, please make sure to apply those changes to the actual source files later.
+- This folder contains my TypeScript library files and modules, which are used by the build tools. You can make use of these files for your project, as well.
 
 ### ./tools/
 
-This folder contains the scripts we use to automate work flows, like:
+This folder contains the build tool files and scripts.
 
-- building source code into a website, browser extension, or command line application;
-- performing some kind of maintenance on project files;
-- and even other operations like:
-  - opening all the source files in your project (see ts-library repo linked above)
-  - re-installing all the npm packages in your package.json (see ts-library repo linked above)
+- To build or modify a project, update the `./tools/build.ts` file as you see fit.
 
-You can literally do anything you want, which is the point of this library. These scripts should be easy to read, easy to write, and easy to modify. The goal isn't to produce a complete packaged build tool like Gulp, Grunt, Webpack, Makefile, etc. You can use those tools as well! The main idea here is to get away from writing clumsy npm scripts in package.json that rely on other packaged tools.
+### ./out/
 
-**Note:**
+This folder is produced during the normal build process and will contain the final compiled/bundled source code.
 
-The scripts under `./tools/` also use modules from this library (from `./src/`). To reiterate, the goal of these scripts is not to produce a package; though, you can do that if you want to! For new projects, you would ideally copy the library files from `./src/` (or `./src-stripped/` if you don't want the test files and example) into your project's `./src/` folder (the library files are contained under `src/lib/ericchase` to distinguish that these files are from this library. you don't need to use this file/folder structure, but doing so will allow you to easily update your copy of the library if needed). This is already done for you in the various `ts-templates-` repositories.
+For this project, a final vanilla HTML, CSS, and JavaScript website is produced, along with a copy of any media files. _Any modification to the contents of this folder will be overwritten during the next build._
 
-### ./dev_database/
+### ./server/
 
-A local database for database testing. I've prepared a standard PostgreSQL docker container with some minimal example code in the dev server.
-
-### ./dev_server/
-
-A local web server for testing the website. It is configured to serve files from the `./build/` folder and works like a typical web server.
-
-Generally, you would use the VSCode **Live Server** extension during development process, as it is able to refresh pages automatically. I haven't created a feature like this for the local server, and I'm not sure I will, since Live Server exists and works well for that use case.
-
-- ritwickdey.LiveServer
-  - https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer
-- yandeu.five-server
-  - https://marketplace.visualstudio.com/items?itemName=yandeu.five-server
-  - I don't recommend using this similar extension. It is not a drop-in replacement for Live Server. To use it efficiently, you would need to write a configuration file for each project (as far as I can see).
-
-### ./
-
-I've modified these files to work well with website projects. Please read over them to familiarize yourself with the configurations.
-
-- .gitignore
-- .prettierignore
-- .prettierrc
-- biome.json
-- package.json
-- tsconfig.json
+A local dev server for testing various kinds of projects that utilize a server. The server folder is a separate project with its own repository (https://github.com/ericchase/tool--basic-web-server) that I maintain and update. You could use a different dev server provided by another tool like Vite, or even the VSCode Live Server extension. I prefer writing the server myself, so that's why I include it.
 
 ## Copyright & License
 
@@ -132,13 +97,13 @@ The code in this repository will always be truly free and open source (unless I 
 
 - _please leave a trail_
 
-When making a copy of this project, I _kindly ask_ that you include the text within the `NOTICE` file somewhere (perhaps in your own README.md or LICENSE or NOTICE file?) or a link to this repository so that other readers of your project may also be able to find this original template.
+When making a copy of this project, I _kindly ask_ that you include the text within the `NOTICE` file somewhere (perhaps in your own README.md or LICENSE or NOTICE file?) or a link to this repository so that other users of your project may also be able to find this original template.
 
 ```
-Typescript Template Website
-https://github.com/ericchase-library/ts-templates-website
+Typescript Library
+https://github.com/ericchase-library/ts-library
 
-Copyright © 2024 ericchase
+Copyright © 2025 ericchase
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

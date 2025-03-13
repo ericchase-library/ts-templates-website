@@ -1,8 +1,8 @@
-import { ConsoleError } from './lib/ericchase/Utility/Console.js';
-import { NodeRef } from './lib/ericchase/Web API/Node_Utility.js';
+import { ConsoleError } from 'src/lib/ericchase/Utility/Console.js';
+import { NodeRef } from 'src/lib/ericchase/Web API/Node_Utility.js';
+import { EnableHotRefresh } from 'src/lib/server/HotRefresh.js';
 
-import { socket_restart } from './dev_server/hotreload.js';
-socket_restart();
+EnableHotRefresh();
 
 class Page {
   divMessages: HTMLDivElement;
@@ -28,6 +28,8 @@ class Page {
 const page = new Page();
 
 page.addMessage('Hello, Script!');
+
+// Database requires docker to be installed and running.
 
 // try {
 //   if (await DatabaseConnected()) {

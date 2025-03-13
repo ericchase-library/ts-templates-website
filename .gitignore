@@ -160,9 +160,6 @@ dist-ssr
 *.mkv
 *.mp4
 
-# don't share vscode settings unless you know for sure they should be shared
-.vscode/
-
 # build folders
 # build/
 # out/
@@ -176,4 +173,4 @@ sync.ffs_db
 ## Repo Specific
 ##
 
-tools/cache
+tools/cache/

@@ -1,5 +1,5 @@
-import { Compat_FileSystemDirectoryEntry } from './FileSystemDirectoryEntry.js';
-import { Compat_FileSystemEntry } from './FileSystemEntry.js';
+import { Compat_FileSystemDirectoryEntry } from 'src/lib/ericchase/Web API/FileSystemDirectoryEntry.js';
+import { Compat_FileSystemEntry } from 'src/lib/ericchase/Web API/FileSystemEntry.js';
 
 export class FileSystemEntryIterator {
   list: FileSystemEntry[] = [];

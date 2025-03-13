@@ -1,4 +1,4 @@
-import { JSONAnalyze, type JSONArray, type JSONObject, type JSONParseResult } from './Analyze.js';
+import { JSONAnalyze, JSONArray, JSONObject, JSONParseResult } from 'src/lib/ericchase/Algorithm/JSON/Analyze.js';
 
 export function JSONMerge(...sources: unknown[]): JSONParseResult {
   if (sources.length === 0) return null;

@@ -1,4 +1,5 @@
-import { GetLeftMarginSize, LineIsOnlyWhiteSpace, RemoveWhiteSpaceOnlyLinesFromTopAndBottom } from './String.js';
+import { JSONRawStringParse } from 'src/lib/ericchase/Algorithm/JSON.js';
+import { GetLeftMarginSize, LineIsOnlyWhiteSpace, RemoveWhiteSpaceOnlyLinesFromTopAndBottom } from 'src/lib/ericchase/Utility/String.js';
 
 export function PrepareMessage(message: string, left_margin_pad_size = 0, number_of_blank_lines_after = 0, number_of_blank_lines_before = 0): string {
   const lines = RemoveWhiteSpaceOnlyLinesFromTopAndBottom(message);
@@ -19,5 +20,5 @@ export function PrepareMessage(message: string, left_margin_pad_size = 0, number
   for (let i = 0; i < number_of_blank_lines_after; i++) {
     out.push('');
   }
-  return out.join('\n');
+  return out.join(JSONRawStringParse(String.raw`\n`));
 }

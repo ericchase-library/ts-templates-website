@@ -1,4 +1,4 @@
-export function GetLeftMarginSize(text: string) {
+export function GetLeftMarginSize(text: string): number {
   let i = 0;
   for (; i < text.length; i++) {
     if (text[i] !== ' ') {
@@ -8,11 +8,15 @@ export function GetLeftMarginSize(text: string) {
   return i;
 }
 
-export function LineIsOnlyWhiteSpace(line: string) {
+export function LineIsOnlyWhiteSpace(line: string): boolean {
   return /^\s*$/.test(line);
 }
 
-export function RemoveWhiteSpaceOnlyLinesFromTopAndBottom(text: string) {
+export function RemoveWhiteSpaceOnlyLines(text: string): string[] {
+  const lines = SplitLines(text);
+  return lines.filter((line) => !LineIsOnlyWhiteSpace(line));
+}
+export function RemoveWhiteSpaceOnlyLinesFromTopAndBottom(text: string): string[] {
   const lines = SplitLines(text);
   return lines.slice(
     lines.findIndex((line) => LineIsOnlyWhiteSpace(line) === false),

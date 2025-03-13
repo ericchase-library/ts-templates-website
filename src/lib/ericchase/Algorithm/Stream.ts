@@ -1,5 +1,5 @@
-import { SplitLines } from '../Utility/String.js';
-import { U8, U8Concat, U8Take } from './Uint8Array.js';
+import { U8, U8Concat, U8Take } from 'src/lib/ericchase/Algorithm/Uint8Array.js';
+import { SplitLines } from 'src/lib/ericchase/Utility/String.js';
 
 export async function* AsyncReader<T>(stream: ReadableStream<T>) {
   const reader = stream.getReader();

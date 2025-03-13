@@ -1,5 +1,5 @@
-import type { N } from '../Utility/Types.js';
-import { Compat_DataTransferItem } from './DataTransferItem.js';
+import { N } from 'src/lib/ericchase/Utility/Types.js';
+import { Compat_DataTransferItem } from 'src/lib/ericchase/Web API/DataTransferItem.js';
 
 export class DataTransferItemIterator {
   list: DataTransferItem[] = [];

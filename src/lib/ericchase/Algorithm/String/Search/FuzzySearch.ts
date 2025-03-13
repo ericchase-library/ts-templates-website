@@ -1,4 +1,4 @@
-import { levenshtein_distance } from './LevenshteinDistance.js';
+import { levenshtein_distance } from 'src/lib/ericchase/Algorithm/String/Search/LevenshteinDistance.js';
 
 export interface IFuzzyMatchResult {
   distance: number;

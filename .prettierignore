@@ -1,19 +1,19 @@
 # prettier ignores files setup in .gitignore
 
-coverage
-docs
-examples
+*.js
+*.jsx
+*.ts
+*.tsx
 
-# lock files
-bun.lockb
-package-lock.json
-pnpm-lock.yaml
-yarn.lock
+*.json
+*.jsonc
+
+coverage/
+docs/
+examples/
+
+*-lock.yaml
 
 # miscellaneous
-src/lib/ericchase
-
-**/*.js
-**/*.jsx
-**/*.ts
-**/*.tsx
+out/
+src/lib/ericchase/

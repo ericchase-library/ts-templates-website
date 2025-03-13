@@ -1,4 +1,4 @@
-import { SplitLines } from '../Utility/String.js';
+import { SplitLines } from 'src/lib/ericchase/Utility/String.js';
 
 const BYTE_TO_B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 const B64_TO_BYTE = new Map([...BYTE_TO_B64].map((char, byte) => [char, byte]));

@@ -1,5 +1,5 @@
-import { Defer } from './Defer.js';
-import type { SyncAsync } from './Types.js';
+import { Defer } from 'src/lib/ericchase/Utility/Defer.js';
+import { SyncAsync } from 'src/lib/ericchase/Utility/Types.js';
 
 /** debounced functions return nothing when called; by design */
 export function Debounce<T extends (...args: any[]) => SyncAsync<any>>(fn: T, delay_ms: number) {
