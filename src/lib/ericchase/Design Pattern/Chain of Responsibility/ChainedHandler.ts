@@ -8,9 +8,7 @@ export class ChainedHandlerCaller<Request = void, Actions = void> extends Handle
     for (const handler of this) {
       await handler(request, {
         ...actions,
-        removeSelf: () => {
-          this.remove(handler);
-        },
+        removeSelf: () => this.remove(handler),
         stopHandlerChain: () => {
           abort = true;
         },

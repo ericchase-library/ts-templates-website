@@ -1,6 +1,8 @@
 import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
 import { FileStats, PlatformProviderId, UnimplementedProvider } from 'src/lib/ericchase/Platform/PlatformProvider.js';
-import { ConsoleLogWithDate } from 'src/lib/ericchase/Utility/Console.js';
+import { KEYS } from 'src/lib/ericchase/Platform/Shell.js';
+import { AddStdinListener, StartStdinRawModeReader } from 'src/lib/ericchase/Platform/StdinReader.js';
+import { ConsoleLog, ConsoleLogWithDate } from 'src/lib/ericchase/Utility/Console.js';
 import { Debounce } from 'src/lib/ericchase/Utility/Debounce.js';
 import { Defer } from 'src/lib/ericchase/Utility/Defer.js';
 import { Map_GetOrDefault } from 'src/lib/ericchase/Utility/Map.js';
@@ -136,7 +138,8 @@ export class BuilderInternal {
     this.$set_unprocessed_updated_files.add(file);
   }
 
-  // File Events
+  // Source Watcher
+
   $unwatchSource?: () => void;
   async getStats(path: CPath | string): Promise<FileStats | undefined> {
     try {
@@ -206,8 +209,24 @@ export class BuilderInternal {
     await this.processUnprocessedFiles();
 
     if (this.watchmode === true) {
-      // Source Watcher
+      // Setup Source Watcher
       this.setupSourceWatcher();
+      // Setup Stdin Reader
+      AddStdinListener(async (bytes, text, removeSelf) => {
+        if (text === KEYS.SIGINT || text === 'q') {
+          removeSelf();
+          ConsoleLog('User Command: Quit');
+          this.$unwatchSource?.();
+          // Cleanup Steps
+          for (const step of this.cleanup_steps) {
+            ConsoleLogWithDate(step.constructor.name);
+            await step.run(this);
+          }
+          // Force Exit
+          process.exit();
+        }
+      });
+      StartStdinRawModeReader();
     } else {
       // Cleanup Steps
       for (const step of this.cleanup_steps) {

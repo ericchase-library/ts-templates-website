@@ -1,8 +1,8 @@
 import { SyncAsync } from 'src/lib/ericchase/Utility/Types.js';
 
 export type Handler<Request = void, Actions = void> = (
-  request: Request, //
-  actions: { removeSelf: () => void } & Actions,
+  request: Request,
+  actions: { removeSelf: () => void } & Actions, //
 ) => SyncAsync<void>;
 
 export class HandlerSet<Request = void, Actions = void> {
@@ -29,9 +29,7 @@ export class HandlerCaller<Request = void, Actions = void> extends HandlerSet<Re
     for (const handler of this) {
       await handler(request, {
         ...actions,
-        removeSelf: () => {
-          this.remove(handler);
-        },
+        removeSelf: () => this.remove(handler),
       });
     }
   }

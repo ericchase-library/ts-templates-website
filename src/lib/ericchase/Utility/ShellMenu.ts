@@ -1,4 +1,4 @@
-import { Shell } from 'src/lib/ericchase/Platform/Node/Shell.js';
+import { Shell } from 'src/lib/ericchase/Platform/Shell.js';
 import { ConsoleLog } from 'src/lib/ericchase/Utility/Console.js';
 import { Menu, MenuNavigator, ParseMenu } from 'src/lib/ericchase/Utility/Menu.js';
 
