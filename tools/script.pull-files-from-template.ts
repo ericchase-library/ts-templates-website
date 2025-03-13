@@ -16,7 +16,7 @@ builder.setStartupSteps([
   BuildStep_FSMirrorDirectory({ from: Path(template_project_path, 'server/'), to: 'server/', include_patterns: ['**/*'], exclude_patterns: ['node_modules/**/*', 'bun.lockb'] }),
 
   // Mirror Template Project Directories "src/lib/ericchase", "tools/lib"
-  BuildStep_FSMirrorDirectory({ from: Path(template_project_path, 'src/lib/ericchase/'), to: 'src/lib/ericchase/', include_patterns: ['**/*.ts'], exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'] }),
+  BuildStep_FSMirrorDirectory({ from: Path(template_project_path, 'src/lib/ericchase/'), to: 'src/lib/ericchase/', include_patterns: ['**/*.ts'] }),
   BuildStep_FSMirrorDirectory({ from: Path(template_project_path, 'tools/lib/'), to: 'tools/lib/', include_patterns: ['**/*.ts'] }),
 
   // Copy Template Project Root Files
