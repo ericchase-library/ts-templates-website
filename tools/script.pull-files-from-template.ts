@@ -19,8 +19,8 @@ builder.setStartupSteps([
   BuildStep_FSMirrorDirectory({ from: Path(template_project_path, 'tools/lib/'), to: 'tools/lib/', include_patterns: ['**/*.ts'] }),
 
   // Copy Template Project Root Files
-  BuildStep_FSCopyFiles({ from: Path(template_project_path, './'), to: './', include_patterns: ['.gitignore', '.prettierignore', '.prettierrc', 'LICENSE-APACHE', 'biome.json', 'tsconfig.json'], overwrite: true }),
-  BuildStep_FSCopyFiles({ from: Path(template_project_path, './'), to: './', include_patterns: ['package.json'], overwrite: false }),
+  BuildStep_FSCopyFiles({ from: Path(template_project_path, './'), to: './', include_patterns: ['.prettierignore', '.prettierrc', 'LICENSE-APACHE', 'biome.json', 'tsconfig.json'], overwrite: true }),
+  BuildStep_FSCopyFiles({ from: Path(template_project_path, './'), to: './', include_patterns: ['.gitignore', 'package.json'], overwrite: false }),
 
   BuildStep_FSFormat('quiet'),
   //
