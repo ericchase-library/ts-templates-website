@@ -23,7 +23,7 @@ stdin.start();
 
 TryLock(command_map.serve);
 
-await Bun.spawn(['bun', 'update'], { cwd: './dev_server/', stdin: 'inherit', stdout: 'inherit' }).exited;
+await Bun.spawn(['bun', 'install'], { cwd: './dev_server/', stdin: 'inherit', stdout: 'inherit' }).exited;
 
 function run_server() {
   return Bun.spawn(['bun', './tools/start'], {

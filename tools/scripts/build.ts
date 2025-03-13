@@ -190,7 +190,7 @@ export function onLog(data: string) {
 if (Bun.argv[1] === __filename) {
   TryLockEach([command_map.build, command_map.format]);
 
-  RunSync.Bun('update');
+  RunSync.Bun('install');
   Cache_Unlock(command_map.format);
   RunSync.BunRun('format', 'silent');
   TryLock(command_map.format);
