@@ -8,7 +8,7 @@ export function Processor_BasicWriter(include_patterns: string[], exclude_patter
   return new CProcessor_BasicWriter(include_patterns, exclude_patterns);
 }
 
-export class CProcessor_BasicWriter implements ProcessorModule {
+class CProcessor_BasicWriter implements ProcessorModule {
   constructor(
     readonly include_patterns: string[],
     readonly exclude_patterns: string[],

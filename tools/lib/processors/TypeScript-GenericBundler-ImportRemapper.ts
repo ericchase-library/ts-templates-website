@@ -7,7 +7,7 @@ export function Processor_TypeScript_GenericBundlerImportRemapper(): ProcessorMo
   return new CProcessor_TypeScript_GenericBundlerImportRemapper();
 }
 
-export class CProcessor_TypeScript_GenericBundlerImportRemapper implements ProcessorModule {
+class CProcessor_TypeScript_GenericBundlerImportRemapper implements ProcessorModule {
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>) {
     for (const file of files) {
       if (file.src_path.endsWith('.module.ts') === false) {

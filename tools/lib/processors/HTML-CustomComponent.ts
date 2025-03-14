@@ -9,7 +9,7 @@ export function Processor_HTML_CustomComponent(): ProcessorModule {
   return new CProcessor_HTML_CustomComponent();
 }
 
-export class CProcessor_HTML_CustomComponent implements ProcessorModule {
+class CProcessor_HTML_CustomComponent implements ProcessorModule {
   component_map = new Map<string, ProjectFile>();
   htmlfile_set = new Set<ProjectFile>();
 

@@ -6,14 +6,14 @@ import { Processor_TypeScript_GenericBundlerImportRemapper } from 'tools/lib/pro
 import { Processor_TypeScript_GenericBundler } from 'tools/lib/processors/TypeScript-GenericBundler.js';
 import { Step_Bun_Run } from 'tools/lib/steps/Bun-Run.js';
 import { Step_Format } from 'tools/lib/steps/FS-Format.js';
-import { Step_StartDevServer } from 'tools/StartDevServer.js';
+import { Step_StartServer } from 'tools/StartServer.js';
 
 const builder = new Builder(Bun.argv[2] === '--watch' ? 'watch' : 'build');
 
 builder.setStartupSteps([
   Step_Bun_Run({ cmd: ['bun', 'install'] }, 'quiet'),
   Step_Format('quiet'),
-  Step_StartDevServer(),
+  Step_StartServer(),
   //
 ]);
 

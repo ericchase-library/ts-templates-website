@@ -10,7 +10,7 @@ export function Processor_TypeScript_GenericBundler({ external = [], sourcemap =
   return new CProcessor_TypeScript_GenericBundler({ external, sourcemap, target });
 }
 
-export class CProcessor_TypeScript_GenericBundler implements ProcessorModule {
+class CProcessor_TypeScript_GenericBundler implements ProcessorModule {
   config: Parameters<typeof Bun.build>[0];
   constructor({ external = [], sourcemap = 'linked', target = 'browser' }: BuildConfig) {
     this.config = {

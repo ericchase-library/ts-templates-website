@@ -8,7 +8,7 @@ export function Processor_HTML_ImportConverter(): ProcessorModule {
   return new CProcessor_HTML_ImportConverter();
 }
 
-export class CProcessor_HTML_ImportConverter implements ProcessorModule {
+class CProcessor_HTML_ImportConverter implements ProcessorModule {
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>) {
     for (const file of files) {
       if (file.src_path.ext !== '.html') {
