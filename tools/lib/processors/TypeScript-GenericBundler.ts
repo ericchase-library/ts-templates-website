@@ -6,7 +6,11 @@ import { ProjectFile } from 'tools/lib/ProjectFile.js';
 
 type BuildConfig = Pick<Parameters<typeof Bun.build>[0], 'external' | 'sourcemap' | 'target'>;
 
-export class CProcessor_TypeScriptGenericBundler implements ProcessorModule {
+export function Processor_TypeScript_GenericBundler({ external = [], sourcemap = 'linked', target = 'browser' }: BuildConfig): ProcessorModule {
+  return new CProcessor_TypeScript_GenericBundler({ external, sourcemap, target });
+}
+
+export class CProcessor_TypeScript_GenericBundler implements ProcessorModule {
   config: Parameters<typeof Bun.build>[0];
   constructor({ external = [], sourcemap = 'linked', target = 'browser' }: BuildConfig) {
     this.config = {
@@ -98,8 +102,4 @@ export class CProcessor_TypeScriptGenericBundler implements ProcessorModule {
       ConsoleLog();
     }
   }
-}
-
-export function Processor_TypeScriptGenericBundler({ external = [], sourcemap = 'linked', target = 'browser' }: BuildConfig): ProcessorModule {
-  return new CProcessor_TypeScriptGenericBundler({ external, sourcemap, target });
 }

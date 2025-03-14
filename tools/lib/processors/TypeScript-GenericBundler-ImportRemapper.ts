@@ -3,7 +3,11 @@ import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
 import { ProcessorModule } from 'tools/lib/Processor.js';
 import { ProjectFile } from 'tools/lib/ProjectFile.js';
 
-export class CProcessor_TypeScriptGenericBundlerImportRemapper implements ProcessorModule {
+export function Processor_TypeScript_GenericBundlerImportRemapper(): ProcessorModule {
+  return new CProcessor_TypeScript_GenericBundlerImportRemapper();
+}
+
+export class CProcessor_TypeScript_GenericBundlerImportRemapper implements ProcessorModule {
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>) {
     for (const file of files) {
       if (file.src_path.endsWith('.module.ts') === false) {
@@ -81,8 +85,4 @@ function findQuotePairFromEnd(text: string, start: number, end: number) {
     return { start: start + slice.lastIndexOf('"', double_end - 1), end: start + double_end };
   }
   return { start: start + slice.lastIndexOf("'", single_end - 1), end: start + single_end };
-}
-
-export function Processor_TypeScriptGenericBundlerImportRemapper(): ProcessorModule {
-  return new CProcessor_TypeScriptGenericBundlerImportRemapper();
 }

@@ -201,7 +201,6 @@ export class BuilderInternal {
 
     // Startup Steps
     for (const step of this.startup_steps) {
-      ConsoleLogWithDate(step.constructor.name);
       await step.run(this);
     }
 
@@ -219,7 +218,6 @@ export class BuilderInternal {
           this.$unwatchSource?.();
           // Cleanup Steps
           for (const step of this.cleanup_steps) {
-            ConsoleLogWithDate(step.constructor.name);
             await step.run(this);
           }
           // Force Exit
@@ -230,7 +228,6 @@ export class BuilderInternal {
     } else {
       // Cleanup Steps
       for (const step of this.cleanup_steps) {
-        ConsoleLogWithDate(step.constructor.name);
         await step.run(this);
       }
     }

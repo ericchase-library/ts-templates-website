@@ -4,12 +4,18 @@ import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
 import { ProcessorModule } from 'tools/lib/Processor.js';
 import { ProjectFile } from 'tools/lib/ProjectFile.js';
 
-// patterns should use / instead of \
-export class CProcessor_FSBasicWriter implements ProcessorModule {
+export function Processor_BasicWriter(include_patterns: string[], exclude_patterns: string[]): ProcessorModule {
+  return new CProcessor_BasicWriter(include_patterns, exclude_patterns);
+}
+
+export class CProcessor_BasicWriter implements ProcessorModule {
   constructor(
     readonly include_patterns: string[],
     readonly exclude_patterns: string[],
-  ) {}
+  ) {
+    this.include_patterns.map((pattern) => Path(pattern).standard);
+    this.exclude_patterns.map((pattern) => Path(pattern).standard);
+  }
 
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {
     for (const file of files) {
@@ -23,11 +29,4 @@ export class CProcessor_FSBasicWriter implements ProcessorModule {
   async onProcess(builder: BuilderInternal, file: ProjectFile): Promise<void> {
     await file.write();
   }
-}
-
-export function Processor_FSBasicWriter(include_patterns: string[], exclude_patterns: string[]): ProcessorModule {
-  return new CProcessor_FSBasicWriter(
-    include_patterns.map((pattern) => Path(pattern).standard),
-    exclude_patterns.map((pattern) => Path(pattern).standard),
-  );
 }

@@ -4,7 +4,11 @@ import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
 import { ProcessorModule } from 'tools/lib/Processor.js';
 import { ProjectFile } from 'tools/lib/ProjectFile.js';
 
-export class CProcessor_HTMLImportConverter implements ProcessorModule {
+export function Processor_HTML_ImportConverter(): ProcessorModule {
+  return new CProcessor_HTML_ImportConverter();
+}
+
+export class CProcessor_HTML_ImportConverter implements ProcessorModule {
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>) {
     for (const file of files) {
       if (file.src_path.ext !== '.html') {
@@ -39,8 +43,4 @@ function getBasename(src: string) {
   } catch (error) {
     return Path(src).basename;
   }
-}
-
-export function Processor_HTMLImportConverter(): ProcessorModule {
-  return new CProcessor_HTMLImportConverter();
 }
