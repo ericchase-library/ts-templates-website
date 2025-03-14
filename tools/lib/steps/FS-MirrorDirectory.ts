@@ -33,7 +33,7 @@ class CStep_MirrorDirectory implements BuildStep {
     }
     await builder.platform.Directory.create(this.options.to);
     const set_from = await globScan(builder.platform, this.options.from, this.options.include_patterns, this.options.exclude_patterns);
-    const set_to = await globScan(builder.platform, this.options.to, this.options.include_patterns, this.options.exclude_patterns);
+    const set_to = await globScan(builder.platform, this.options.to, ['**/*'], []);
     const logs: string[] = [];
     // remove all files that shouldn't be
     for (const path of set_to.difference(set_from)) {
