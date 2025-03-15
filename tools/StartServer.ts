@@ -1,4 +1,5 @@
 import { Subprocess } from 'bun';
+import { AsyncLineReader } from 'src/lib/ericchase/Algorithm/Stream.js';
 import { AddStdinListener } from 'src/lib/ericchase/Platform/StdinReader.js';
 import { Debounce } from 'src/lib/ericchase/Utility/Debounce.js';
 import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
@@ -14,7 +15,7 @@ export function Step_StartServer(): Step {
 }
 
 class CStep_StartServer implements Step {
-  child_process?: Subprocess<'ignore', 'inherit', 'inherit'>;
+  child_process?: Subprocess<'ignore', 'pipe', 'pipe'>;
   enabled = false;
   logger = logger.newChannel();
 
@@ -39,7 +40,19 @@ class CStep_StartServer implements Step {
 
   async run(builder: BuilderInternal) {
     if (builder.watchmode === true) {
-      this.child_process = Bun.spawn(['bun', 'run', 'server/tools/start.ts'], { stderr: 'inherit', stdout: 'inherit' });
+      this.child_process = Bun.spawn(['bun', 'run', 'server/tools/start.ts'], { stderr: 'pipe', stdout: 'pipe' });
+      const { stdout, stderr } = this.child_process;
+      (async () => {
+        for await (const lines of AsyncLineReader(stdout)) {
+          logger.log(...lines);
+        }
+      })();
+      (async () => {
+        for await (const lines of AsyncLineReader(stderr)) {
+          logger.error(...lines);
+        }
+      })();
+
       // give the server some time to start up
       Sleep(1000).then(() => {
         this.enable(builder);
