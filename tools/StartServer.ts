@@ -40,18 +40,18 @@ class CStep_StartServer implements Step {
 
   async run(builder: BuilderInternal) {
     if (builder.watchmode === true) {
-      this.child_process = Bun.spawn(['bun', 'run', 'server/tools/start.ts'], { stderr: 'pipe', stdout: 'pipe' });
-      const { stdout, stderr } = this.child_process;
+      const p0 = Bun.spawn(['bun', 'run', 'server/tools/start.ts'], { stderr: 'pipe', stdout: 'pipe' });
       (async () => {
-        for await (const lines of AsyncLineReader(stdout)) {
+        for await (const lines of AsyncLineReader(p0.stdout)) {
           logger.log(...lines);
         }
       })();
       (async () => {
-        for await (const lines of AsyncLineReader(stderr)) {
+        for await (const lines of AsyncLineReader(p0.stderr)) {
           logger.error(...lines);
         }
       })();
+      this.child_process = p0;
 
       // give the server some time to start up
       Sleep(1000).then(() => {
