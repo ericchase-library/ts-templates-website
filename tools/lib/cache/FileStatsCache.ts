@@ -1,7 +1,8 @@
 import { CPath } from 'src/lib/ericchase/Platform/FilePath.js';
-import { DataSetMarkerManager } from 'src/lib/ericchase/Utility/UpdateMarker.js';
 import { cache_db, cache_platform, CreateAllQuery, CreateGetQuery, CreateRunQuery, QueryError, QueryExistsResult, QueryResult } from 'tools/lib/cache/cache.js';
 import { Cache_Lock, Cache_Unlock } from 'tools/lib/cache/LockCache.js';
+
+let h64Raw: ((inputBuffer: Uint8Array, seed?: bigint) => bigint) | undefined = undefined;
 
 const PATH = 'path';
 const MTIMEMS = 'mtimeMs';
@@ -77,6 +78,12 @@ const DELETE_ALL_RECORDS = /* sql */ `
 `;
 const deleteAllRecords = CreateRunQuery(DELETE_ALL_RECORDS);
 
+const DELETE_RECORD = /* sql */ `
+  DELETE FROM ${TABLE}
+   WHERE ${PATH} = $${PATH}
+`;
+const deleteRecord = CreateRunQuery(DELETE_RECORD, { [PATH]: '' });
+
 const UPDATE_FILESTAT_RECORD = /* sql */ `
   INSERT OR REPLACE INTO ${TABLE} (${PATH}, ${MTIMEMS}, ${HASH})
   VALUES ($${PATH}, $${MTIMEMS}, $${HASH})
@@ -101,32 +108,51 @@ export function Cache_FileStats_Reset(): QueryResult<boolean> {
   }
 }
 
-const modified_marker_manager = new DataSetMarkerManager<string>();
-
-/** Markers only get updated when Cache_IsFileModified is called. */
-export function Cache_GetFileModifiedMarker() {
-  return modified_marker_manager.getNewMarker();
-}
-
-let h64Raw: ((inputBuffer: Uint8Array, seed?: bigint) => bigint) | undefined = undefined;
-export async function Cache_IsFileModified(path: CPath): Promise<QueryResult<boolean>> {
-  if (h64Raw === undefined) {
-    h64Raw = (await (await import('xxhash-wasm')).default()).h64Raw;
-  }
+export function Cache_QueryFileStats(path: CPath): QueryResult<FILESTATS_RECORD | undefined> {
   try {
-    const mtimeMs = (await cache_platform.Path.getStats(path)).mtimeMs;
-    const q0 = isFileTimeModified({ [PATH]: path.raw, [CURRENT_MTIMEMS]: mtimeMs });
-    if (q0?.result === 1) {
-      const xxhash = h64Raw(await cache_platform.File.readBytes(path));
-      const q1 = isFileHashModified({ [PATH]: path.raw, [CURRENT_HASH]: xxhash });
-      updateFileStatsRecord({ [PATH]: path.raw, [MTIMEMS]: mtimeMs, [HASH]: xxhash });
-      if (q1?.result === 1) {
-        modified_marker_manager.updateMarkers(path.raw);
-        return { data: true };
-      }
+    const q0 = getFileStatsRecord[PATH]({ [PATH]: path.raw });
+    if (q0 === undefined) {
+      return { data: undefined };
     }
-    return { data: false };
+    return { data: q0 };
   } catch (error) {
     return QueryError(error);
   }
+}
+
+export async function Cache_UpdateFileStats(path: CPath): Promise<QueryResult<FILESTATS_RECORD>> {
+  try {
+    const stats = new FILESTATS_RECORD();
+    stats[PATH] = path.raw;
+    stats[MTIMEMS] = await getMTimeMS(path);
+    const q0 = Cache_QueryFileStats(path);
+    if (q0.data !== undefined && q0.data[MTIMEMS] === stats[MTIMEMS]) {
+      return q0;
+    }
+    stats[HASH] = await getHash(path);
+    updateFileStatsRecord({ [PATH]: stats[PATH], [MTIMEMS]: stats[MTIMEMS], [HASH]: stats[HASH] });
+    return { data: stats };
+  } catch (error) {
+    return QueryError(error);
+  }
+}
+
+export function Cache_RemoveFileStats(path: CPath): QueryResult<boolean> {
+  try {
+    deleteRecord({ path: path.raw });
+    return { data: true };
+  } catch (error) {
+    return QueryError(error);
+  }
+}
+
+export async function getHash(path: CPath): Promise<bigint> {
+  if (h64Raw === undefined) {
+    h64Raw = (await (await import('xxhash-wasm')).default()).h64Raw;
+  }
+  return h64Raw(await cache_platform.File.readBytes(path));
+}
+
+export async function getMTimeMS(path: CPath): Promise<number> {
+  return (await cache_platform.Path.getStats(path)).mtimeMs;
 }

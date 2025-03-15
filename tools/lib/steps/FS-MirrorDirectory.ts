@@ -2,7 +2,7 @@ import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
 import { globScan } from 'src/lib/ericchase/Platform/util.js';
 import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
 import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
-import { Cache_IsFileModified } from 'tools/lib/cache/FileStatsCache.js';
+import { Cache_QueryFileStats, Cache_RemoveFileStats, Cache_UpdateFileStats } from 'tools/lib/cache/FileStatsCache.js';
 import { Step } from 'tools/lib/Step.js';
 
 // !! WARNING: This can DELETE entire directories. Use with caution!!
@@ -37,35 +37,36 @@ class CStep_MirrorDirectory implements Step {
     }
     await builder.platform.Directory.create(this.options.to);
     const set_from = await globScan(builder.platform, this.options.from, this.options.include_patterns, this.options.exclude_patterns);
-    const set_to = await globScan(builder.platform, this.options.to, ['**/*'], []);
+    const set_to = await globScan(builder.platform, this.options.to, ['**/*'], this.options.exclude_patterns);
     // remove all files that shouldn't be
     for (const path of set_to.difference(set_from)) {
-      const from = Path(this.options.from, path);
       const to = Path(this.options.to, path);
       if ((await builder.platform.File.delete(to)) === true) {
-        this.logger.log(`Deleted "${from.raw}" -> "${to.raw}"`);
+        Cache_RemoveFileStats(to);
+        this.logger.log(`Deleted "${to.raw}"`);
       }
     }
     // copy all files that are missing
     for (const path of set_from.difference(set_to)) {
       const from = Path(this.options.from, path);
       const to = Path(this.options.to, path);
-      await Cache_IsFileModified(from);
       if ((await builder.platform.File.copy(from, to, true)) === true) {
+        await Cache_UpdateFileStats(to);
         this.logger.log(`Copied "${from.raw}" -> "${to.raw}"`);
       }
     }
     // check matching files for modification
     for (const path of set_from.intersection(set_to)) {
       const from = Path(this.options.from, path);
-      const result = await Cache_IsFileModified(from);
-      if (result.data === true) {
-        const to = Path(this.options.to, path);
+      const to = Path(this.options.to, path);
+      const stats_from = Cache_QueryFileStats(from).data;
+      const stats_to = Cache_QueryFileStats(to).data;
+      if (stats_from === undefined || stats_to === undefined || stats_from.xxhash !== stats_to.xxhash) {
         if ((await builder.platform.File.copy(from, to, true)) === true) {
+          await Cache_UpdateFileStats(from);
+          await Cache_UpdateFileStats(to);
           this.logger.log(`Replaced "${from.raw}" -> "${to.raw}"`);
         }
-      } else if (result.error !== undefined) {
-        throw result.error;
       }
     }
   }

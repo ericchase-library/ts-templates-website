@@ -2,7 +2,7 @@ import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
 import { globScan } from 'src/lib/ericchase/Platform/util.js';
 import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
 import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
-import { Cache_IsFileModified } from 'tools/lib/cache/FileStatsCache.js';
+import { Cache_QueryFileStats, Cache_UpdateFileStats } from 'tools/lib/cache/FileStatsCache.js';
 import { Step } from 'tools/lib/Step.js';
 
 const logger = Logger(__filename, Step_CopyFiles.name);
@@ -43,20 +43,22 @@ class CStep_CopyFiles implements Step {
       const from = Path(this.options.from, path);
       const to = Path(this.options.to, path);
       if ((await builder.platform.File.copy(from, to, this.options.overwrite)) === true) {
+        await Cache_UpdateFileStats(to);
         this.logger.log(`Copied "${from.raw}" -> "${to.raw}"`);
       }
     }
     // check matching files for modification
     for (const path of set_from.intersection(set_to)) {
       const from = Path(this.options.from, path);
-      const result = await Cache_IsFileModified(from);
-      if (result.data === true) {
-        const to = Path(this.options.to, path);
+      const to = Path(this.options.to, path);
+      const stats_from = Cache_QueryFileStats(from).data;
+      const stats_to = Cache_QueryFileStats(to).data;
+      if (stats_from === undefined || stats_to === undefined || stats_from.xxhash !== stats_to.xxhash) {
         if ((await builder.platform.File.copy(from, to, this.options.overwrite)) === true) {
+          await Cache_UpdateFileStats(from);
+          await Cache_UpdateFileStats(to);
           this.logger.log(`Replaced "${from.raw}" -> "${to.raw}"`);
         }
-      } else if (result.error !== undefined) {
-        throw result.error;
       }
     }
   }
