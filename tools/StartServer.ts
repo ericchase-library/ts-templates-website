@@ -1,42 +1,47 @@
 import { Subprocess } from 'bun';
 import { AddStdinListener } from 'src/lib/ericchase/Platform/StdinReader.js';
-import { ConsoleLog } from 'src/lib/ericchase/Utility/Console.js';
 import { Debounce } from 'src/lib/ericchase/Utility/Debounce.js';
+import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
 import { Sleep } from 'src/lib/ericchase/Utility/Sleep.js';
 import { server_http } from 'src/lib/server/server.js';
-import { BuildStep, BuilderInternal } from 'tools/lib/BuilderInternal.js';
+import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
+import { Step } from 'tools/lib/Step.js';
 
-export function Step_StartServer(): BuildStep {
+const logger = Logger(__filename, Step_StartServer.name);
+
+export function Step_StartServer(): Step {
   return new CStep_StartServer();
 }
 
-class CStep_StartServer implements BuildStep {
+class CStep_StartServer implements Step {
   child_process?: Subprocess<'ignore', 'inherit', 'inherit'>;
   enabled = false;
+  logger = logger.newChannel();
 
   disable() {
     this.enabled = false;
     this.unwatch?.();
     this.unwatch = undefined;
-    ConsoleLog("Hot Refresh Off   (Press 'h' to toggle.)");
+    logger.log("Hot Refresh Off   (Press 'h' to toggle.)");
   }
   enable(builder: BuilderInternal) {
     this.enabled = true;
-    this.unwatch = builder.platform.Directory.watch(builder.dir.out, this.onchange);
-    ConsoleLog("Hot Refresh On    (Press 'h' to toggle.)");
+    const onchange = Debounce(() => this.onchange(), 100);
+    this.unwatch = builder.platform.Directory.watch(builder.dir.out, onchange);
+    logger.log("Hot Refresh On    (Press 'h' to toggle.)");
   }
-  onchange = Debounce(() => {
+  onchange() {
     try {
       fetch(`${server_http}/server/reload`);
     } catch (error) {}
-  }, 100);
+  }
   unwatch?: () => void;
 
   async run(builder: BuilderInternal) {
     if (builder.watchmode === true) {
       this.child_process = Bun.spawn(['bun', 'run', 'server/tools/start.ts'], { stderr: 'inherit', stdout: 'inherit' });
       // give the server some time to start up
-      Sleep(500).then(() => {
+      Sleep(1000).then(() => {
         this.enable(builder);
         AddStdinListener(async (bytes, text) => {
           if (text === 'h') {

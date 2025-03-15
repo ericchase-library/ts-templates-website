@@ -1,13 +1,18 @@
 import { Path } from 'src/lib/ericchase/Platform/FilePath.js';
+import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
 import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
 import { ProcessorModule } from 'tools/lib/Processor.js';
 import { ProjectFile } from 'tools/lib/ProjectFile.js';
+
+const logger = Logger(__filename, Processor_TypeScript_GenericBundlerImportRemapper.name);
 
 export function Processor_TypeScript_GenericBundlerImportRemapper(): ProcessorModule {
   return new CProcessor_TypeScript_GenericBundlerImportRemapper();
 }
 
 class CProcessor_TypeScript_GenericBundlerImportRemapper implements ProcessorModule {
+  logger = logger.newChannel();
+
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>) {
     for (const file of files) {
       if (file.src_path.endsWith('.module.ts') === false) {

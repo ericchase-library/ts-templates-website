@@ -2,7 +2,7 @@ import { Defer } from 'src/lib/ericchase/Utility/Defer.js';
 import { SyncAsync } from 'src/lib/ericchase/Utility/Types.js';
 
 /** debounced functions return nothing when called; by design */
-export function Debounce<T extends (...args: any[]) => SyncAsync<any>>(fn: T, delay_ms: number) {
+export function Debounce<T extends (...args: any[]) => SyncAsync<any>>(fn: T, delay_ms: number): (...args: Parameters<T>) => Promise<void> {
   let deferred = Defer();
   let timeout: ReturnType<typeof setTimeout>;
   return (...args: Parameters<T>) => {
@@ -21,7 +21,7 @@ export function Debounce<T extends (...args: any[]) => SyncAsync<any>>(fn: T, de
 }
 
 /** debounced functions return nothing when called; by design */
-export function ImmediateDebounce<T extends (...args: any[]) => SyncAsync<any>>(fn: T, delay_ms: number) {
+export function ImmediateDebounce<T extends (...args: any[]) => SyncAsync<any>>(fn: T, delay_ms: number): (...args: Parameters<T>) => Promise<void> {
   let deferred = Defer();
   let timeout: ReturnType<typeof setTimeout> | undefined;
   return (...args: Parameters<T>) => {

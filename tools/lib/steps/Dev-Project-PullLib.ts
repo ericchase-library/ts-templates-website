@@ -1,17 +1,21 @@
 import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
-import { ConsoleLogWithDate } from 'src/lib/ericchase/Utility/Console.js';
-import { BuilderInternal, BuildStep } from 'tools/lib/BuilderInternal.js';
+import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
+import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
+import { Step } from 'tools/lib/Step.js';
 import { Step_CopyFiles } from 'tools/lib/steps/FS-CopyFiles.js';
 import { Step_MirrorDirectory } from 'tools/lib/steps/FS-MirrorDirectory.js';
 
-export function Step_Project_PullLib(project_dir: CPath | string): BuildStep {
+const logger = Logger(__filename, Step_Project_PullLib.name);
+
+export function Step_Project_PullLib(project_dir: CPath | string): Step {
   return new CStep_Project_PullLib(Path(project_dir));
 }
 
-class CStep_Project_PullLib implements BuildStep {
+class CStep_Project_PullLib implements Step {
+  logger = logger.newChannel();
   constructor(readonly external_directory: CPath) {}
   async run(builder: BuilderInternal) {
-    ConsoleLogWithDate(this.constructor.name);
+    this.logger.logWithDate();
     const steps = [
       // Mirror Server
       Step_MirrorDirectory({

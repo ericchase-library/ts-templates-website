@@ -1,12 +1,15 @@
 import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
 import { globScan } from 'src/lib/ericchase/Platform/util.js';
-import { ConsoleLogNotEmpty, ConsoleLogWithDate } from 'src/lib/ericchase/Utility/Console.js';
-import { BuilderInternal, BuildStep } from 'tools/lib/BuilderInternal.js';
+import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
+import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
 import { Cache_IsFileModified } from 'tools/lib/cache/FileStatsCache.js';
+import { Step } from 'tools/lib/Step.js';
 
 // !! WARNING: This can DELETE entire directories. Use with caution!!
 
-export function Step_MirrorDirectory(options: { from: CPath | string; to: CPath | string; include_patterns?: string[]; exclude_patterns?: string[] }): BuildStep {
+const logger = Logger(__filename, Step_MirrorDirectory.name);
+
+export function Step_MirrorDirectory(options: { from: CPath | string; to: CPath | string; include_patterns?: string[]; exclude_patterns?: string[] }): Step {
   return new CStep_MirrorDirectory({
     from: Path(options.from),
     to: Path(options.to),
@@ -15,7 +18,8 @@ export function Step_MirrorDirectory(options: { from: CPath | string; to: CPath 
   });
 }
 
-class CStep_MirrorDirectory implements BuildStep {
+class CStep_MirrorDirectory implements Step {
+  logger = logger.newChannel();
   constructor(
     readonly options: {
       from: CPath;
@@ -25,7 +29,7 @@ class CStep_MirrorDirectory implements BuildStep {
     },
   ) {}
   async run(builder: BuilderInternal) {
-    ConsoleLogWithDate(this.constructor.name);
+    this.logger.logWithDate();
     try {
       await builder.platform.Path.getStats(this.options.from);
     } catch (error) {
@@ -34,13 +38,12 @@ class CStep_MirrorDirectory implements BuildStep {
     await builder.platform.Directory.create(this.options.to);
     const set_from = await globScan(builder.platform, this.options.from, this.options.include_patterns, this.options.exclude_patterns);
     const set_to = await globScan(builder.platform, this.options.to, ['**/*'], []);
-    const logs: string[] = [];
     // remove all files that shouldn't be
     for (const path of set_to.difference(set_from)) {
       const from = Path(this.options.from, path);
       const to = Path(this.options.to, path);
       if ((await builder.platform.File.delete(to)) === true) {
-        logs.push(`Deleted "${from.raw}" -> "${to.raw}"`);
+        this.logger.log(`Deleted "${from.raw}" -> "${to.raw}"`);
       }
     }
     // copy all files that are missing
@@ -49,7 +52,7 @@ class CStep_MirrorDirectory implements BuildStep {
       const to = Path(this.options.to, path);
       await Cache_IsFileModified(from);
       if ((await builder.platform.File.copy(from, to, true)) === true) {
-        logs.push(`Copied "${from.raw}" -> "${to.raw}"`);
+        this.logger.log(`Copied "${from.raw}" -> "${to.raw}"`);
       }
     }
     // check matching files for modification
@@ -59,12 +62,11 @@ class CStep_MirrorDirectory implements BuildStep {
       if (result.data === true) {
         const to = Path(this.options.to, path);
         if ((await builder.platform.File.copy(from, to, true)) === true) {
-          logs.push(`Copied "${from.raw}" -> "${to.raw}"`);
+          this.logger.log(`Replaced "${from.raw}" -> "${to.raw}"`);
         }
       } else if (result.error !== undefined) {
         throw result.error;
       }
     }
-    ConsoleLogNotEmpty(logs.join('\n'));
   }
 }

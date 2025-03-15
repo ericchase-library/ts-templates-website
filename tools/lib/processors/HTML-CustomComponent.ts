@@ -1,9 +1,11 @@
 import { Path } from 'src/lib/ericchase/Platform/FilePath.js';
 import { ParseHTML } from 'src/lib/ericchase/Platform/NPM/NodeHTMLParser.js';
-import { ConsoleError, ConsoleLog } from 'src/lib/ericchase/Utility/Console.js';
+import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
 import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
 import { ProcessorModule } from 'tools/lib/Processor.js';
 import { ProjectFile } from 'tools/lib/ProjectFile.js';
+
+const logger = Logger(__filename, Processor_HTML_CustomComponent.name);
 
 export function Processor_HTML_CustomComponent(): ProcessorModule {
   return new CProcessor_HTML_CustomComponent();
@@ -12,6 +14,7 @@ export function Processor_HTML_CustomComponent(): ProcessorModule {
 class CProcessor_HTML_CustomComponent implements ProcessorModule {
   component_map = new Map<string, ProjectFile>();
   htmlfile_set = new Set<ProjectFile>();
+  logger = logger.newChannel();
 
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {
     const component_path = Path(builder.dir.lib, 'components');
@@ -105,9 +108,9 @@ class CProcessor_HTML_CustomComponent implements ProcessorModule {
           }
         }
       } catch (error) {
-        ConsoleError(`ERROR: ${__filename} @ onProcess, File: ${file.src_path}`);
-        ConsoleLog(error);
-        ConsoleLog();
+        this.logger.errorWithDate(`ERROR: Processor: ${__filename}, File: ${file.src_path}`);
+        this.logger.log(error);
+        this.logger.log();
       }
     }
     if (update_text === true) {

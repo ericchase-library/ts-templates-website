@@ -1,10 +1,12 @@
 import { Path } from 'src/lib/ericchase/Platform/FilePath.js';
-import { ConsoleError, ConsoleLog } from 'src/lib/ericchase/Utility/Console.js';
+import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
 import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
 import { ProcessorModule } from 'tools/lib/Processor.js';
 import { ProjectFile } from 'tools/lib/ProjectFile.js';
 
 type BuildConfig = Pick<Parameters<typeof Bun.build>[0], 'external' | 'sourcemap' | 'target'>;
+
+const logger = Logger(__filename, Processor_TypeScript_GenericBundler.name);
 
 export function Processor_TypeScript_GenericBundler({ external = [], sourcemap = 'linked', target = 'browser' }: BuildConfig): ProcessorModule {
   return new CProcessor_TypeScript_GenericBundler({ external, sourcemap, target });
@@ -12,6 +14,7 @@ export function Processor_TypeScript_GenericBundler({ external = [], sourcemap =
 
 class CProcessor_TypeScript_GenericBundler implements ProcessorModule {
   config: Parameters<typeof Bun.build>[0];
+  logger = logger.newChannel();
   constructor({ external = [], sourcemap = 'linked', target = 'browser' }: BuildConfig) {
     this.config = {
       entrypoints: [],
@@ -95,11 +98,11 @@ class CProcessor_TypeScript_GenericBundler implements ProcessorModule {
         }
       }
     } else {
-      ConsoleError(`ERROR: Processor: ${__filename}, File: ${file.src_path}`);
+      this.logger.errorWithDate(`ERROR: Processor: ${__filename}, File: ${file.src_path}`);
       for (const log of build_results.logs) {
-        ConsoleLog(log.message);
+        this.logger.log(log.message);
       }
-      ConsoleLog();
+      this.logger.log();
     }
   }
 }

@@ -1,4 +1,4 @@
-import { ConsoleLog } from 'src/lib/ericchase/Utility/Console.js';
+import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
 import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
 import { ProjectFile } from 'tools/lib/ProjectFile.js';
 
@@ -12,8 +12,18 @@ export interface ProcessorModule {
 
 // Example
 
+const logger = Logger(__filename, Processor_ExampleProcessorModule.name);
+
+// A "factory" function for creating and/or configuring the class. Also helps
+// cut down on code ceremony for the user.
+export function Processor_ExampleProcessorModule(): ProcessorModule {
+  return new CProcessor_ExampleProcessorModule();
+}
+
 // The class used to setup files with the processor function.
-export class CProcessor_ExampleProcessorModule implements ProcessorModule {
+class CProcessor_ExampleProcessorModule implements ProcessorModule {
+  logger = logger.newChannel();
+  constructor() {}
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {
     // Determine which files should be processed.
     for (const file of files) {
@@ -25,15 +35,8 @@ export class CProcessor_ExampleProcessorModule implements ProcessorModule {
     // The files may no longer exist, but you may still have access to their
     // cached contents.
   }
-
   async onProcess(builder: BuilderInternal, file: ProjectFile): Promise<void> {
     // Do whatever you want to do with the file.
-    ConsoleLog(`Example Processor: "${file.src_path.raw}"`);
+    this.logger.logWithDate(`Example Processor: "${file.src_path.raw}"`);
   }
-}
-
-// A "factory" function for creating and/or configuring the class. Also helps
-// cut down on code ceremony for the user.
-export function Processor_ExampleProcessorModule(): ProcessorModule {
-  return new CProcessor_ExampleProcessorModule();
 }

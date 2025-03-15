@@ -2,17 +2,16 @@ import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
 import { FileStats, PlatformProviderId, UnimplementedProvider } from 'src/lib/ericchase/Platform/PlatformProvider.js';
 import { KEYS } from 'src/lib/ericchase/Platform/Shell.js';
 import { AddStdinListener, StartStdinRawModeReader } from 'src/lib/ericchase/Platform/StdinReader.js';
-import { ConsoleLog, ConsoleLogWithDate } from 'src/lib/ericchase/Utility/Console.js';
 import { Debounce } from 'src/lib/ericchase/Utility/Debounce.js';
 import { Defer } from 'src/lib/ericchase/Utility/Defer.js';
+import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
 import { Map_GetOrDefault } from 'src/lib/ericchase/Utility/Map.js';
 import { Builder } from 'tools/lib/Builder.js';
 import { ProcessorModule } from 'tools/lib/Processor.js';
 import { ProjectFile } from 'tools/lib/ProjectFile.js';
+import { Step } from 'tools/lib/Step.js';
 
-export interface BuildStep {
-  run: (builder: BuilderInternal) => Promise<void>;
-}
+const logger = Logger(__filename, 'Builder');
 
 export class BuilderInternal {
   constructor(public external: Builder) {}
@@ -32,9 +31,9 @@ export class BuilderInternal {
 
   // Build Steps & Processor Modules
 
-  startup_steps: BuildStep[] = [];
+  startup_steps: Step[] = [];
   processor_modules: ProcessorModule[] = [];
-  cleanup_steps: BuildStep[] = [];
+  cleanup_steps: Step[] = [];
 
   // Dependencies
 
@@ -184,7 +183,7 @@ export class BuilderInternal {
         event_paths.add(path.raw);
         const orphan = process_events();
       });
-      ConsoleLogWithDate(`Watching "${this.dir.src.raw}"`);
+      logger.logWithDate(`Watching "${this.dir.src.raw}"`);
     }
   }
 
@@ -214,7 +213,7 @@ export class BuilderInternal {
       AddStdinListener(async (bytes, text, removeSelf) => {
         if (text === KEYS.SIGINT || text === 'q') {
           removeSelf();
-          ConsoleLog('User Command: Quit');
+          logger.log('User Command: Quit');
           this.$unwatchSource?.();
           // Cleanup Steps
           for (const step of this.cleanup_steps) {
@@ -305,7 +304,7 @@ async function runProcessorList(file: ProjectFile, waitlist: Promise<void>[], de
   for (const task of waitlist) {
     await task;
   }
-  ConsoleLogWithDate(`Processing - "${file.src_path.raw}"`);
+  logger.logWithDate(`Processing - "${file.src_path.raw}"`);
   file.resetBytes();
   for (const { processor, method } of file.$processor_list) {
     await method.call(processor, file.builder, file);
