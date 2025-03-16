@@ -11,8 +11,9 @@ export function Step_Bun_Run({ cmd, dir }: { cmd: string[]; dir?: CPath | string
 }
 
 class CStep_Bun_Run implements Step {
-  dir?: string;
   logger = logger.newChannel();
+
+  dir?: string;
   constructor(
     readonly cmd: string[],
     dir?: CPath | string,

@@ -13,10 +13,19 @@ export function Step_Project_PullLib(project_dir: CPath | string): Step {
 
 class CStep_Project_PullLib implements Step {
   logger = logger.newChannel();
+
   constructor(readonly external_directory: CPath) {}
   async run(builder: BuilderInternal) {
     this.logger.logWithDate();
     const steps = [
+      // Mirror Database
+      Step_MirrorDirectory({
+        from: Path(this.external_directory, 'database'),
+        to: 'database',
+        include_patterns: ['**/*'],
+        //
+      }),
+
       // Mirror Server
       Step_MirrorDirectory({
         from: Path(this.external_directory, 'server'),
@@ -28,9 +37,24 @@ class CStep_Project_PullLib implements Step {
 
       // Mirror Lib
       Step_MirrorDirectory({
+        from: Path(this.external_directory, 'src/lib/database'),
+        to: Path(builder.dir.lib, 'database'),
+        include_patterns: ['**/*.ts'],
+        exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
+        //
+      }),
+      Step_MirrorDirectory({
         from: Path(this.external_directory, 'src/lib/ericchase'),
         to: Path(builder.dir.lib, 'ericchase'),
         include_patterns: ['**/*.ts'],
+        exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
+        //
+      }),
+      Step_MirrorDirectory({
+        from: Path(this.external_directory, 'src/lib/server'),
+        to: Path(builder.dir.lib, 'server'),
+        include_patterns: ['**/*.ts'],
+        exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
         //
       }),
 
@@ -39,6 +63,7 @@ class CStep_Project_PullLib implements Step {
         from: Path(this.external_directory, 'tools/lib'),
         to: Path(builder.dir.tools, 'lib'),
         include_patterns: ['**/*.ts'],
+        exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
         //
       }),
 

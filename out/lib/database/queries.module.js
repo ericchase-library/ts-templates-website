@@ -1,5 +1,5 @@
 // @bun
-// src/lib/database-drivers/dbdriver-localhost.ts
+// src/lib/database/dbdriver-localhost.ts
 function getLocalhost(address) {
   return {
     async query(text, params) {
@@ -14,6 +14,12 @@ function getLocalhost(address) {
     }
   };
 }
+
+// src/lib/server/server.ts
+var server_hostname = "127.0.0.1";
+var server_port = "8000";
+var server_http = `http://${server_hostname}:${server_port}`;
+var server_ws = `ws://${server_hostname}:${server_port}`;
 
 // src/lib/ericchase/Utility/UpdateMarker.ts
 class UpdateMarker {
@@ -84,13 +90,7 @@ function ConsoleError(...items) {
   marker_manager.updateMarkers();
 }
 
-// src/lib/server/server.ts
-var server_hostname = "127.0.0.1";
-var server_port = "8000";
-var server_http = `http://${server_hostname}:${server_port}`;
-var server_ws = `ws://${server_hostname}:${server_port}`;
-
-// src/database/queries.module.ts
+// src/lib/database/queries.module.ts
 var db = getLocalhost(server_http);
 async function DatabaseConnected() {
   const q = "SELECT 1";

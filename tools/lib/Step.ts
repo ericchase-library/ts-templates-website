@@ -17,6 +17,7 @@ export function Step_ExampleStep(): Step {
 
 class CStep_ExampleStep implements Step {
   logger = logger.newChannel();
+
   constructor() {}
   async run(builder: BuilderInternal) {
     // Do whatever you want.

@@ -5,13 +5,17 @@ import { Step } from 'tools/lib/Step.js';
 
 const logger = Logger(__filename, Step_CleanDirectory.name);
 
-export function Step_CleanDirectory(paths: (CPath | string)[]): Step {
-  return new CStep_CleanDirectory(paths.map((path) => Path(path)));
+export function Step_CleanDirectory(...paths: (CPath | string)[]): Step {
+  return new CStep_CleanDirectory(paths);
 }
 
 class CStep_CleanDirectory implements Step {
   logger = logger.newChannel();
-  constructor(readonly paths: CPath[]) {}
+
+  paths: CPath[];
+  constructor(paths: (CPath | string)[]) {
+    this.paths = paths.map((path) => Path(path));
+  }
   async run(builder: BuilderInternal) {
     this.logger.logWithDate();
     for (const path of this.paths) {

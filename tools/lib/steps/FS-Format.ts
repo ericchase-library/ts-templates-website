@@ -12,6 +12,7 @@ export function Step_Format(logging?: 'quiet'): Step {
 
 class CStep_Format implements Step {
   logger = logger.newChannel();
+
   constructor(readonly logging: 'normal' | 'quiet') {}
   async run(builder: BuilderInternal) {
     this.logger.logWithDate();

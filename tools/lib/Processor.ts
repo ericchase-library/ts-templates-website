@@ -23,6 +23,7 @@ export function Processor_ExampleProcessorModule(): ProcessorModule {
 // The class used to setup files with the processor function.
 class CProcessor_ExampleProcessorModule implements ProcessorModule {
   logger = logger.newChannel();
+
   constructor() {}
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {
     // Determine which files should be processed.

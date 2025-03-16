@@ -13,8 +13,9 @@ export function Processor_TypeScript_GenericBundler({ external = [], sourcemap =
 }
 
 class CProcessor_TypeScript_GenericBundler implements ProcessorModule {
-  config: Parameters<typeof Bun.build>[0];
   logger = logger.newChannel();
+
+  config: Parameters<typeof Bun.build>[0];
   constructor({ external = [], sourcemap = 'linked', target = 'browser' }: BuildConfig) {
     this.config = {
       entrypoints: [],

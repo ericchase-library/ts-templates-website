@@ -28,7 +28,7 @@ BunProvider.File.copy = async (from, to, overwrite = false) => {
 };
 BunProvider.File.delete = async (path) => {
   await Bun.file(path.raw).delete();
-  return Bun.file(path.raw).exists();
+  return (await Bun.file(path.raw).exists()) === false;
 };
 BunProvider.File.move = async (from, to, overwrite = false) => {
   if (from.raw === to.raw) {

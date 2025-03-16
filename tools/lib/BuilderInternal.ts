@@ -14,6 +14,8 @@ import { Step } from 'tools/lib/Step.js';
 const logger = Logger(__filename, 'Builder');
 
 export class BuilderInternal {
+  logger = logger.newChannel();
+
   constructor(public external: Builder) {}
 
   platform = UnimplementedProvider;
@@ -183,7 +185,7 @@ export class BuilderInternal {
         event_paths.add(path.raw);
         const orphan = process_events();
       });
-      logger.logWithDate(`Watching "${this.dir.src.raw}"`);
+      this.logger.logWithDate(`Watching "${this.dir.src.raw}"`);
     }
   }
 
@@ -213,7 +215,7 @@ export class BuilderInternal {
       AddStdinListener(async (bytes, text, removeSelf) => {
         if (text === KEYS.SIGINT || text === 'q') {
           removeSelf();
-          logger.log('User Command: Quit');
+          this.logger.log('User Command: Quit');
           this.$unwatchSource?.();
           // Cleanup Steps
           for (const step of this.cleanup_steps) {

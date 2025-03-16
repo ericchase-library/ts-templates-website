@@ -5,13 +5,15 @@ import { Processor_HTML_ImportConverter } from 'tools/lib/processors/HTML-Import
 import { Processor_TypeScript_GenericBundlerImportRemapper } from 'tools/lib/processors/TypeScript-GenericBundler-ImportRemapper.js';
 import { Processor_TypeScript_GenericBundler } from 'tools/lib/processors/TypeScript-GenericBundler.js';
 import { Step_Bun_Run } from 'tools/lib/steps/Bun-Run.js';
+import { Step_StartServer } from 'tools/lib/steps/Dev-StartServer.js';
+import { Step_CleanDirectory } from 'tools/lib/steps/FS-CleanDirectory.js';
 import { Step_Format } from 'tools/lib/steps/FS-Format.js';
-import { Step_StartServer } from 'tools/StartServer.js';
 
 const builder = new Builder(Bun.argv[2] === '--watch' ? 'watch' : 'build');
 
 builder.setStartupSteps([
   Step_Bun_Run({ cmd: ['bun', 'install'] }, 'quiet'),
+  Step_CleanDirectory(builder.dir.out),
   Step_Format('quiet'),
   Step_StartServer(),
   //

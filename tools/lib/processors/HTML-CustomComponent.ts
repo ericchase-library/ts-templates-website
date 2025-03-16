@@ -12,9 +12,10 @@ export function Processor_HTML_CustomComponent(): ProcessorModule {
 }
 
 class CProcessor_HTML_CustomComponent implements ProcessorModule {
+  logger = logger.newChannel();
+
   component_map = new Map<string, ProjectFile>();
   htmlfile_set = new Set<ProjectFile>();
-  logger = logger.newChannel();
 
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {
     const component_path = Path(builder.dir.lib, 'components');
