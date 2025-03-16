@@ -38,15 +38,7 @@ class CStep_MirrorDirectory implements Step {
     }
     await builder.platform.Directory.create(this.options.to);
     const set_from = await globScan(builder.platform, this.options.from, this.options.include_patterns, this.options.exclude_patterns);
-    const set_to = await globScan(builder.platform, this.options.to, ['**/*'], []);
-    // remove all files that shouldn't be
-    for (const path of set_to.difference(set_from)) {
-      const to = Path(this.options.to, path);
-      if ((await builder.platform.File.delete(to)) === true) {
-        Cache_RemoveFileStats(to);
-        this.logger.log(`Deleted "${to.raw}"`);
-      }
-    }
+    const set_to = await globScan(builder.platform, this.options.to, ['**/*'], this.options.exclude_patterns);
     // copy all files that are missing
     for (const path of set_from.difference(set_to)) {
       const from = Path(this.options.from, path);
@@ -66,6 +58,14 @@ class CStep_MirrorDirectory implements Step {
           await Cache_UpdateFileStats(to);
           this.logger.log(`Replaced "${from.raw}" -> "${to.raw}"`);
         }
+      }
+    }
+    // remove all files that shouldn't be
+    for (const path of await globScan(builder.platform, this.options.to, ['**/*'], [...set_from, ...this.options.exclude_patterns])) {
+      const to = Path(this.options.to, path);
+      if ((await builder.platform.File.delete(to)) === true) {
+        Cache_RemoveFileStats(to);
+        this.logger.log(`Deleted "${to.raw}"`);
       }
     }
   }
