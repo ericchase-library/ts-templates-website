@@ -222,12 +222,14 @@ process.on('exit', () => {
 
 export function Cache_TryLock(script: string) {
   Cache_LockOrExit(script, (error) => {
-    logger.error(`Another process is locking ${script}. Please wait for that process to end.`, error ?? '');
+    // biome-ignore lint/complexity/useLiteralKeys: <explanation>
+    console['error'](`Another process is locking ${script}. Please wait for that process to end.`, error ?? '');
   });
 }
 
 export function Cache_TryLockEach(scripts: string[]) {
   Cache_LockEachOrExit(scripts, (script, error) => {
-    logger.error(`Another process is locking ${script}. Please wait for that process to end.`, error ?? '');
+    // biome-ignore lint/complexity/useLiteralKeys: <explanation>
+    console['error'](`Another process is locking ${script}. Please wait for that process to end.`, error ?? '');
   });
 }

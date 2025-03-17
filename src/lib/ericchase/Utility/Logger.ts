@@ -1,5 +1,6 @@
 import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
 import { CPlatformProvider } from 'src/lib/ericchase/Platform/PlatformProvider.js';
+import { Defer } from 'src/lib/ericchase/Utility/Defer.js';
 import { Map_GetOrDefault } from 'src/lib/ericchase/Utility/Map.js';
 import { RemoveWhiteSpaceOnlyLinesFromTopAndBottom } from 'src/lib/ericchase/Utility/String.js';
 
@@ -58,6 +59,7 @@ class CLogger {
 
 let buffer: BufferItem[] = [];
 let timeout: ReturnType<typeof setTimeout> | undefined;
+let done = Defer();
 const output_list: Promise<{ path: CPath; platform: CPlatformProvider }>[] = [];
 
 const name_to_buffer = new Map<string, string[]>();
@@ -111,8 +113,10 @@ function setTimer() {
           const text = `${datestring} |${uuid}.${channel}| (${name}) <ERROR> ${line}`;
           if (LoggerOptions.console === true) {
             if (LoggerOptions.ceremony === true) {
+              // biome-ignore lint/complexity/useLiteralKeys: <explanation>
               console['error'](text);
             } else {
+              // biome-ignore lint/complexity/useLiteralKeys: <explanation>
               console['error'](`<ERROR> ${line}`);
             }
           }
@@ -123,8 +127,10 @@ function setTimer() {
           const text = `${datestring} |${uuid}.${channel}| (${name}) ${line}`;
           if (LoggerOptions.console === true) {
             if (LoggerOptions.ceremony === true) {
+              // biome-ignore lint/complexity/useLiteralKeys: <explanation>
               console['log'](text);
             } else {
+              // biome-ignore lint/complexity/useLiteralKeys: <explanation>
               console['log'](line);
             }
           }
@@ -136,12 +142,14 @@ function setTimer() {
       const { path, platform } = await output;
       for (const [name, lines] of name_to_buffer) {
         if (lines.length > 0) {
-          await platform.File.appendText(Path(path, name + '.log'), lines.join('\n') + '\n');
+          await platform.File.appendText(Path(path, `${name}.log`), `${lines.join('\n')}\n`);
           name_to_buffer.set(name, []);
         }
       }
     }
     buffer = [];
+    done.resolve();
+    done = Defer();
   }, 50);
 }
 
@@ -168,7 +176,12 @@ export function SetLoggerOptions(options: { ceremony?: boolean; console?: boolea
   if (options.listmode !== undefined) LoggerOptions.listmode = options.listmode;
 }
 
+export async function WaitForLogger() {
+  await done.promise;
+}
+
 function formatDate(date: Date) {
+  // biome-ignore lint/style/useSingleVarDeclarator: performance
   let y = date.getFullYear(),
     m = date.getMonth() + 1,
     d = date.getDate(),
@@ -177,5 +190,6 @@ function formatDate(date: Date) {
     ss = date.getSeconds(),
     ap = hh < 12 ? 'AM' : 'PM';
   hh = hh % 12 || 12; // Convert to 12-hour format, ensuring 12 instead of 0
+  // biome-ignore lint/style/useTemplate: performance
   return y + '-' + (m < 10 ? '0' : '') + m + '-' + (d < 10 ? '0' : '') + d + ' ' + (hh < 10 ? '0' : '') + hh + ':' + (mm < 10 ? '0' : '') + mm + ':' + (ss < 10 ? '0' : '') + ss + ' ' + ap;
 }

@@ -94,14 +94,14 @@ function cleanStack(stack = '') {
   return lines.join('\n');
 }
 
-async function callAsync<T>(stack = '', promise: Promise<T>): Promise<T> {
+async function callAsync<T>(stack: string | undefined, promise: Promise<T>): Promise<T> {
   try {
     return await promise;
   } catch (async_error: any) {
     if (typeof async_error === 'object') {
-      throw new Error(`${async_error.message}\n${cleanStack(stack)}`);
+      throw new Error(`${async_error.message}\n${cleanStack(stack ?? '')}`);
     }
-    throw new Error(`${async_error}\n${cleanStack(stack)}`);
+    throw new Error(`${async_error}\n${cleanStack(stack ?? '')}`);
   }
 }
 

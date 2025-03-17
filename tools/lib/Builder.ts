@@ -4,7 +4,7 @@ import { KEYS } from 'src/lib/ericchase/Platform/Shell.js';
 import { AddStdinListener, StartStdinRawModeReader } from 'src/lib/ericchase/Platform/StdinReader.js';
 import { Debounce } from 'src/lib/ericchase/Utility/Debounce.js';
 import { Defer } from 'src/lib/ericchase/Utility/Defer.js';
-import { AddLoggerOutputDirectory, Logger } from 'src/lib/ericchase/Utility/Logger.js';
+import { AddLoggerOutputDirectory, Logger, WaitForLogger } from 'src/lib/ericchase/Utility/Logger.js';
 import { Map_GetOrDefault } from 'src/lib/ericchase/Utility/Map.js';
 import { Cache_FileStats_Lock, Cache_FileStats_Unlock } from 'tools/lib/cache/FileStatsCache.js';
 import { Cache_TryLockEach, Cache_UnlockAll } from 'tools/lib/cache/LockCache.js';
@@ -269,23 +269,32 @@ export class BuilderInternal {
     await this.processUnprocessedFiles();
 
     if (this.watchmode === true) {
+      const { promise, resolve, reject } = Defer();
       // Setup Source Watcher
       this.setupSourceWatcher();
       // Setup Stdin Reader
       AddStdinListener(async (bytes, text, removeSelf) => {
         if (text === KEYS.SIGINT || text === 'q') {
-          removeSelf();
-          this.logger.log('User Command: Quit');
-          this.$unwatchSource?.();
-          // Cleanup Steps
-          for (const step of this.cleanup_steps) {
-            await step.run(this);
+          try {
+            removeSelf();
+            this.logger.log('User Command: Quit');
+            this.$unwatchSource?.();
+            // Cleanup Steps
+            for (const step of this.cleanup_steps) {
+              await step.run(this);
+            }
+            // Force Exit
+            Cache_UnlockAll();
+            Cache_FileStats_Unlock();
+            await WaitForLogger();
+            process.exit();
+          } catch (error) {
+            reject(error);
           }
-          // Force Exit
-          process.exit();
         }
       });
       StartStdinRawModeReader();
+      await promise;
     } else {
       // Cleanup Steps
       for (const step of this.cleanup_steps) {
