@@ -2,6 +2,7 @@ import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
 import { CPlatformProvider, FileStats, getPlatformProvider, PlatformProviderId, UnimplementedProvider } from 'src/lib/ericchase/Platform/PlatformProvider.js';
 import { KEYS } from 'src/lib/ericchase/Platform/Shell.js';
 import { AddStdinListener, StartStdinRawModeReader } from 'src/lib/ericchase/Platform/StdinReader.js';
+import { ConsoleError } from 'src/lib/ericchase/Utility/Console.js';
 import { Debounce } from 'src/lib/ericchase/Utility/Debounce.js';
 import { Defer } from 'src/lib/ericchase/Utility/Defer.js';
 import { AddLoggerOutputDirectory, Logger, WaitForLogger } from 'src/lib/ericchase/Utility/Logger.js';
@@ -274,7 +275,7 @@ export class BuilderInternal {
       this.setupSourceWatcher();
       // Setup Stdin Reader
       AddStdinListener(async (bytes, text, removeSelf) => {
-        if (text === KEYS.SIGINT || text === 'q') {
+        if (text === 'q') {
           try {
             removeSelf();
             this.logger.log('User Command: Quit');
@@ -287,10 +288,23 @@ export class BuilderInternal {
             Cache_UnlockAll();
             Cache_FileStats_Unlock();
             await WaitForLogger();
-            process.exit();
           } catch (error) {
-            reject(error);
+            ConsoleError(error);
           }
+          process.exit();
+        }
+      });
+      AddStdinListener(async (bytes, text, removeSelf) => {
+        if (text === KEYS.SIGINT) {
+          try {
+            removeSelf();
+            this.logger.log('User Command: Force Quit');
+            this.$unwatchSource?.();
+            resolve();
+          } catch (error) {
+            ConsoleError(error);
+          }
+          process.exit();
         }
       });
       StartStdinRawModeReader();

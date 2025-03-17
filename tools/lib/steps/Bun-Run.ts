@@ -6,7 +6,7 @@ import { BuilderInternal, Step } from 'tools/lib/Builder.js';
 
 const logger = Logger(Step_Bun_Run.name);
 
-export function Step_Bun_Run({ cmd, dir }: { cmd: string[]; dir?: CPath | string }, logging?: 'quiet'): Step {
+export function Step_Bun_Run({ cmd, dir }: { cmd: string[]; dir?: CPath | string }, logging?: 'normal' | 'quiet'): Step {
   return new CStep_Bun_Run(cmd, Path(dir ?? process.cwd()).raw, logging ?? 'normal');
 }
 

@@ -1,6 +1,5 @@
 import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
 import { CPlatformProvider } from 'src/lib/ericchase/Platform/PlatformProvider.js';
-import { Defer } from 'src/lib/ericchase/Utility/Defer.js';
 import { Map_GetOrDefault } from 'src/lib/ericchase/Utility/Map.js';
 import { RemoveWhiteSpaceOnlyLinesFromTopAndBottom } from 'src/lib/ericchase/Utility/String.js';
 
@@ -59,7 +58,6 @@ class CLogger {
 
 let buffer: BufferItem[] = [];
 let timeout: ReturnType<typeof setTimeout> | undefined;
-let done = Defer();
 const output_list: Promise<{ path: CPath; platform: CPlatformProvider }>[] = [];
 
 const name_to_buffer = new Map<string, string[]>();
@@ -148,8 +146,6 @@ function setTimer() {
       }
     }
     buffer = [];
-    done.resolve();
-    done = Defer();
   }, 50);
 }
 
@@ -177,7 +173,13 @@ export function SetLoggerOptions(options: { ceremony?: boolean; console?: boolea
 }
 
 export async function WaitForLogger() {
-  await done.promise;
+  return new Promise<void>((resolve, reject) => {
+    setInterval(() => {
+      if (buffer.length === 0 && timeout === undefined) {
+        resolve();
+      }
+    }, 250);
+  });
 }
 
 function formatDate(date: Date) {
