@@ -161,8 +161,7 @@ dist-ssr
 *.mp4
 
 # build folders
-# build/
-# out/
+# out/ # keep build output for future comparisons
 debug/
 src-tauri/target/
 
@@ -173,4 +172,4 @@ sync.ffs_db
 ## Repo Specific
 ##
 
-tools/cache/
+cache/

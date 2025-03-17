@@ -1,11 +1,9 @@
 import { Path } from 'src/lib/ericchase/Platform/FilePath.js';
 import { ParseHTML } from 'src/lib/ericchase/Platform/NPM/NodeHTMLParser.js';
 import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
-import { ProcessorModule } from 'tools/lib/Processor.js';
-import { ProjectFile } from 'tools/lib/ProjectFile.js';
+import { BuilderInternal, ProcessorModule, ProjectFile } from 'tools/lib/Builder.js';
 
-const logger = Logger(__filename, Processor_HTML_CustomComponent.name);
+const logger = Logger(Processor_HTML_CustomComponent.name);
 
 export function Processor_HTML_CustomComponent(): ProcessorModule {
   return new CProcessor_HTML_CustomComponent();
@@ -21,15 +19,14 @@ class CProcessor_HTML_CustomComponent implements ProcessorModule {
     const component_path = Path(builder.dir.lib, 'components');
     let trigger_reprocess = false;
     for (const file of files) {
-      if (file.src_path.ext !== '.html') {
-        continue;
+      if (file.src_path.ext === '.html') {
+        if (file.src_path.startsWith(component_path)) {
+          this.component_map.set(file.src_path.name, file);
+          trigger_reprocess = true;
+        }
+        file.addProcessor(this, this.onProcess);
+        this.htmlfile_set.add(file);
       }
-      if (file.src_path.startsWith(component_path)) {
-        this.component_map.set(file.src_path.name, file);
-        trigger_reprocess = true;
-      }
-      file.addProcessor(this, this.onProcessHTMLFile);
-      this.htmlfile_set.add(file);
     }
     if (trigger_reprocess === true) {
       for (const file of this.htmlfile_set) {
@@ -41,14 +38,13 @@ class CProcessor_HTML_CustomComponent implements ProcessorModule {
     const component_path = Path(builder.dir.lib, 'components');
     let component_added = false;
     for (const file of files) {
-      if (file.src_path.ext !== '.html') {
-        continue;
+      if (file.src_path.ext === '.html') {
+        if (file.src_path.startsWith(component_path)) {
+          this.component_map.delete(file.src_path.name);
+          component_added = true;
+        }
+        this.htmlfile_set.delete(file);
       }
-      if (file.src_path.startsWith(component_path)) {
-        this.component_map.delete(file.src_path.name);
-        component_added = true;
-      }
-      this.htmlfile_set.delete(file);
     }
     if (component_added === true) {
       for (const file of this.htmlfile_set) {
@@ -57,7 +53,7 @@ class CProcessor_HTML_CustomComponent implements ProcessorModule {
     }
   }
 
-  async onProcessHTMLFile(builder: BuilderInternal, file: ProjectFile): Promise<void> {
+  async onProcess(builder: BuilderInternal, file: ProjectFile): Promise<void> {
     let update_text = false;
     const root_element = ParseHTML((await file.getText()).trim(), { convert_tagnames_to_lowercase: true, self_close_void_tags: true });
     for (const [component_name, component_file] of this.component_map) {
@@ -109,9 +105,8 @@ class CProcessor_HTML_CustomComponent implements ProcessorModule {
           }
         }
       } catch (error) {
-        this.logger.errorWithDate(`ERROR: Processor: ${__filename}, File: ${file.src_path}`);
+        this.logger.error(`ERROR: Processor: ${__filename}, File: ${file.src_path}`);
         this.logger.log(error);
-        this.logger.log();
       }
     }
     if (update_text === true) {

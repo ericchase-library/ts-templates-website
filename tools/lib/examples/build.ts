@@ -1,40 +1,29 @@
 import { Builder } from 'tools/lib/Builder.js';
 import { Processor_BasicWriter } from 'tools/lib/processors/FS-BasicWriter.js';
-import { Processor_HTML_CustomComponent } from 'tools/lib/processors/HTML-CustomComponent.js';
-import { Processor_HTML_ImportConverter } from 'tools/lib/processors/HTML-ImportConverter.js';
 import { Processor_TypeScript_GenericBundlerImportRemapper } from 'tools/lib/processors/TypeScript-GenericBundler-ImportRemapper.js';
 import { Processor_TypeScript_GenericBundler } from 'tools/lib/processors/TypeScript-GenericBundler.js';
 import { Step_Bun_Run } from 'tools/lib/steps/Bun-Run.js';
-import { Step_StartServer } from 'tools/lib/steps/Dev-StartServer.js';
 import { Step_CleanDirectory } from 'tools/lib/steps/FS-CleanDirectory.js';
 import { Step_Format } from 'tools/lib/steps/FS-Format.js';
 
 // Use command line arguments to set watch mode.
 const builder = new Builder(Bun.argv[2] === '--watch' ? 'watch' : 'build');
 
-// During "dev" mode (when "--watch" is passed as an argument), the dev server
-// will start running with hot refreshing if enabled in your index file.
 builder.setStartupSteps([
   Step_Bun_Run({ cmd: ['bun', 'install'] }, 'quiet'),
   Step_CleanDirectory(builder.dir.out),
   Step_Format('quiet'),
-  Step_StartServer(),
   //
 ]);
 
-// Basic setup for a typescript powered website. Typescript files that match
+// Basic setup for a general typescript project. Typescript files that match
 // "*.module.ts" and "*.script.ts" are bundled and written to the out folder.
 // The other typescript files do not produce bundles. Module ("*.module.ts")
 // files will not bundle other module files. Instead, they'll import whatever
 // exports are needed from other module files. Script ("*.script.ts") files, on
 // the other hand, produce fully contained bundles. They do not import anything
 // from anywhere. Use them accordingly.
-
-// HTML custom components are a lightweight alternative to web components made
-// possible by the processors below. There are examples
 builder.setProcessorModules([
-  Processor_HTML_CustomComponent(),
-  Processor_HTML_ImportConverter(),
   Processor_TypeScript_GenericBundler({ sourcemap: 'none', target: 'browser' }),
   Processor_TypeScript_GenericBundlerImportRemapper(),
   Processor_BasicWriter(['**/*'], ['**/*.ts', `${builder.dir.lib.standard}/**/*`]), // all files except for .ts and lib files
@@ -43,6 +32,7 @@ builder.setProcessorModules([
 ]);
 
 builder.setCleanupSteps([
+  Step_Format('quiet'),
   //
 ]);
 

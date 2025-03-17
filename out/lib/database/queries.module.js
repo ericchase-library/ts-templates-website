@@ -1,4 +1,3 @@
-// @bun
 // src/lib/database/dbdriver-localhost.ts
 function getLocalhost(address) {
   return {

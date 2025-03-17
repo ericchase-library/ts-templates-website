@@ -1,4 +1,3 @@
-// @bun
 // src/lib/ericchase/Utility/UpdateMarker.ts
 class UpdateMarker {
   $manager;

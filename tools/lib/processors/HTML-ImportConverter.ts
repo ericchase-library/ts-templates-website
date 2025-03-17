@@ -1,11 +1,9 @@
 import { Path } from 'src/lib/ericchase/Platform/FilePath.js';
 import { ParseHTML } from 'src/lib/ericchase/Platform/NPM/NodeHTMLParser.js';
 import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
-import { ProcessorModule } from 'tools/lib/Processor.js';
-import { ProjectFile } from 'tools/lib/ProjectFile.js';
+import { BuilderInternal, ProcessorModule, ProjectFile } from 'tools/lib/Builder.js';
 
-const logger = Logger(__filename, Processor_HTML_ImportConverter.name);
+const logger = Logger(Processor_HTML_ImportConverter.name);
 
 export function Processor_HTML_ImportConverter(): ProcessorModule {
   return new CProcessor_HTML_ImportConverter();
@@ -16,10 +14,9 @@ class CProcessor_HTML_ImportConverter implements ProcessorModule {
 
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>) {
     for (const file of files) {
-      if (file.src_path.ext !== '.html') {
-        continue;
+      if (file.src_path.ext === '.html') {
+        file.addProcessor(this, this.onProcess);
       }
-      file.addProcessor(this, this.onProcess);
     }
   }
   async onRemove(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {}

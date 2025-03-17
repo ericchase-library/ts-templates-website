@@ -1,11 +1,10 @@
 import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
 import { globScan } from 'src/lib/ericchase/Platform/util.js';
 import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
+import { BuilderInternal, Step } from 'tools/lib/Builder.js';
 import { Cache_AreFilesEqual, Cache_UpdateFileStats } from 'tools/lib/cache/FileStatsCache.js';
-import { Step } from 'tools/lib/Step.js';
 
-const logger = Logger(__filename, Step_CopyFiles.name);
+const logger = Logger(Step_CopyFiles.name);
 
 export function Step_CopyFiles(options: { from: CPath | string; to: CPath | string; include_patterns?: string[]; exclude_patterns?: string[]; overwrite?: boolean }): Step {
   return new CStep_CopyFiles({
@@ -30,7 +29,7 @@ class CStep_CopyFiles implements Step {
     },
   ) {}
   async run(builder: BuilderInternal) {
-    this.logger.logWithDate();
+    this.logger.log('Copy Files');
     try {
       await builder.platform.Path.getStats(this.options.from);
     } catch (error) {

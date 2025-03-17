@@ -52,7 +52,7 @@ export class CPath {
   }
   // Joins path segments with standard forward slash / separators
   get standard() {
-    return this.segments.join('/');
+    return this.raw.replaceAll('\\', '/');
   }
 
   // Returns a relative path between this path and other.

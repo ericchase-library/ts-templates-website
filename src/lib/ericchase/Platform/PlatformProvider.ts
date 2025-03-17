@@ -22,6 +22,12 @@ export class CPlatformProvider {
     },
   };
   File = {
+    appendBytes: (path: CPath, bytes: Uint8Array): Promise<void> => {
+      throw new Error('Not Implemented');
+    },
+    appendText: (path: CPath, text: string): Promise<void> => {
+      throw new Error('Not Implemented');
+    },
     compare: (from: CPath, to: CPath): Promise<boolean> => {
       throw new Error('Not Implemented');
     },
@@ -118,6 +124,12 @@ class CPlatformProviderErrorWrapper extends CPlatformProvider {
     },
   };
   File = {
+    appendBytes: (path: CPath, bytes: Uint8Array): Promise<void> => {
+      return callAsync(Error().stack, this.provider.File.appendBytes(path, bytes));
+    },
+    appendText: (path: CPath, text: string): Promise<void> => {
+      return callAsync(Error().stack, this.provider.File.appendText(path, text));
+    },
     compare: (from: CPath, to: CPath): Promise<boolean> => {
       return callAsync(Error().stack, this.provider.File.compare(from, to));
     },

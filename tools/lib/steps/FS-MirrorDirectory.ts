@@ -1,13 +1,12 @@
 import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
 import { globScan } from 'src/lib/ericchase/Platform/util.js';
 import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
+import { BuilderInternal, Step } from 'tools/lib/Builder.js';
 import { Cache_AreFilesEqual, Cache_RemoveFileStats, Cache_UpdateFileStats } from 'tools/lib/cache/FileStatsCache.js';
-import { Step } from 'tools/lib/Step.js';
 
 // !! WARNING: This can DELETE entire directories. Use with caution!!
 
-const logger = Logger(__filename, Step_MirrorDirectory.name);
+const logger = Logger(Step_MirrorDirectory.name);
 
 export function Step_MirrorDirectory(options: { from: CPath | string; to: CPath | string; include_patterns?: string[]; exclude_patterns?: string[] }): Step {
   return new CStep_MirrorDirectory({
@@ -30,7 +29,7 @@ class CStep_MirrorDirectory implements Step {
     },
   ) {}
   async run(builder: BuilderInternal) {
-    this.logger.logWithDate();
+    this.logger.log('Mirror Directory');
     try {
       await builder.platform.Path.getStats(this.options.from);
     } catch (error) {

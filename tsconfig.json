@@ -15,6 +15,9 @@
     "skipLibCheck": true,
     "strict": true,
 
+    // Other options
+    "resolveJsonModule": true,
+
     // Import aliases
     "paths": { "src/*": ["./src/*"], "tools/*": ["./tools/*"] }
   },

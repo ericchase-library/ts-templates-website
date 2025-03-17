@@ -1,18 +1,7 @@
 import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
-import { ProjectFile } from 'tools/lib/ProjectFile.js';
+import { BuilderInternal, ProcessorModule, ProjectFile } from 'tools/lib/Builder.js';
 
-// Type Declarations
-
-export type ProcessorMethod = (builder: BuilderInternal, file: ProjectFile) => Promise<void>;
-export interface ProcessorModule {
-  onAdd: (builder: BuilderInternal, files: Set<ProjectFile>) => Promise<void>;
-  onRemove: (builder: BuilderInternal, files: Set<ProjectFile>) => Promise<void>;
-}
-
-// Example
-
-const logger = Logger(__filename, Processor_ExampleProcessorModule.name);
+const logger = Logger(Processor_ExampleProcessorModule.name);
 
 // A "factory" function for creating and/or configuring the class. Also helps
 // cut down on code ceremony for the user.
@@ -38,6 +27,6 @@ class CProcessor_ExampleProcessorModule implements ProcessorModule {
   }
   async onProcess(builder: BuilderInternal, file: ProjectFile): Promise<void> {
     // Do whatever you want to do with the file.
-    this.logger.logWithDate(`Example Processor: "${file.src_path.raw}"`);
+    this.logger.log(`Example Processor: "${file.src_path.raw}"`);
   }
 }

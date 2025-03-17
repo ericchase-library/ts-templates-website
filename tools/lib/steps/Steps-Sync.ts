@@ -1,5 +1,4 @@
-import { BuilderInternal } from 'tools/lib/BuilderInternal.js';
-import { Step } from 'tools/lib/Step.js';
+import { BuilderInternal, Step } from 'tools/lib/Builder.js';
 
 export function Step_Sync(steps: Step[]): Step {
   return new CStep_Sync(steps);

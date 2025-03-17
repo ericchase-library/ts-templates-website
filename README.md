@@ -2,11 +2,13 @@
 
 https://github.com/ericchase-library/ts-templates-website
 
-This is a template for website projects. Please check out https://github.com/ericchase-library/ts-library for other information.
+This is a template for website projects. Please check out https://github.com/ericchase-library/ts-library for more information.
 
 ## Build Tools V2
 
-This template project uses the new 2.0 version of my build tools and library modules. Read more about that in the ts-library repo.
+The build tools were completely rewritten, along with some of the library modules. As of now, the library should be considered on version 2.0.0. It's a work in progress, but should be much more useful than v1.
+
+These build tools use the Biome (https://biomejs.dev/) toolchain for formatting and linting most source files; as well as Prettier (https://prettier.io/) for formatting html and markdown files. Formatting has always been a massive pain point in web dev, and will probably continue to be so. From time to time, I find better tools for formatting files, and the build tools may be updated accordingly.
 
 ## Disclaimer
 
@@ -38,12 +40,6 @@ For final builds:
 
 ```
 bun run build
-```
-
-**Lint the source code**
-
-```
-bun run lint
 ```
 
 ## Project Structure

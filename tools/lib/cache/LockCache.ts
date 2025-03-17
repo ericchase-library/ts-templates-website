@@ -2,7 +2,7 @@ import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
 import { TaskRepeater } from 'src/lib/ericchase/Utility/TaskRepeater.js';
 import { cache_db, CreateAllQuery, CreateGetQuery, CreateRunQuery, QueryError, QueryExistsResult, QueryResult } from 'tools/lib/cache/cache.js';
 
-const logger = Logger(__filename, 'LockCache');
+const logger = Logger('LockCache');
 
 const TAG = 'tag';
 const PID = 'pid';
@@ -222,12 +222,12 @@ process.on('exit', () => {
 
 export function Cache_TryLock(script: string) {
   Cache_LockOrExit(script, (error) => {
-    logger.errorWithDate(`Another process is locking ${script}. Please wait for that process to end.`, error ?? '');
+    logger.error(`Another process is locking ${script}. Please wait for that process to end.`, error ?? '');
   });
 }
 
 export function Cache_TryLockEach(scripts: string[]) {
   Cache_LockEachOrExit(scripts, (script, error) => {
-    logger.errorWithDate(`Another process is locking ${script}. Please wait for that process to end.`, error ?? '');
+    logger.error(`Another process is locking ${script}. Please wait for that process to end.`, error ?? '');
   });
 }

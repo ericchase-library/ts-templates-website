@@ -1,123 +1,181 @@
+import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
+import { CPlatformProvider } from 'src/lib/ericchase/Platform/PlatformProvider.js';
 import { Map_GetOrDefault } from 'src/lib/ericchase/Utility/Map.js';
+import { RemoveWhiteSpaceOnlyLinesFromTopAndBottom } from 'src/lib/ericchase/Utility/String.js';
 
-export function Logger(uuid = '', name = '') {
-  return Map_GetOrDefault(loggers, name, () => new CLogger(uuid, name));
-}
-
-// const platform = getPlatformProvider('node');
-// function AddLoggerOutputFolder(path: CPath) {}
+const LoggerOptions: {
+  ceremony: boolean;
+  console: boolean;
+  list: Set<string>;
+  listmode: 'allow' | 'block';
+} = {
+  ceremony: true,
+  console: true,
+  list: new Set(),
+  listmode: 'block',
+};
 
 enum Kind {
-  Error = 0,
+  Err = 0,
   Log = 1,
-}
-
-let buffer: { kind: Kind; name: string; channel: number; items: any[]; date: number; showdate: boolean }[] = [];
-let timeout: ReturnType<typeof setTimeout> | undefined;
-function addlog(kind: Kind, name: string, channel: number, items: any[], showdate = false) {
-  buffer.push({ kind, name, channel, items, date: Date.now(), showdate });
-  timeout ??= setTimeout(() => {
-    timeout = undefined;
-    const lines: string[] = [];
-    for (const { kind, name, channel, items, date, showdate } of buffer) {
-      // const line = `[${name}#${channel}] ${items.map((item) => (typeof item === 'object' ? JSON.stringify(item, null, 2) : String(item))).join(' ')}`;
-      if (kind === Kind.Error) {
-        if (showdate) {
-          lines.push(`(${new Date(date).toLocaleString()}) [${name}#${channel}] ${items.join(' ')}`);
-        } else {
-          lines.push(`[${name}#${channel}] ${items.join(' ')}`);
-        }
-      } else {
-        if (showdate) {
-          lines.push(`(${new Date(date).toLocaleString()}) [${name}#${channel}] ${items.join(' ')}`);
-        } else {
-          lines.push(`[${name}#${channel}] ${items.join(' ')}`);
-        }
-      }
-    }
-    buffer = [];
-    console['log'](lines.join('\n'));
-  }, 250);
-}
-
-class CLoggerChannel {
-  constructor(
-    readonly channel: number,
-    readonly logger: CLogger,
-  ) {}
-  error(...items: any[]) {
-    addlog(Kind.Error, this.logger.name, this.channel, items);
-  }
-  errorNotEmpty(...items: any[]) {
-    for (const item of items) {
-      if (Array.isArray(item) && item.length === 0) continue;
-      if (ArrayBuffer.isView(item) && item.byteLength === 0) continue;
-      if (typeof item === 'string' && item.length === 0) continue;
-      addlog(Kind.Error, this.logger.name, this.channel, items);
-      break;
-    }
-  }
-  errorWithDate(...items: any[]) {
-    addlog(Kind.Error, this.logger.name, this.channel, items, true);
-  }
-  log(...items: any[]) {
-    addlog(Kind.Log, this.logger.name, this.channel, items);
-  }
-  logNotEmpty(...items: any[]) {
-    for (const item of items) {
-      if (Array.isArray(item) && item.length === 0) continue;
-      if (ArrayBuffer.isView(item) && item.byteLength === 0) continue;
-      if (typeof item === 'string' && item.length === 0) continue;
-      addlog(Kind.Log, this.logger.name, this.channel, items);
-      break;
-    }
-  }
-  logWithDate(...items: any[]) {
-    addlog(Kind.Log, this.logger.name, this.channel, items, true);
-  }
 }
 
 class CLogger {
   constructor(
     readonly uuid: string,
+    readonly channel: string,
     readonly name: string,
   ) {}
-
   error(...items: any[]) {
-    addlog(Kind.Error, this.name, 0, items);
+    addlog(Kind.Err, this, items);
   }
   errorNotEmpty(...items: any[]) {
     for (const item of items) {
       if (Array.isArray(item) && item.length === 0) continue;
       if (ArrayBuffer.isView(item) && item.byteLength === 0) continue;
       if (typeof item === 'string' && item.length === 0) continue;
-      addlog(Kind.Error, this.name, 0, items);
+      addlog(Kind.Err, this, items);
       break;
     }
   }
-  errorWithDate(...items: any[]) {
-    addlog(Kind.Error, this.name, 0, items, true);
-  }
   log(...items: any[]) {
-    addlog(Kind.Log, this.name, 0, items);
+    addlog(Kind.Log, this, items);
   }
   logNotEmpty(...items: any[]) {
     for (const item of items) {
       if (Array.isArray(item) && item.length === 0) continue;
       if (ArrayBuffer.isView(item) && item.byteLength === 0) continue;
       if (typeof item === 'string' && item.length === 0) continue;
-      addlog(Kind.Log, this.name, 0, items);
+      addlog(Kind.Log, this, items);
       break;
     }
   }
-  logWithDate(...items: any[]) {
-    addlog(Kind.Log, this.name, 0, items, true);
-  }
 
-  next_channel_id = 1;
-  newChannel() {
-    return new CLoggerChannel(this.next_channel_id++, this);
+  newChannel(): CLogger {
+    return new CLogger(this.uuid, getNextChannel(this.uuid), this.name);
   }
 }
 
-const loggers = new Map<string, CLogger>();
+let buffer: BufferItem[] = [];
+let timeout: ReturnType<typeof setTimeout> | undefined;
+const output_list: Promise<{ path: CPath; platform: CPlatformProvider }>[] = [];
+
+const name_to_buffer = new Map<string, string[]>();
+const name_to_logger = new Map<string, CLogger>();
+const name_to_uuid = new Map<string, string>();
+const uuid_to_channel = new Map<string, number>();
+const uuid_to_name = new Map<string, string>();
+
+interface BufferItem {
+  date: number;
+  kind: 0 | 1; // Kind.Err | Kind.Log
+  uuid: string;
+  channel: string;
+  items: any[];
+}
+
+function addlog(kind: BufferItem['kind'], logger: CLogger, items: BufferItem['items']) {
+  buffer.push({ date: Date.now(), kind, uuid: logger.uuid, channel: logger.channel, items });
+  setTimer();
+}
+function getUuid(name: string): string {
+  return Map_GetOrDefault(name_to_uuid, name, () => {
+    const uuid = (name_to_uuid.size + 1).toString().padStart(2, '0');
+    uuid_to_name.set(uuid, name);
+    return uuid;
+  });
+}
+function getNextChannel(uuid: string): string {
+  const channel = (uuid_to_channel.get(uuid) ?? 0) + 1;
+  uuid_to_channel.set(uuid, channel);
+  return channel.toString().padStart(2, '0');
+}
+function isLoggerEnabled(name: string) {
+  if (LoggerOptions.listmode === 'allow') {
+    return LoggerOptions.list.has(name);
+  }
+  return !LoggerOptions.list.has(name);
+}
+function setTimer() {
+  timeout ??= setTimeout(async () => {
+    timeout = undefined;
+    for (const { date, kind, uuid, channel, items } of buffer) {
+      const name = uuid_to_name.get(uuid) ?? 'default';
+      const name_buffer = Map_GetOrDefault(name_to_buffer, name, () => []);
+      if (isLoggerEnabled(name) === false) {
+        continue;
+      }
+      const datestring = formatDate(new Date(date));
+      if (kind === Kind.Err) {
+        for (const line of RemoveWhiteSpaceOnlyLinesFromTopAndBottom(items.join(' '))) {
+          const text = `${datestring} |${uuid}.${channel}| (${name}) <ERROR> ${line}`;
+          if (LoggerOptions.console === true) {
+            if (LoggerOptions.ceremony === true) {
+              console['error'](text);
+            } else {
+              console['error'](`<ERROR> ${line}`);
+            }
+          }
+          name_buffer.push(text);
+        }
+      } else {
+        for (const line of RemoveWhiteSpaceOnlyLinesFromTopAndBottom(items.join(' '))) {
+          const text = `${datestring} |${uuid}.${channel}| (${name}) ${line}`;
+          if (LoggerOptions.console === true) {
+            if (LoggerOptions.ceremony === true) {
+              console['log'](text);
+            } else {
+              console['log'](line);
+            }
+          }
+          name_buffer.push(text);
+        }
+      }
+    }
+    for (const output of output_list) {
+      const { path, platform } = await output;
+      for (const [name, lines] of name_to_buffer) {
+        if (lines.length > 0) {
+          await platform.File.appendText(Path(path, name + '.log'), lines.join('\n') + '\n');
+          name_to_buffer.set(name, []);
+        }
+      }
+    }
+    buffer = [];
+  }, 50);
+}
+
+export const DefaultLogger = Logger();
+
+export function Logger(name = 'default'): CLogger {
+  return Map_GetOrDefault(name_to_logger, name, () => new CLogger(getUuid(name), '00', name));
+}
+
+export function AddLoggerOutputDirectory(path: CPath | string, platform: CPlatformProvider) {
+  path = Path(path, 'logs');
+  output_list.push(
+    (async () => {
+      await platform.Directory.create(path);
+      return { path, platform };
+    })(),
+  );
+}
+
+export function SetLoggerOptions(options: { ceremony?: boolean; console?: boolean; list?: string[]; listmode?: 'allow' | 'block' }) {
+  if (options.ceremony !== undefined) LoggerOptions.ceremony = options.ceremony;
+  if (options.console !== undefined) LoggerOptions.console = options.console;
+  if (options.list !== undefined) LoggerOptions.list = new Set(options.list);
+  if (options.listmode !== undefined) LoggerOptions.listmode = options.listmode;
+}
+
+function formatDate(date: Date) {
+  let y = date.getFullYear(),
+    m = date.getMonth() + 1,
+    d = date.getDate(),
+    hh = date.getHours(),
+    mm = date.getMinutes(),
+    ss = date.getSeconds(),
+    ap = hh < 12 ? 'AM' : 'PM';
+  hh = hh % 12 || 12; // Convert to 12-hour format, ensuring 12 instead of 0
+  return y + '-' + (m < 10 ? '0' : '') + m + '-' + (d < 10 ? '0' : '') + d + ' ' + (hh < 10 ? '0' : '') + hh + ':' + (mm < 10 ? '0' : '') + mm + ':' + (ss < 10 ? '0' : '') + ss + ' ' + ap;
+}

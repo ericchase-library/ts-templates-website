@@ -1,8 +1,9 @@
 import { CPath } from 'src/lib/ericchase/Platform/FilePath.js';
 import { cache_db, cache_platform, CreateAllQuery, CreateGetQuery, CreateRunQuery, QueryError, QueryExistsResult, QueryResult } from 'tools/lib/cache/cache.js';
 import { Cache_Lock, Cache_Unlock } from 'tools/lib/cache/LockCache.js';
+import { default as xxhash } from 'xxhash-wasm';
 
-let h64Raw: ((inputBuffer: Uint8Array, seed?: bigint) => bigint) | undefined = undefined;
+const { h64Raw } = await xxhash();
 
 const PATH = 'path';
 const MTIMEMS = 'mtimeMs';
@@ -174,9 +175,6 @@ async function getB64Hash(path: CPath): Promise<string> {
   return btoa((await getHash(path)).toString());
 }
 export async function getHash(path: CPath): Promise<bigint> {
-  if (h64Raw === undefined) {
-    h64Raw = (await (await import('xxhash-wasm')).default()).h64Raw;
-  }
   return h64Raw(await cache_platform.File.readBytes(path));
 }
 
