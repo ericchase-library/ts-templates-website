@@ -10,7 +10,7 @@ export function Processor_HTML_CustomComponent(): ProcessorModule {
 }
 
 class CProcessor_HTML_CustomComponent implements ProcessorModule {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   component_map = new Map<string, ProjectFile>();
   htmlfile_set = new Set<ProjectFile>();
@@ -105,8 +105,8 @@ class CProcessor_HTML_CustomComponent implements ProcessorModule {
           }
         }
       } catch (error) {
-        this.logger.error(`ERROR: Processor: ${__filename}, File: ${file.src_path}`);
-        this.logger.log(error);
+        this.channel.error(`ERROR: Processor: ${__filename}, File: ${file.src_path}`);
+        this.channel.log(error);
       }
     }
     if (update_text === true) {

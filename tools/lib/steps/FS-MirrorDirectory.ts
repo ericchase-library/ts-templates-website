@@ -18,7 +18,7 @@ export function Step_MirrorDirectory(options: { from: CPath | string; to: CPath 
 }
 
 class CStep_MirrorDirectory implements Step {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   constructor(
     readonly options: {
@@ -28,8 +28,9 @@ class CStep_MirrorDirectory implements Step {
       exclude_patterns: string[];
     },
   ) {}
+  async end(builder: BuilderInternal) {}
   async run(builder: BuilderInternal) {
-    this.logger.log('Mirror Directory');
+    this.channel.log('Mirror Directory');
     try {
       await builder.platform.Path.getStats(this.options.from);
     } catch (error) {
@@ -44,7 +45,7 @@ class CStep_MirrorDirectory implements Step {
       const to = Path(this.options.to, path);
       if ((await builder.platform.File.copy(from, to, true)) === true) {
         await Cache_UpdateFileStats(to);
-        this.logger.log(`Copied "${from.raw}" -> "${to.raw}"`);
+        this.channel.log(`Copied "${from.raw}" -> "${to.raw}"`);
       }
     }
     // check matching files for modification
@@ -55,7 +56,7 @@ class CStep_MirrorDirectory implements Step {
         if ((await builder.platform.File.copy(from, to, true)) === true) {
           await Cache_UpdateFileStats(from);
           await Cache_UpdateFileStats(to);
-          this.logger.log(`Replaced "${from.raw}" -> "${to.raw}"`);
+          this.channel.log(`Replaced "${from.raw}" -> "${to.raw}"`);
         }
       }
     }
@@ -64,7 +65,7 @@ class CStep_MirrorDirectory implements Step {
       const to = Path(this.options.to, path);
       if ((await builder.platform.File.delete(to)) === true) {
         Cache_RemoveFileStats(to);
-        this.logger.log(`Deleted "${to.raw}"`);
+        this.channel.log(`Deleted "${to.raw}"`);
       }
     }
   }

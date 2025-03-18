@@ -1,7 +1,7 @@
 import { Store } from 'src/lib/ericchase/Design Pattern/Observer/Store.js';
 import { ConsoleLog } from 'src/lib/ericchase/Utility/Console.js';
 
-export type SubscriptionCallback<Result, Tag> = (result?: Result, error?: Error, tag?: Tag) => { abort: boolean } | void;
+type SubscriptionCallback<Result, Tag> = (result?: Result, error?: Error, tag?: Tag) => { abort: boolean } | void;
 
 export class JobQueue<Result = void, Tag = void> {
   /**

@@ -17,7 +17,7 @@ export function Step_CopyFiles(options: { from: CPath | string; to: CPath | stri
 }
 
 class CStep_CopyFiles implements Step {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   constructor(
     readonly options: {
@@ -28,8 +28,9 @@ class CStep_CopyFiles implements Step {
       overwrite: boolean;
     },
   ) {}
+  async end(builder: BuilderInternal) {}
   async run(builder: BuilderInternal) {
-    this.logger.log('Copy Files');
+    this.channel.log('Copy Files');
     try {
       await builder.platform.Path.getStats(this.options.from);
     } catch (error) {
@@ -44,7 +45,7 @@ class CStep_CopyFiles implements Step {
       const to = Path(this.options.to, path);
       if ((await builder.platform.File.copy(from, to, this.options.overwrite)) === true) {
         await Cache_UpdateFileStats(to);
-        this.logger.log(`Copied "${from.raw}" -> "${to.raw}"`);
+        this.channel.log(`Copied "${from.raw}" -> "${to.raw}"`);
       }
     }
     // check matching files for modification
@@ -55,7 +56,7 @@ class CStep_CopyFiles implements Step {
         if ((await builder.platform.File.copy(from, to, this.options.overwrite)) === true) {
           await Cache_UpdateFileStats(from);
           await Cache_UpdateFileStats(to);
-          this.logger.log(`Replaced "${from.raw}" -> "${to.raw}"`);
+          this.channel.log(`Replaced "${from.raw}" -> "${to.raw}"`);
         }
       }
     }

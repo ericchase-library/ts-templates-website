@@ -9,7 +9,7 @@ export function Processor_TypeScript_GenericBundlerImportRemapper(): ProcessorMo
 }
 
 class CProcessor_TypeScript_GenericBundlerImportRemapper implements ProcessorModule {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>) {
     for (const file of files) {

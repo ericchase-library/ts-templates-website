@@ -74,7 +74,9 @@ interface BufferItem {
   items: any[];
 }
 
+let unprocessedlogcount = 0;
 function addlog(kind: BufferItem['kind'], logger: CLogger, items: BufferItem['items']) {
+  unprocessedlogcount++;
   buffer.push({ date: Date.now(), kind, uuid: logger.uuid, channel: logger.channel, items });
   setTimer();
 }
@@ -96,56 +98,65 @@ function isLoggerEnabled(name: string) {
   }
   return !LoggerOptions.list.has(name);
 }
+async function processBuffer() {
+  const default_buffer = Map_GetOrDefault(name_to_buffer, 'default', () => []);
+  const temp_buffer = buffer;
+  buffer = [];
+  for (const { date, kind, uuid, channel, items } of temp_buffer) {
+    unprocessedlogcount--;
+    const name = uuid_to_name.get(uuid) ?? 'default';
+    const name_buffer = Map_GetOrDefault(name_to_buffer, name, () => []);
+    if (isLoggerEnabled(name) === false) {
+      continue;
+    }
+    const datestring = formatDate(new Date(date));
+    if (kind === Kind.Err) {
+      for (const line of RemoveWhiteSpaceOnlyLinesFromTopAndBottom(items.join(' '))) {
+        const text = `${datestring} |${uuid}.${channel}| (${name}) <ERROR> ${line}`;
+        if (LoggerOptions.console === true) {
+          if (LoggerOptions.ceremony === true) {
+            // biome-ignore lint/complexity/useLiteralKeys: <explanation>
+            console['error'](text);
+          } else {
+            // biome-ignore lint/complexity/useLiteralKeys: <explanation>
+            console['error'](`<ERROR> ${line}`);
+          }
+        }
+        default_buffer.push(text);
+        name_buffer.push(text);
+      }
+    } else {
+      for (const line of RemoveWhiteSpaceOnlyLinesFromTopAndBottom(items.join(' '))) {
+        const text = `${datestring} |${uuid}.${channel}| (${name}) ${line}`;
+        if (LoggerOptions.console === true) {
+          if (LoggerOptions.ceremony === true) {
+            // biome-ignore lint/complexity/useLiteralKeys: <explanation>
+            console['log'](text);
+          } else {
+            // biome-ignore lint/complexity/useLiteralKeys: <explanation>
+            console['log'](line);
+          }
+        }
+        default_buffer.push(text);
+        name_buffer.push(text);
+      }
+    }
+  }
+  for (const output of output_list) {
+    const { path, platform } = await output;
+    for (const [name, lines] of name_to_buffer) {
+      if (lines.length > 0) {
+        await platform.File.appendText(Path(path, `${name}.log`), `${lines.join('\n')}\n`);
+        name_to_buffer.set(name, []);
+      }
+    }
+  }
+}
+let task: Promise<void> | undefined = undefined;
 function setTimer() {
-  timeout ??= setTimeout(async () => {
+  timeout ??= setTimeout(() => {
     timeout = undefined;
-    for (const { date, kind, uuid, channel, items } of buffer) {
-      const name = uuid_to_name.get(uuid) ?? 'default';
-      const name_buffer = Map_GetOrDefault(name_to_buffer, name, () => []);
-      if (isLoggerEnabled(name) === false) {
-        continue;
-      }
-      const datestring = formatDate(new Date(date));
-      if (kind === Kind.Err) {
-        for (const line of RemoveWhiteSpaceOnlyLinesFromTopAndBottom(items.join(' '))) {
-          const text = `${datestring} |${uuid}.${channel}| (${name}) <ERROR> ${line}`;
-          if (LoggerOptions.console === true) {
-            if (LoggerOptions.ceremony === true) {
-              // biome-ignore lint/complexity/useLiteralKeys: <explanation>
-              console['error'](text);
-            } else {
-              // biome-ignore lint/complexity/useLiteralKeys: <explanation>
-              console['error'](`<ERROR> ${line}`);
-            }
-          }
-          name_buffer.push(text);
-        }
-      } else {
-        for (const line of RemoveWhiteSpaceOnlyLinesFromTopAndBottom(items.join(' '))) {
-          const text = `${datestring} |${uuid}.${channel}| (${name}) ${line}`;
-          if (LoggerOptions.console === true) {
-            if (LoggerOptions.ceremony === true) {
-              // biome-ignore lint/complexity/useLiteralKeys: <explanation>
-              console['log'](text);
-            } else {
-              // biome-ignore lint/complexity/useLiteralKeys: <explanation>
-              console['log'](line);
-            }
-          }
-          name_buffer.push(text);
-        }
-      }
-    }
-    for (const output of output_list) {
-      const { path, platform } = await output;
-      for (const [name, lines] of name_to_buffer) {
-        if (lines.length > 0) {
-          await platform.File.appendText(Path(path, `${name}.log`), `${lines.join('\n')}\n`);
-          name_to_buffer.set(name, []);
-        }
-      }
-    }
-    buffer = [];
+    task = processBuffer();
   }, 50);
 }
 
@@ -173,13 +184,19 @@ export function SetLoggerOptions(options: { ceremony?: boolean; console?: boolea
 }
 
 export async function WaitForLogger() {
-  return new Promise<void>((resolve, reject) => {
-    setInterval(() => {
-      if (buffer.length === 0 && timeout === undefined) {
-        resolve();
-      }
-    }, 250);
-  });
+  if (unprocessedlogcount > 0) {
+    await new Promise<void>((resolve, reject) => {
+      let id = setInterval(() => {
+        if (unprocessedlogcount > 0) {
+          setTimer();
+        } else {
+          clearInterval(id);
+          resolve();
+        }
+      }, 250);
+    });
+    await task;
+  }
 }
 
 function formatDate(date: Date) {
@@ -195,3 +212,11 @@ function formatDate(date: Date) {
   // biome-ignore lint/style/useTemplate: performance
   return y + '-' + (m < 10 ? '0' : '') + m + '-' + (d < 10 ? '0' : '') + d + ' ' + (hh < 10 ? '0' : '') + hh + ':' + (mm < 10 ? '0' : '') + mm + ':' + (ss < 10 ? '0' : '') + ss + ' ' + ap;
 }
+
+process.on('beforeExit', async (code) => {
+  await WaitForLogger();
+  if (unprocessedlogcount > 0) {
+    // biome-ignore lint/complexity/useLiteralKeys: <explanation>
+    console['error']('Unprocessed Logs:', unprocessedlogcount);
+  }
+});

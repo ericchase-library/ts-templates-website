@@ -1,4 +1,4 @@
-export type SubscriptionCallback = (element: Element, unsubscribe: () => void) => void;
+export type ElementAddedSubscriptionCallback = (element: Element, unsubscribe: () => void) => void;
 
 export class ElementAddedObserver {
   constructor({
@@ -44,7 +44,7 @@ export class ElementAddedObserver {
       this.subscriptionSet.delete(callback);
     }
   }
-  public subscribe(callback: SubscriptionCallback): () => void {
+  public subscribe(callback: ElementAddedSubscriptionCallback): () => void {
     this.subscriptionSet.add(callback);
     let abort = false;
     for (const element of this.matchSet) {
@@ -60,7 +60,7 @@ export class ElementAddedObserver {
   }
   protected mutationObserver: MutationObserver;
   protected matchSet = new Set<Element>();
-  protected subscriptionSet = new Set<SubscriptionCallback>();
+  protected subscriptionSet = new Set<ElementAddedSubscriptionCallback>();
   private send(element: Element) {
     if (!this.matchSet.has(element)) {
       this.matchSet.add(element);

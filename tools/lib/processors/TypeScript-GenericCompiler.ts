@@ -16,7 +16,7 @@ export function Processor_TypeScript_GenericCompiler(include_patterns: string[],
 }
 
 class CProcessor_TypeScript_GenericCompiler implements ProcessorModule {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   transpiler: import('bun').Transpiler;
   constructor(
@@ -52,8 +52,8 @@ class CProcessor_TypeScript_GenericCompiler implements ProcessorModule {
     try {
       file.setText(await this.transpiler.transform(await file.getText()));
     } catch (error) {
-      this.logger.error(`ERROR: Processor: ${__filename}, File: ${file.src_path.raw}`);
-      this.logger.error(error);
+      this.channel.error(`ERROR: Processor: ${__filename}, File: ${file.src_path.raw}`);
+      this.channel.error(error);
     }
   }
 }

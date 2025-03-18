@@ -1,4 +1,4 @@
-export type SubscriptionCallback<Value> = (value: Value, unsubscribe: () => void) => void;
+import { SubscriptionCallback } from 'src/lib/ericchase/Design Pattern/Observer/ObserverCallbacks.js';
 
 export class Broadcast<Value> {
   protected subscriptionSet = new Set<SubscriptionCallback<Value>>();

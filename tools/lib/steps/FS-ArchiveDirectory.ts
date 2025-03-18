@@ -10,7 +10,7 @@ export function Step_ArchiveDirectory(dir: CPath | string, outfile: CPath | stri
 }
 
 class CStep_ArchiveDirectory implements Step {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   zip = new AdmZip();
 
@@ -18,17 +18,18 @@ class CStep_ArchiveDirectory implements Step {
     readonly dir: CPath,
     readonly outpath: CPath,
   ) {}
+  async end(builder: BuilderInternal) {}
   async run(builder: BuilderInternal) {
-    this.logger.log('Archive');
+    this.channel.log('Archive');
     try {
       this.zip.addLocalFolder(this.dir.raw);
       this.zip.writeZip(this.outpath.raw);
       const stats = await builder.platform.Path.getStats(this.outpath);
       if (stats.isFile() === true) {
-        this.logger.log(`ZIP: [${stats.size}] ${this.outpath.raw}`);
+        this.channel.log(`ZIP: [${stats.size}] ${this.outpath.raw}`);
       }
     } catch (error) {
-      this.logger.log(`Error while creating archive for "${this.dir.raw}".`);
+      this.channel.log(`Error while creating archive for "${this.dir.raw}".`);
       throw error;
     }
   }

@@ -1,11 +1,12 @@
+import { RefCounter } from 'src/lib/ericchase/Design Pattern/Observer/RefCounter.js';
 import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
 import { CPlatformProvider, FileStats, getPlatformProvider, PlatformProviderId, UnimplementedProvider } from 'src/lib/ericchase/Platform/PlatformProvider.js';
 import { KEYS } from 'src/lib/ericchase/Platform/Shell.js';
-import { AddStdinListener, StartStdinRawModeReader } from 'src/lib/ericchase/Platform/StdinReader.js';
+import { AddStdInListener, GetStdInReaderLock, StartStdInRawModeReader } from 'src/lib/ericchase/Platform/StdinReader.js';
 import { ConsoleError } from 'src/lib/ericchase/Utility/Console.js';
 import { Debounce } from 'src/lib/ericchase/Utility/Debounce.js';
 import { Defer } from 'src/lib/ericchase/Utility/Defer.js';
-import { AddLoggerOutputDirectory, Logger, WaitForLogger } from 'src/lib/ericchase/Utility/Logger.js';
+import { AddLoggerOutputDirectory, Logger } from 'src/lib/ericchase/Utility/Logger.js';
 import { Map_GetOrDefault } from 'src/lib/ericchase/Utility/Map.js';
 import { Cache_FileStats_Lock, Cache_FileStats_Unlock } from 'tools/lib/cache/FileStatsCache.js';
 import { Cache_TryLockEach, Cache_UnlockAll } from 'tools/lib/cache/LockCache.js';
@@ -23,6 +24,7 @@ export interface ProcessorModule {
 
 export interface Step {
   run: (builder: BuilderInternal) => Promise<void>;
+  end: (builder: BuilderInternal) => Promise<void>;
 }
 
 export class Builder {
@@ -55,27 +57,29 @@ export class Builder {
   setStartupSteps(steps: Step[]): void {
     this.$internal.startup_steps = steps;
   }
+  setBeforeProcessingSteps(steps: Step[]): void {
+    this.$internal.before_steps = steps;
+  }
   setProcessorModules(modules: ProcessorModule[]): void {
     this.$internal.processor_modules = modules;
+  }
+  setAfterProcessingSteps(steps: Step[]): void {
+    this.$internal.after_steps = steps;
   }
   setCleanupSteps(steps: Step[]): void {
     this.$internal.cleanup_steps = steps;
   }
 
   async start(): Promise<void> {
-    Cache_FileStats_Lock();
-    Cache_TryLockEach(['Build', 'Format']);
     if (this.platform === UnimplementedProvider) {
       this.platform = await getPlatformProvider(this.runtime);
     }
     await this.$internal.start();
-    Cache_UnlockAll();
-    Cache_FileStats_Unlock();
   }
 }
 
 export class BuilderInternal {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   constructor(public external: Builder) {}
 
@@ -95,7 +99,9 @@ export class BuilderInternal {
   // Build Steps & Processor Modules
 
   startup_steps: Step[] = [];
+  before_steps: Step[] = [];
   processor_modules: ProcessorModule[] = [];
+  after_steps: Step[] = [];
   cleanup_steps: Step[] = [];
 
   // Dependencies
@@ -214,6 +220,8 @@ export class BuilderInternal {
     if (this.$unwatchSource === undefined) {
       const event_paths = new Set<string>();
       const process_events = Debounce(async () => {
+        const unlock = this.$idle.lock();
+
         // copy the set and clear it
         const event_paths_copy = new Set(event_paths);
         event_paths.clear();
@@ -241,24 +249,65 @@ export class BuilderInternal {
 
         // process files
         await this.processUnprocessedFiles();
+
+        unlock();
       }, 100);
       this.$unwatchSource = this.platform.Directory.watch(this.dir.src, (event, path) => {
         event_paths.add(path.raw);
         const orphan = process_events();
       });
-      this.logger.log(`Watching "${this.dir.src.raw}"`);
+      this.channel.log(`Watching "${this.dir.src.raw}"`);
     }
   }
 
   // Processing
+
+  $idle = new RefCounter();
 
   $set_unprocessed_added_files = new Set<ProjectFile>();
   $set_unprocessed_removed_files = new Set<ProjectFile>();
   $set_unprocessed_updated_files = new Set<ProjectFile>();
 
   async start() {
+    // Grab Locks
+    Cache_FileStats_Lock();
+    Cache_TryLockEach(['Build', 'Format']);
+
+    const unlock = this.$idle.lock();
+
     for (const path of await this.platform.Directory.globScan(this.dir.src, '**/*')) {
       this.addPath(Path(this.dir.src, path), Path(this.dir.out, path));
+    }
+
+    if (this.watchmode === true) {
+      // Setup Source Watcher
+      this.setupSourceWatcher();
+      // Setup Stdin Reader
+      const releaseStdIn = GetStdInReaderLock();
+      AddStdInListener(async (bytes, text, removeSelf) => {
+        if (text === 'q') {
+          removeSelf();
+          this.channel.log('User Command: Quit');
+          await this.$idle.onZeroLocks();
+          this.$unwatchSource?.();
+          await this.shutdown();
+          releaseStdIn();
+        }
+      });
+      AddStdInListener(async (bytes, text, removeSelf) => {
+        if (text === KEYS.SIGINT) {
+          try {
+            removeSelf();
+            this.channel.log('User Command: Force Quit');
+            this.$unwatchSource?.();
+            releaseStdIn();
+          } catch (error) {
+            ConsoleError(error);
+          }
+          process.exit();
+        }
+      });
+      StartStdInRawModeReader();
     }
 
     // Startup Steps
@@ -269,52 +318,31 @@ export class BuilderInternal {
     // Processor Modules
     await this.processUnprocessedFiles();
 
-    if (this.watchmode === true) {
-      const { promise, resolve, reject } = Defer();
-      // Setup Source Watcher
-      this.setupSourceWatcher();
-      // Setup Stdin Reader
-      AddStdinListener(async (bytes, text, removeSelf) => {
-        if (text === 'q') {
-          try {
-            removeSelf();
-            this.logger.log('User Command: Quit');
-            this.$unwatchSource?.();
-            // Cleanup Steps
-            for (const step of this.cleanup_steps) {
-              await step.run(this);
-            }
-            // Force Exit
-            Cache_UnlockAll();
-            Cache_FileStats_Unlock();
-            await WaitForLogger();
-          } catch (error) {
-            ConsoleError(error);
-          }
-          process.exit();
-        }
-      });
-      AddStdinListener(async (bytes, text, removeSelf) => {
-        if (text === KEYS.SIGINT) {
-          try {
-            removeSelf();
-            this.logger.log('User Command: Force Quit');
-            this.$unwatchSource?.();
-            resolve();
-          } catch (error) {
-            ConsoleError(error);
-          }
-          process.exit();
-        }
-      });
-      StartStdinRawModeReader();
-      await promise;
-    } else {
-      // Cleanup Steps
-      for (const step of this.cleanup_steps) {
-        await step.run(this);
-      }
+    if (this.watchmode !== true) {
+      await this.shutdown();
     }
+
+    unlock();
+  }
+
+  async shutdown() {
+    for (const step of this.startup_steps) {
+      await step.end(this);
+    }
+    for (const step of this.before_steps) {
+      await step.end(this);
+    }
+    for (const step of this.after_steps) {
+      await step.end(this);
+    }
+    // Cleanup Steps
+    for (const step of this.cleanup_steps) {
+      await step.run(this);
+      await step.end(this);
+    }
+    // Release Locks
+    Cache_UnlockAll();
+    Cache_FileStats_Unlock();
   }
 
   async processUnprocessedFiles() {
@@ -325,21 +353,27 @@ export class BuilderInternal {
       if (this.$set_unprocessed_added_files.size > 0) {
         await this.$processAddedFiles();
       }
+      for (const step of this.before_steps) {
+        await step.run(this);
+      }
       if (this.$set_unprocessed_updated_files.size > 0) {
         await this.$processUpdatedFiles();
+      }
+      for (const step of this.after_steps) {
+        await step.run(this);
       }
     }
   }
 
   // always call processUpdatedFiles after this
   async $processAddedFiles() {
-    logger.log('Processing Added Files');
+    this.channel.log('Processing Added Files');
     for (const processor of this.processor_modules) {
       await processor.onAdd(this, this.$set_unprocessed_added_files);
     }
     const tasks: Promise<void>[] = [];
     for (const file of this.$set_unprocessed_added_files) {
-      tasks.push(firstRunProcessorList(file));
+      tasks.push(this.firstRunProcessorList(file));
     }
     for (const task of tasks) {
       await task;
@@ -356,7 +390,7 @@ export class BuilderInternal {
   }
 
   async $processUpdatedFiles() {
-    logger.log('Processing Updated Files');
+    this.channel.log('Processing Updated Files');
     const defers = new Map<ProjectFile, Defer<void>>();
     // add defers for updated file and all downstream files
     for (const file of this.$set_unprocessed_updated_files) {
@@ -379,12 +413,32 @@ export class BuilderInternal {
           waitlist.push(upstream_defer.promise);
         }
       }
-      tasks.push(runProcessorList(file, waitlist, defer));
+      tasks.push(this.runProcessorList(file, waitlist, defer));
     }
     for (const task of tasks) {
       await task;
     }
     this.$set_unprocessed_updated_files.clear();
+  }
+
+  async firstRunProcessorList(file: ProjectFile) {
+    this.channel.log(`"${file.src_path.raw}"`);
+    file.resetBytes();
+    for (const { processor, method } of file.$processor_list) {
+      await method.call(processor, file.builder, file);
+    }
+  }
+
+  async runProcessorList(file: ProjectFile, waitlist: Promise<void>[], defer?: Defer<void>) {
+    for (const task of waitlist) {
+      await task;
+    }
+    this.channel.log(`"${file.src_path.raw}"`);
+    file.resetBytes();
+    for (const { processor, method } of file.$processor_list) {
+      await method.call(processor, file.builder, file);
+    }
+    defer?.resolve();
   }
 }
 
@@ -472,24 +526,4 @@ export class ProjectFile {
   toString(): string {
     return this.src_path.toString();
   }
-}
-
-async function firstRunProcessorList(file: ProjectFile) {
-  logger.log(`"${file.src_path.raw}"`);
-  file.resetBytes();
-  for (const { processor, method } of file.$processor_list) {
-    await method.call(processor, file.builder, file);
-  }
-}
-
-async function runProcessorList(file: ProjectFile, waitlist: Promise<void>[], defer?: Defer<void>) {
-  for (const task of waitlist) {
-    await task;
-  }
-  logger.log(`"${file.src_path.raw}"`);
-  file.resetBytes();
-  for (const { processor, method } of file.$processor_list) {
-    await method.call(processor, file.builder, file);
-  }
-  defer?.resolve();
 }

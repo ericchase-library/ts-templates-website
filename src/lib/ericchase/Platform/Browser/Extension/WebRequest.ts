@@ -1,4 +1,4 @@
-export type SubscriptionCallback = () => { abort: boolean } | void;
+export type WebRequestSubscriptionCallback = () => { abort: boolean } | void;
 
 export interface WebRequest {
   bodyDetails?: chrome.webRequest.WebRequestBodyDetails;
@@ -7,7 +7,7 @@ export interface WebRequest {
 
 export namespace WebRequestCache {
   export const RequestIdToRequestMap = new Map<string, WebRequest>();
-  export const SubscriptionSet = new Set<SubscriptionCallback>();
+  export const SubscriptionSet = new Set<WebRequestSubscriptionCallback>();
   export const TabIdToRequestMap = new Map<number, WebRequest>();
   export function AddBody(details: chrome.webRequest.WebRequestBodyDetails) {
     const webRequest = WebRequestCache.RequestIdToRequestMap.get(details.requestId);
@@ -37,7 +37,7 @@ export namespace WebRequestCache {
       }
     }
   }
-  export function Subscribe(callback: SubscriptionCallback): () => void {
+  export function Subscribe(callback: WebRequestSubscriptionCallback): () => void {
     WebRequestCache.SubscriptionSet.add(callback);
     if (callback()?.abort === true) {
       WebRequestCache.SubscriptionSet.delete(callback);

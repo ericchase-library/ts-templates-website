@@ -11,7 +11,7 @@ export function Processor_TypeScript_GenericBundler({ external = [], sourcemap =
 }
 
 class CProcessor_TypeScript_GenericBundler implements ProcessorModule {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   bundlefile_set = new Set<ProjectFile>();
   constructor(readonly config: Required<BuildConfig>) {}
@@ -88,9 +88,9 @@ class CProcessor_TypeScript_GenericBundler implements ProcessorModule {
         }
       }
     } else {
-      this.logger.error(`ERROR: Processor: ${__filename}, File: ${file.src_path.raw}`);
+      this.channel.error(`ERROR: Processor: ${__filename}, File: ${file.src_path.raw}`);
       for (const log of build_results.logs) {
-        this.logger.log(log.message);
+        this.channel.log(log.message);
       }
     }
   }

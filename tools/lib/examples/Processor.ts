@@ -11,7 +11,7 @@ export function Processor_ExampleProcessorModule(): ProcessorModule {
 
 // The class used to setup files with the processor function.
 class CProcessor_ExampleProcessorModule implements ProcessorModule {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   constructor() {}
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {
@@ -27,6 +27,6 @@ class CProcessor_ExampleProcessorModule implements ProcessorModule {
   }
   async onProcess(builder: BuilderInternal, file: ProjectFile): Promise<void> {
     // Do whatever you want to do with the file.
-    this.logger.log(`Example Processor: "${file.src_path.raw}"`);
+    this.channel.log(`Example Processor: "${file.src_path.raw}"`);
   }
 }

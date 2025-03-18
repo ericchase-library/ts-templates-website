@@ -1,4 +1,4 @@
-export type SubscriptionCallback = (record: MutationRecord, unsubscribe: () => void) => void;
+import { MutationObserverSubscriptionCallback } from 'src/lib/ericchase/Platform/Web/DOM/MutationObserver/MutationObserverCallbacks.js';
 
 export class AttributeObserver {
   constructor({
@@ -24,14 +24,14 @@ export class AttributeObserver {
       subtree: options.subtree ?? true,
     });
   }
-  public subscribe(callback: SubscriptionCallback): () => void {
+  public subscribe(callback: MutationObserverSubscriptionCallback): () => void {
     this.subscriptionSet.add(callback);
     return () => {
       this.subscriptionSet.delete(callback);
     };
   }
   protected mutationObserver: MutationObserver;
-  protected subscriptionSet = new Set<SubscriptionCallback>();
+  protected subscriptionSet = new Set<MutationObserverSubscriptionCallback>();
   private send(record: MutationRecord) {
     for (const callback of this.subscriptionSet) {
       callback(record, () => {

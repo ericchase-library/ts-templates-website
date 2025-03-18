@@ -9,11 +9,12 @@ export function Step_Lint(logging?: 'normal' | 'quiet'): Step {
 }
 
 class CStep_Lint implements Step {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   constructor(readonly logging: 'normal' | 'quiet') {}
+  async end(builder: BuilderInternal) {}
   async run(builder: BuilderInternal) {
-    this.logger.log('Lint');
+    this.channel.log('Lint');
     await Step_Bun_Run({ cmd: ['biome', 'lint', '--error-on-warnings', '--write'] }, this.logging).run(builder);
   }
 }

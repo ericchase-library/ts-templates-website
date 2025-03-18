@@ -14,13 +14,16 @@ const builder = new Builder(Bun.argv[2] === '--watch' ? 'watch' : 'build');
 
 // During "dev" mode (when "--watch" is passed as an argument), the dev server
 // will start running with hot refreshing if enabled in your index file.
+// These steps are run during the startup phase only.
 builder.setStartupSteps([
   Step_Bun_Run({ cmd: ['bun', 'install'] }, 'quiet'),
   Step_CleanDirectory(builder.dir.out),
   Step_Format('quiet'),
-  Step_StartServer(),
   //
 ]);
+
+// These steps are run before each processing phase.
+builder.setBeforeProcessingSteps([]);
 
 // Basic setup for a typescript powered website. Typescript files that match
 // "*.module.ts" and "*.script.ts" are bundled and written to the out folder.
@@ -42,8 +45,13 @@ builder.setProcessorModules([
   //
 ]);
 
-builder.setCleanupSteps([
+// These steps are run after each processing phase.
+builder.setAfterProcessingSteps([
+  Step_StartServer(),
   //
 ]);
+
+// These steps are run during the shutdown phase only.
+builder.setCleanupSteps([]);
 
 await builder.start();

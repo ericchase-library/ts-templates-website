@@ -11,20 +11,21 @@ export function Step_Bun_Run({ cmd, dir }: { cmd: string[]; dir?: CPath | string
 }
 
 class CStep_Bun_Run implements Step {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   constructor(
     readonly cmd: string[],
     readonly dir: string,
     readonly logging?: 'normal' | 'quiet',
   ) {}
+  async end(builder: BuilderInternal) {}
   async run(builder: BuilderInternal) {
-    this.logger.log(`Command: "${this.cmd.join(' ')}" | Directory: "${this.dir}"`);
+    this.channel.log(`Command: "${this.cmd.join(' ')}" | Directory: "${this.dir}"`);
     const p0 = Bun.spawn(this.cmd, { cwd: this.dir, stderr: 'pipe', stdout: 'pipe' });
     await Promise.allSettled([p0.exited]);
     if (this.logging === 'normal') {
-      this.logger.errorNotEmpty(BunRunErrorCleaner(U8ToString(await U8StreamReadAll(p0.stderr))));
-      this.logger.logNotEmpty(U8ToString(await U8StreamReadAll(p0.stdout)));
+      this.channel.errorNotEmpty(BunRunErrorCleaner(U8ToString(await U8StreamReadAll(p0.stderr))));
+      this.channel.logNotEmpty(U8ToString(await U8StreamReadAll(p0.stdout)));
     }
   }
 }

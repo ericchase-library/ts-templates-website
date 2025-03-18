@@ -8,11 +8,12 @@ export function Step_ExampleStep(): Step {
 }
 
 class CStep_ExampleStep implements Step {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   constructor() {}
+  async end(builder: BuilderInternal) {}
   async run(builder: BuilderInternal) {
     // Do whatever you want.
-    this.logger.log('Example  Step');
+    this.channel.log('Example  Step');
   }
 }

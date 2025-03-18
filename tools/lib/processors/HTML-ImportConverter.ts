@@ -10,7 +10,7 @@ export function Processor_HTML_ImportConverter(): ProcessorModule {
 }
 
 class CProcessor_HTML_ImportConverter implements ProcessorModule {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>) {
     for (const file of files) {

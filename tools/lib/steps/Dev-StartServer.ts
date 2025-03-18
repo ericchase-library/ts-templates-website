@@ -1,9 +1,7 @@
 import { Subprocess } from 'bun';
 import { AsyncLineReader } from 'src/lib/ericchase/Algorithm/Stream.js';
-import { AddStdinListener } from 'src/lib/ericchase/Platform/StdinReader.js';
-import { Debounce } from 'src/lib/ericchase/Utility/Debounce.js';
+import { AddStdInListener } from 'src/lib/ericchase/Platform/StdinReader.js';
 import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { Sleep } from 'src/lib/ericchase/Utility/Sleep.js';
 import { server_http } from 'src/lib/server/server.js';
 import { BuilderInternal, Step } from 'tools/lib/Builder.js';
 
@@ -14,67 +12,74 @@ export function Step_StartServer(): Step {
 }
 
 class CStep_StartServer implements Step {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   child_process?: Subprocess<'ignore', 'pipe', 'pipe'>;
-  enabled = false;
+  hotreload_enabled = true;
 
-  disable() {
-    this.enabled = false;
-    this.unwatch?.();
-    this.unwatch = undefined;
-    logger.log("Hot Refresh Off   (Press 'h' to toggle.)");
+  async end(builder: BuilderInternal) {
+    if (this.child_process !== undefined) {
+      this.child_process.kill();
+      this.child_process = undefined;
+      this.channel.log('Server Killed');
+    }
   }
-  enable(builder: BuilderInternal) {
-    this.enabled = true;
-    const onchange = Debounce(() => this.onchange(), 100);
-    this.unwatch = builder.platform.Directory.watch(builder.dir.out, onchange);
-    logger.log("Hot Refresh On    (Press 'h' to toggle.)");
-  }
-  onchange() {
-    fetch(`${server_http}/server/reload`).catch((error) => {
-      logger.error(error);
-    });
-  }
-  unwatch?: () => void;
-
   async run(builder: BuilderInternal) {
-    this.logger.log('Start Server');
-    if (builder.watchmode === true) {
+    // only start server if in watch mode
+    if (builder.watchmode !== true) {
+      return;
+    }
+
+    if (this.child_process === undefined) {
+      // start the server
+      this.channel.log('Start Server');
       const p0 = Bun.spawn(['bun', 'run', 'server/tools/start.ts'], { stderr: 'pipe', stdout: 'pipe' });
-      (async () => {
-        for await (const lines of AsyncLineReader(p0.stdout)) {
-          logger.log(...lines);
-        }
-      })().catch((error) => {
-        logger.error(error);
-      });
-      (async () => {
-        for await (const lines of AsyncLineReader(p0.stderr)) {
-          logger.error(...lines);
-        }
-      })().catch((error) => {
-        logger.error(error);
-      });
       this.child_process = p0;
 
-      // give the server some time to start up
-      Sleep(1000)
-        .then(() => {
-          this.enable(builder);
-          AddStdinListener(async (bytes, text) => {
-            if (text === 'h') {
-              if (this.enabled === true) {
-                this.disable();
-              } else {
-                this.enable(builder);
+      (async () => {
+        for await (const lines of AsyncLineReader(p0.stderr)) {
+          this.channel.error(...lines);
+        }
+      })().catch((error) => {
+        this.channel.error(error);
+      });
+
+      const [stdout, stdout_tee] = p0.stdout.tee();
+      (async () => {
+        for await (const lines of AsyncLineReader(stdout)) {
+          this.channel.log(...lines);
+        }
+      })().catch((error) => {
+        this.channel.error(error);
+      });
+
+      (async () => {
+        for await (const lines of AsyncLineReader(stdout_tee)) {
+          // wait for server to finish starting up before setting up hotkeys
+          if (lines.findIndex((line) => line.startsWith('Console at')) !== -1) {
+            // setup listener to toggle hot reloading
+            AddStdInListener(async (bytes, text) => {
+              if (text === 'h') {
+                this.hotreload_enabled = !this.hotreload_enabled;
+                if (this.hotreload_enabled === true) {
+                  this.channel.log("Hot Refresh On    (Press 'h' to toggle.)");
+                } else {
+                  this.channel.log("Hot Refresh Off   (Press 'h' to toggle.)");
+                }
               }
-            }
-          });
-        })
-        .catch((error) => {
-          logger.error(error);
-        });
+            });
+            this.channel.log("Hot Refresh On    (Press 'h' to toggle.)");
+            break;
+          }
+        }
+      })().catch((error) => {
+        this.channel.error(error);
+      });
+    } else if (this.hotreload_enabled === true) {
+      // trigger hot reload
+      fetch(`${server_http}/server/reload`).catch((error) => {
+        this.channel.error(error);
+      });
     }
   }
 }

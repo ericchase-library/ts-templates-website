@@ -11,11 +11,12 @@ export function Step_Project_PullLib(project_dir: CPath | string): Step {
 }
 
 class CStep_Project_PullLib implements Step {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   constructor(readonly external_directory: CPath) {}
+  async end(builder: BuilderInternal) {}
   async run(builder: BuilderInternal) {
-    this.logger.log('Pull Lib');
+    this.channel.log('Pull Lib');
     const steps = [
       // Mirror Database
       Step_MirrorDirectory({

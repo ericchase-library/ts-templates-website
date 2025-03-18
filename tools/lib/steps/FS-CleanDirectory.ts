@@ -9,11 +9,12 @@ export function Step_CleanDirectory(...paths: (CPath | string)[]): Step {
 }
 
 class CStep_CleanDirectory implements Step {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   constructor(readonly paths: CPath[]) {}
+  async end(builder: BuilderInternal) {}
   async run(builder: BuilderInternal) {
-    this.logger.log('Clean Directory');
+    this.channel.log('Clean Directory');
     for (const path of this.paths) {
       await builder.platform.Directory.delete(path);
       await builder.platform.Directory.create(path);

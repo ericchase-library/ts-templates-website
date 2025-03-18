@@ -1,5 +1,4 @@
-export type SubscriptionCallback<Value> = (value: Value, unsubscribe: () => void) => void;
-export type UpdateCallback<Value> = (value: Value) => Value;
+import { SubscriptionCallback, UpdateCallback } from 'src/lib/ericchase/Design Pattern/Observer/ObserverCallbacks.js';
 
 export class ConstantStore<Value> {
   protected subscriptionSet = new Set<SubscriptionCallback<Value>>();

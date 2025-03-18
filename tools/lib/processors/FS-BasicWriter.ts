@@ -13,7 +13,7 @@ export function Processor_BasicWriter(include_patterns: string[], exclude_patter
 }
 
 class CProcessor_BasicWriter implements ProcessorModule {
-  logger = logger.newChannel();
+  channel = logger.newChannel();
 
   constructor(
     readonly include_patterns: string[],

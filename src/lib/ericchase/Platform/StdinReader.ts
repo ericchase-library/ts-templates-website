@@ -15,13 +15,9 @@ function handler(bytes: Uint8Array): void {
   }
 }
 
-export function AddStdinListener(listener: (bytes: Uint8Array, text: string, removeSelf: () => boolean) => Promise<void>) {
-  listeners.add(listener);
-}
-
-export function StartStdinReader() {
+function SwitchToLineReader() {
   if (enabled === true && rawmode === true) {
-    StopStdinReader();
+    StopStdInReader();
   }
   if (enabled === false) {
     process.stdin //
@@ -32,10 +28,9 @@ export function StartStdinReader() {
     rawmode = false;
   }
 }
-
-export function StartStdinRawModeReader() {
+function SwitchToRawModeReader() {
   if (enabled === true && rawmode === false) {
-    StopStdinReader();
+    StopStdInReader();
   }
   if (enabled === false) {
     process.stdin //
@@ -47,8 +42,7 @@ export function StartStdinRawModeReader() {
     rawmode = true;
   }
 }
-
-export function StopStdinReader() {
+function StopReader() {
   if (enabled === true) {
     process.stdin //
       .pause()
@@ -57,5 +51,35 @@ export function StopStdinReader() {
     // await Sleep(0); // ??
     enabled = true;
     rawmode = false;
+  }
+}
+
+export function AddStdInListener(listener: (bytes: Uint8Array, text: string, removeSelf: () => boolean) => Promise<void>) {
+  listeners.add(listener);
+}
+
+const locks = new Set<() => void>();
+export function GetStdInReaderLock() {
+  const release = () => {
+    locks.delete(release);
+    if (locks.size === 0) {
+      StopReader();
+    }
+  };
+  locks.add(release);
+  return release;
+}
+
+export function StartStdInReader() {
+  SwitchToLineReader();
+}
+
+export function StartStdInRawModeReader() {
+  SwitchToRawModeReader();
+}
+
+export function StopStdInReader() {
+  if (locks.size === 0) {
+    StopReader();
   }
 }
