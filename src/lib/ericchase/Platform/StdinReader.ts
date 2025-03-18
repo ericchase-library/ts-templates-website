@@ -1,3 +1,5 @@
+import { Orphan } from 'src/lib/ericchase/Utility/Promise.js';
+
 // Gotchas:
 // If the stdin stream is switched to utf8 mode, it cannot be switched back to
 // byte mode (need to verify again). Instead, leave it in byte mode, and decode the bytes.
@@ -11,7 +13,7 @@ const listeners = new Set<(bytes: Uint8Array, text: string, removeSelf: () => bo
 function handler(bytes: Uint8Array): void {
   const text = decoder.decode(bytes);
   for (const listener of listeners) {
-    const ignore = listener(bytes, text, () => listeners.delete(listener));
+    Orphan(listener(bytes, text, () => listeners.delete(listener)));
   }
 }
 

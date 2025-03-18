@@ -12,8 +12,6 @@ import { Step_Format } from 'tools/lib/steps/FS-Format.js';
 // Use command line arguments to set watch mode.
 const builder = new Builder(Bun.argv[2] === '--watch' ? 'watch' : 'build');
 
-// During "dev" mode (when "--watch" is passed as an argument), the dev server
-// will start running with hot refreshing if enabled in your index file.
 // These steps are run during the startup phase only.
 builder.setStartupSteps([
   Step_Bun_Run({ cmd: ['bun', 'install'] }, 'quiet'),
@@ -40,13 +38,17 @@ builder.setProcessorModules([
   Processor_HTML_ImportConverter(),
   Processor_TypeScript_GenericBundler({ sourcemap: 'none', target: 'browser' }),
   Processor_TypeScript_GenericBundlerImportRemapper(),
-  Processor_BasicWriter(['**/*'], ['**/*.ts', `${builder.dir.lib.standard}/**/*`]), // all files except for .ts and lib files
-  Processor_BasicWriter(['**/*.module.ts', '**/*.script.ts'], []), // all module and script files
+  // all files except for .ts and lib files
+  Processor_BasicWriter(['**/*'], ['**/*.ts', `${builder.dir.lib.standard}/**/*`]),
+  // all module and script files
+  Processor_BasicWriter(['**/*.module.ts', '**/*.script.ts'], []),
   //
 ]);
 
 // These steps are run after each processing phase.
 builder.setAfterProcessingSteps([
+  // During "dev" mode (when "--watch" is passed as an argument), the server
+  // will start running with hot refreshing if enabled in your index file.
   Step_StartServer(),
   //
 ]);

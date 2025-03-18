@@ -138,3 +138,13 @@ export async function U8StreamReadSome(stream: ReadableStream<Uint8Array>, count
     reader.releaseLock();
   }
 }
+
+export async function U8StreamReadLines(stream: ReadableStream<Uint8Array>, callback: (line: string) => boolean | void) {
+  for await (const lines of AsyncLineReader(stream)) {
+    for (const line of lines) {
+      if (callback(line) === false) {
+        return;
+      }
+    }
+  }
+}

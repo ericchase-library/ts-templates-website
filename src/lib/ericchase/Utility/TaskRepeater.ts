@@ -1,3 +1,4 @@
+import { Orphan } from 'src/lib/ericchase/Utility/Promise.js';
 import { SyncAsync } from 'src/lib/ericchase/Utility/Types.js';
 
 export class TaskRepeater<ReturnType> {
@@ -27,7 +28,7 @@ export class TaskRepeater<ReturnType> {
   start() {
     if (this.$running === false) {
       this.$running = true;
-      const orphan = this.$executor();
+      Orphan(this.$executor());
     }
   }
   stop() {

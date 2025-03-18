@@ -8,6 +8,7 @@ import { Debounce } from 'src/lib/ericchase/Utility/Debounce.js';
 import { Defer } from 'src/lib/ericchase/Utility/Defer.js';
 import { AddLoggerOutputDirectory, Logger } from 'src/lib/ericchase/Utility/Logger.js';
 import { Map_GetOrDefault } from 'src/lib/ericchase/Utility/Map.js';
+import { Orphan } from 'src/lib/ericchase/Utility/Promise.js';
 import { Cache_FileStats_Lock, Cache_FileStats_Unlock } from 'tools/lib/cache/FileStatsCache.js';
 import { Cache_TryLockEach, Cache_UnlockAll } from 'tools/lib/cache/LockCache.js';
 
@@ -254,7 +255,7 @@ export class BuilderInternal {
       }, 100);
       this.$unwatchSource = this.platform.Directory.watch(this.dir.src, (event, path) => {
         event_paths.add(path.raw);
-        const orphan = process_events();
+        Orphan(process_events());
       });
       this.channel.log(`Watching "${this.dir.src.raw}"`);
     }
