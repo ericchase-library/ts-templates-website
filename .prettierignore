@@ -1,12 +1,16 @@
 # prettier ignores files setup in .gitignore
 
 # use biome for these
+# https://biomejs.dev/internals/language-support/
 *.js
+*.ts
+*.jsx
+*.tsx
 *.json
 *.jsonc
-*.jsx
-*.ts
-*.tsx
+*.css
+*.graphqls
+*.graphql
 
 # probably don't want to format your hand written documents
 coverage/

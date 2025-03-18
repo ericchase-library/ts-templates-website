@@ -8,7 +8,7 @@ import { Step_Project_PullLib } from 'tools/lib/steps/Dev-Project-PullLib.js';
 const builder = new Builder();
 
 builder.setStartupSteps([
-  Step_Bun_Run({ cmd: ['bun', 'install'] }),
+  Step_Bun_Run({ cmd: ['bun', 'install'] }, 'quiet'),
   Step_Project_PullLib('C:/Code/Base/Javascript-Typescript/Project@Template'),
   //
 ]);

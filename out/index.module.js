@@ -124,10 +124,8 @@ function NodeRef(node) {
 }
 
 // src/lib/server/server.ts
-var server_hostname = "127.0.0.1";
-var server_port = "8000";
-var server_http = `http://${server_hostname}:${server_port}`;
-var server_ws = `ws://${server_hostname}:${server_port}`;
+var server_http = `http://${window.location.host}/`;
+var server_ws = `ws://${window.location.host}/`;
 
 // src/lib/server/HotRefresh.ts
 var socket = undefined;

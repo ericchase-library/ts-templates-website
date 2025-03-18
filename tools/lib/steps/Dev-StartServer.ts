@@ -2,7 +2,6 @@ import { Subprocess } from 'bun';
 import { AsyncLineReader } from 'src/lib/ericchase/Algorithm/Stream.js';
 import { AddStdInListener } from 'src/lib/ericchase/Platform/StdinReader.js';
 import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { server_http } from 'src/lib/server/server.js';
 import { BuilderInternal, Step } from 'tools/lib/Builder.js';
 
 const logger = Logger(Step_StartServer.name);
@@ -16,6 +15,7 @@ class CStep_StartServer implements Step {
 
   child_process?: Subprocess<'ignore', 'pipe', 'pipe'>;
   hotreload_enabled = true;
+  server_href?: string;
 
   async end(builder: BuilderInternal) {
     if (this.child_process !== undefined) {
@@ -54,22 +54,26 @@ class CStep_StartServer implements Step {
       });
 
       (async () => {
+        // wait for server to finish starting up
+        // grab host and setup listener to toggle hot reloading
         for await (const lines of AsyncLineReader(stdout_tee)) {
-          // wait for server to finish starting up before setting up hotkeys
-          if (lines.findIndex((line) => line.startsWith('Console at')) !== -1) {
-            // setup listener to toggle hot reloading
-            AddStdInListener(async (bytes, text) => {
-              if (text === 'h') {
-                this.hotreload_enabled = !this.hotreload_enabled;
-                if (this.hotreload_enabled === true) {
-                  this.channel.log("Hot Refresh On    (Press 'h' to toggle.)");
-                } else {
-                  this.channel.log("Hot Refresh Off   (Press 'h' to toggle.)");
+          for (const line of lines) {
+            if (line.startsWith('Serving at')) {
+              this.server_href = line.slice('Serving at'.length).trim();
+            } else if (line.startsWith('Console at')) {
+              AddStdInListener(async (bytes, text) => {
+                if (text === 'h') {
+                  this.hotreload_enabled = !this.hotreload_enabled;
+                  if (this.hotreload_enabled === true) {
+                    this.channel.log("Hot Refresh On    (Press 'h' to toggle.)");
+                  } else {
+                    this.channel.log("Hot Refresh Off   (Press 'h' to toggle.)");
+                  }
                 }
-              }
-            });
-            this.channel.log("Hot Refresh On    (Press 'h' to toggle.)");
-            break;
+              });
+              this.channel.log("Hot Refresh On    (Press 'h' to toggle.)");
+              break;
+            }
           }
         }
       })().catch((error) => {
@@ -77,9 +81,11 @@ class CStep_StartServer implements Step {
       });
     } else if (this.hotreload_enabled === true) {
       // trigger hot reload
-      fetch(`${server_http}/server/reload`).catch((error) => {
-        this.channel.error(error);
-      });
+      if (this.server_href !== undefined) {
+        fetch(`${this.server_href}server/reload`).catch((error) => {
+          this.channel.error(error);
+        });
+      }
     }
   }
 }
