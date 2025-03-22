@@ -8,12 +8,12 @@ import { Cache_AreFilesEqual, Cache_RemoveFileStats, Cache_UpdateFileStats } fro
 
 const logger = Logger(Step_MirrorDirectory.name);
 
-export function Step_MirrorDirectory(options: { from: CPath | string; to: CPath | string; include_patterns?: string[]; exclude_patterns?: string[] }): Step {
+export function Step_MirrorDirectory(options: { from: CPath | string; to: CPath | string; include_patterns?: (CPath | string)[]; exclude_patterns?: (CPath | string)[] }): Step {
   return new CStep_MirrorDirectory({
     from: Path(options.from),
     to: Path(options.to),
-    include_patterns: options.include_patterns ?? ['*'],
-    exclude_patterns: options.exclude_patterns ?? [],
+    include_patterns: (options.include_patterns ?? ['*']).map((pattern) => Path(pattern).standard),
+    exclude_patterns: (options.exclude_patterns ?? []).map((pattern) => Path(pattern).standard),
   });
 }
 

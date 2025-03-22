@@ -6,12 +6,12 @@ import { Cache_AreFilesEqual, Cache_UpdateFileStats } from 'tools/lib/cache/File
 
 const logger = Logger(Step_CopyFiles.name);
 
-export function Step_CopyFiles(options: { from: CPath | string; to: CPath | string; include_patterns?: string[]; exclude_patterns?: string[]; overwrite?: boolean }): Step {
+export function Step_CopyFiles(options: { from: CPath | string; to: CPath | string; include_patterns?: (CPath | string)[]; exclude_patterns?: (CPath | string)[]; overwrite?: boolean }): Step {
   return new CStep_CopyFiles({
     from: Path(options.from),
     to: Path(options.to),
-    include_patterns: options.include_patterns ?? ['*'],
-    exclude_patterns: options.exclude_patterns ?? [],
+    include_patterns: (options.include_patterns ?? ['*']).map((pattern) => Path(pattern).standard),
+    exclude_patterns: (options.exclude_patterns ?? []).map((pattern) => Path(pattern).standard),
     overwrite: options.overwrite ?? false,
   });
 }

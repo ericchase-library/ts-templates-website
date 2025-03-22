@@ -20,7 +20,7 @@ class CStep_ArchiveDirectory implements Step {
   ) {}
   async end(builder: BuilderInternal) {}
   async run(builder: BuilderInternal) {
-    this.channel.log('Archive');
+    this.channel.log('Archive Directory');
     try {
       this.zip.addLocalFolder(this.dir.raw);
       this.zip.writeZip(this.outpath.raw);
