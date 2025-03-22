@@ -376,9 +376,7 @@ export class BuilderInternal {
     for (const file of this.$set_unprocessed_added_files) {
       tasks.push(this.firstRunProcessorList(file));
     }
-    for (const task of tasks) {
-      await task;
-    }
+    await Promise.all(tasks);
     this.$set_unprocessed_added_files.clear();
   }
 
@@ -416,9 +414,7 @@ export class BuilderInternal {
       }
       tasks.push(this.runProcessorList(file, waitlist, defer));
     }
-    for (const task of tasks) {
-      await task;
-    }
+    await Promise.all(tasks);
     this.$set_unprocessed_updated_files.clear();
   }
 
@@ -431,9 +427,7 @@ export class BuilderInternal {
   }
 
   async runProcessorList(file: ProjectFile, waitlist: Promise<void>[], defer?: Defer<void>) {
-    for (const task of waitlist) {
-      await task;
-    }
+    await Promise.all(waitlist);
     this.channel.log(`"${file.src_path.raw}"`);
     file.resetBytes();
     for (const { processor, method } of file.$processor_list) {

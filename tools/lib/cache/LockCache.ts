@@ -1,8 +1,5 @@
-import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { TaskRepeater } from 'src/lib/ericchase/Utility/TaskRepeater.js';
+import { TaskRepeater } from 'src/lib/ericchase/Utility/Task_TaskRepeater.js';
 import { cache_db, CreateAllQuery, CreateGetQuery, CreateRunQuery, QueryError, QueryExistsResult, QueryResult } from 'tools/lib/cache/cache.js';
-
-const logger = Logger('LockCache');
 
 const TAG = 'tag';
 const PID = 'pid';

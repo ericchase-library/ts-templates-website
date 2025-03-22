@@ -34,10 +34,10 @@ class CStep_StartServer implements Step {
       // start the server
       this.channel.log('Start Server');
       const p0 = Bun.spawn(['bun', 'run', 'server/tools/start.ts'], { stderr: 'pipe', stdout: 'pipe' });
-      this.child_process = p0;
       const [stdout, stdout_tee] = p0.stdout.tee();
       Orphan(U8StreamReadLines(p0.stderr, (line) => this.channel.error(line)));
       Orphan(U8StreamReadLines(stdout, (line) => this.channel.log(line)));
+      this.child_process = p0;
 
       Orphan(
         // wait for server to finish starting up

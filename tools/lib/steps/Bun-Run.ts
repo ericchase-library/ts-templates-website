@@ -22,7 +22,7 @@ class CStep_Bun_Run implements Step {
   async run(builder: BuilderInternal) {
     this.channel.log(`Command: "${this.cmd.join(' ')}" | Directory: "${this.dir}"`);
     const p0 = Bun.spawn(this.cmd, { cwd: this.dir, stderr: 'pipe', stdout: 'pipe' });
-    await Promise.allSettled([p0.exited]);
+    await p0.exited;
     if (this.logging === 'normal') {
       this.channel.errorNotEmpty(U8ToString(await U8StreamReadAll(p0.stderr)));
       this.channel.logNotEmpty(U8ToString(await U8StreamReadAll(p0.stdout)));
