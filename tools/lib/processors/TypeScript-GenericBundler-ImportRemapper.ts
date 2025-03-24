@@ -49,7 +49,7 @@ class CProcessor_TypeScript_GenericBundlerImportRemapper implements ProcessorMod
         const item_source = list_sources[BinarySearch.Insertion(list_sources, item_import, (a, b) => a.start < b.start) - 1]; // - 1 because insertion index would be 1 after
         if (item_source.path.equals(file.src_path) === false) {
           const path_join_source_import = Path(node_path.join(item_source.path.slice(0, -1).standard, item_import.path.standard));
-          const path_relative = GetRelativePath({ path: file.src_path, isFile: true }, { path: path_join_source_import, isFile: true });
+          const path_relative = GetRelativePath({ isFile: true, path: file.src_path }, { isFile: true, path: path_join_source_import });
           const path_fixed_import = path_relative.segments[0] === '..' ? path_relative.standard : `./${path_relative.standard}`;
           text_parts.push(text.slice(text_index, item_import.start), path_fixed_import);
           text_index = item_import.end;

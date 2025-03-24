@@ -1,11 +1,11 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
   "files": {
-    "maxSize": 5242880
+    "maxSize": 10240
   },
   "formatter": {
     "enabled": true,
-    "ignore": ["out/", "src/lib/ericchase/", "*-lock.json"],
+    "ignore": ["node_modules", "*-lock.json", "out/", "src/lib/ericchase/", "tools/lib/"],
     "attributePosition": "auto",
     "formatWithErrors": true,
     "indentStyle": "space",
@@ -43,7 +43,7 @@
   },
   "linter": {
     "enabled": true,
-    "ignore": ["out/", "src/lib/ericchase/", "*-lock.json"],
+    "ignore": ["node_modules", "*-lock.json", "out/", "src/lib/ericchase/", "tools/lib/"],
     "rules": {
       "complexity": {
         "noUselessConstructor": "off",
