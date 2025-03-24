@@ -46,6 +46,7 @@
     "ignore": ["node_modules", "*-lock.json", "out/", "src/lib/ericchase/", "tools/lib/"],
     "rules": {
       "complexity": {
+        "noBannedTypes": "off",
         "noUselessConstructor": "off",
         "noUselessTernary": "off"
       },

@@ -114,6 +114,7 @@ export function GetRelativePath(from: { path: CPath | string; isFile: boolean },
 // result is always a string that can be used as a filename.
 export function GetSanitizedFileName(name: CPath | string): string {
   return Path(name)
-    .standard.replace(/[^a-z0-9\.\_\-]/gi, '_')
+    .standard.replace(/ /g, '-')
+    .replace(/[^a-z0-9\.\_\-]/gi, '_')
     .toLowerCase();
 }

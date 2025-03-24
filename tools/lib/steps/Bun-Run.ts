@@ -24,6 +24,7 @@ class CStep_Bun_Run implements Step {
     const p0 = Bun.spawn(this.cmd, { cwd: this.dir, stderr: 'pipe', stdout: 'pipe' });
     await p0.exited;
     if (this.logging === 'normal') {
+      this.channel.logNotEmpty(`"${this.dir}"`);
       this.channel.errorNotEmpty(U8ToString(await U8StreamReadAll(p0.stderr)));
       this.channel.logNotEmpty(U8ToString(await U8StreamReadAll(p0.stdout)));
     }
