@@ -1,5 +1,5 @@
 import { default as node_fs } from 'node:fs';
-import { NormalizedPath } from 'src/lib/ericchase/Platform/FilePath.js';
+import { NormalizedPath } from './lib/ericchase/Platform/FilePath.js';
 import { ConsoleLog } from './lib/ericchase/Utility/Console.js';
 import { server } from './route-server.js';
 

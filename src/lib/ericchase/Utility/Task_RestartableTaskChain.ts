@@ -1,4 +1,4 @@
-import { SyncAsync } from 'src/lib/ericchase/Utility/Types.js';
+import { SyncAsync } from './Types.js';
 
 export function RestartableTaskChain(
   tasks: (() => SyncAsync<void>)[],

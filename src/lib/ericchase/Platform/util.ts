@@ -1,5 +1,5 @@
-import { CPath } from 'src/lib/ericchase/Platform/FilePath.js';
-import { CPlatformProvider } from 'src/lib/ericchase/Platform/PlatformProvider.js';
+import { CPath } from './FilePath.js';
+import { CPlatformProvider } from './PlatformProvider.js';
 
 export function globMatch(platform: CPlatformProvider, query: string, include_patterns: string[], exclude_patterns: string[]): boolean {
   let matched = false;

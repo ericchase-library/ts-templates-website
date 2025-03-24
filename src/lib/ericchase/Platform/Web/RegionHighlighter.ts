@@ -1,4 +1,4 @@
-import { Rect } from 'src/lib/ericchase/Utility/Rect.js';
+import { Rect } from '../../Utility/Rect.js';
 
 export class RegionHighlighter {
   element = document.createElement('div');

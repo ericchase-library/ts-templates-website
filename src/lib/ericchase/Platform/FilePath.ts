@@ -55,14 +55,6 @@ export class CPath {
     return this.raw.replaceAll('\\', '/');
   }
 
-  // Returns a relative path between this path and other.
-  getRelative(other: CPath | string): CPath {
-    if (other instanceof CPath) {
-      return Path(node_path.relative(this.standard, other.standard));
-    }
-    return Path(node_path.relative(this.standard, Path(other).standard));
-  }
-
   // String method counterparts that handle normalization and standardization
   // of operands.
   startsWith(other: CPath | string): boolean {
@@ -107,4 +99,21 @@ export function Path(...paths: (CPath | string)[]): CPath {
 // Resolves '..' and '.' segments of final path.
 export function NormalizedPath(...paths: (CPath | string)[]): CPath {
   return Path(node_path.normalize(Path(...paths).standard));
+}
+
+// Returns a relative path between the directory of one path and another path.
+export function GetRelativePath(from: { path: CPath | string; isFile: boolean }, to: { path: CPath | string; isFile: boolean }): CPath {
+  function getDirPath({ path, isFile }: { path: CPath | string; isFile: boolean }): string {
+    return isFile === true ? Path(path).slice(0, -1).raw : Path(path).raw;
+  }
+  return Path(node_path.relative(getDirPath(from), Path(to.path).raw));
+}
+
+// Sanitizes a string into a valid filename. If `name` is a file path, the path
+// segments will be considered invalid filename characters and replaced. The
+// result is always a string that can be used as a filename.
+export function GetSanitizedFileName(name: CPath | string): string {
+  return Path(name)
+    .standard.replace(/[^a-z0-9\.\_\-]/gi, '_')
+    .toLowerCase();
 }

@@ -1,4 +1,4 @@
-import { server_ws } from 'src/lib/server/server.js';
+import { server_ws } from './server.js';
 
 let socket: WebSocket | undefined = undefined;
 

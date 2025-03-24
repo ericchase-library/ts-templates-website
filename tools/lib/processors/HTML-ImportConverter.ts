@@ -1,7 +1,7 @@
-import { Path } from 'src/lib/ericchase/Platform/FilePath.js';
-import { ParseHTML } from 'src/lib/ericchase/Platform/NPM/NodeHTMLParser.js';
-import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { BuilderInternal, ProcessorModule, ProjectFile } from 'tools/lib/Builder.js';
+import { Path } from '../../../src/lib/ericchase/Platform/FilePath.js';
+import { ParseHTML } from '../../../src/lib/ericchase/Platform/NPM/NodeHTMLParser.js';
+import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
+import { BuilderInternal, ProcessorModule, ProjectFile } from '../Builder.js';
 
 const logger = Logger(Processor_HTML_ImportConverter.name);
 
@@ -27,8 +27,11 @@ class CProcessor_HTML_ImportConverter implements ProcessorModule {
     for (const script_tag of root_element.getElementsByTagName('script')) {
       const src = script_tag.getAttribute('src');
       if (src !== undefined) {
-        if (getBasename(src).endsWith('.ts')) {
+        if (getBasename(src)?.endsWith('.ts')) {
           script_tag.setAttribute('src', `${src.slice(0, src.lastIndexOf('.ts'))}.js`);
+          update_text = true;
+        } else if (getBasename(src)?.endsWith('.tsx')) {
+          script_tag.setAttribute('src', `${src.slice(0, src.lastIndexOf('.tsx'))}.js`);
           update_text = true;
         }
       }

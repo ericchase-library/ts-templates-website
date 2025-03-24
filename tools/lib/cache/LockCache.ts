@@ -1,5 +1,5 @@
-import { TaskRepeater } from 'src/lib/ericchase/Utility/Task_TaskRepeater.js';
-import { cache_db, CreateAllQuery, CreateGetQuery, CreateRunQuery, QueryError, QueryExistsResult, QueryResult } from 'tools/lib/cache/cache.js';
+import { TaskRepeater } from '../../../src/lib/ericchase/Utility/Task_TaskRepeater.js';
+import { cache_db, CreateAllQuery, CreateGetQuery, CreateRunQuery, QueryError, QueryExistsResult, QueryResult } from './cache.js';
 
 const TAG = 'tag';
 const PID = 'pid';

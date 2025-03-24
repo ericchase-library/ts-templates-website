@@ -1,4 +1,4 @@
-import { HasMethod, HasProperty } from 'src/lib/ericchase/Utility/Guard.js';
+import { HasMethod, HasProperty } from '../Utility/Guard.js';
 
 export function Compat_FileSystemEntry(entry?: FileSystemEntry) {
   return {

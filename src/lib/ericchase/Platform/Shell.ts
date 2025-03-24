@@ -1,7 +1,7 @@
-import { ArraySplit } from 'src/lib/ericchase/Algorithm/Array.js';
-import { JSONRawStringParse } from 'src/lib/ericchase/Algorithm/JSON.js';
-import { ConsoleError } from 'src/lib/ericchase/Utility/Console.js';
-import { Split, SplitMultipleSpaces } from 'src/lib/ericchase/Utility/String.js';
+import { ArraySplit } from '../Algorithm/Array.js';
+import { JSONRawStringParse } from '../Algorithm/JSON.js';
+import { ConsoleError } from '../Utility/Console.js';
+import { Split, SplitMultipleSpaces } from '../Utility/String.js';
 
 // The seemingly random JSONRawStringParse(String.raw``)s are to keep bundlers
 // from replacing the unicode code points with an alternative representation.

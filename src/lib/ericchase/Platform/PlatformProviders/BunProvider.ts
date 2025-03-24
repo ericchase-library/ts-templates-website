@@ -1,6 +1,6 @@
-import { U8StreamCompare } from 'src/lib/ericchase/Algorithm/Stream.js';
-import { PlatformProvider } from 'src/lib/ericchase/Platform/PlatformProvider.js';
-import NodeProvider from 'src/lib/ericchase/Platform/PlatformProviders/NodeProvider.js';
+import { U8StreamCompare } from '../../Algorithm/Stream.js';
+import { PlatformProvider } from '../PlatformProvider.js';
+import NodeProvider from './NodeProvider.js';
 
 const BunProvider = PlatformProvider();
 

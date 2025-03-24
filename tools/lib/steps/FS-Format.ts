@@ -1,6 +1,6 @@
-import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { BuilderInternal, Step } from 'tools/lib/Builder.js';
-import { Step_Bun_Run } from 'tools/lib/steps/Bun-Run.js';
+import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
+import { BuilderInternal, Step } from '../Builder.js';
+import { Step_Bun_Run } from './Bun-Run.js';
 
 const logger = Logger(Step_Format.name);
 
@@ -15,7 +15,7 @@ class CStep_Format implements Step {
   async end(builder: BuilderInternal) {}
   async run(builder: BuilderInternal) {
     this.channel.log('Format');
-    await Step_Bun_Run({ cmd: ['biome', 'format', '--files-ignore-unknown', 'true', '--verbose', '--write'] }, this.logging).run(builder);
+    await Step_Bun_Run({ cmd: ['biome', 'format', '--verbose', '--write'] }, this.logging).run(builder);
     await Step_Bun_Run({ cmd: ['prettier', '--write', '.'] }, this.logging).run(builder);
   }
 }

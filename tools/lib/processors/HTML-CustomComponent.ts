@@ -1,7 +1,7 @@
-import { Path } from 'src/lib/ericchase/Platform/FilePath.js';
-import { ParseHTML } from 'src/lib/ericchase/Platform/NPM/NodeHTMLParser.js';
-import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { BuilderInternal, ProcessorModule, ProjectFile } from 'tools/lib/Builder.js';
+import { Path } from '../../../src/lib/ericchase/Platform/FilePath.js';
+import { ParseHTML } from '../../../src/lib/ericchase/Platform/NPM/NodeHTMLParser.js';
+import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
+import { BuilderInternal, ProcessorModule, ProjectFile } from '../Builder.js';
 
 const logger = Logger(Processor_HTML_CustomComponent.name);
 

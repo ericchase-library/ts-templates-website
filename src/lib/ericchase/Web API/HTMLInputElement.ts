@@ -1,5 +1,5 @@
-import { HasProperty } from 'src/lib/ericchase/Utility/Guard.js';
-import { IsDeviceMobile } from 'src/lib/ericchase/Web API/Device.js';
+import { HasProperty } from '../Utility/Guard.js';
+import { IsDeviceMobile } from './Device.js';
 
 export function Compat_HTMLInputElement(input?: HTMLInputElement) {
   return {

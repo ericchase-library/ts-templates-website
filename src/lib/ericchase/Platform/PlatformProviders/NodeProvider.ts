@@ -1,6 +1,6 @@
 import { default as node_fs } from 'node:fs';
-import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
-import { PlatformProvider } from 'src/lib/ericchase/Platform/PlatformProvider.js';
+import { CPath, Path } from '../FilePath.js';
+import { PlatformProvider } from '../PlatformProvider.js';
 
 const NodeProvider = PlatformProvider();
 

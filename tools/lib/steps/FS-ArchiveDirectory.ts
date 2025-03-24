@@ -1,7 +1,7 @@
 import { default as AdmZip } from 'adm-zip';
-import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
-import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { BuilderInternal, Step } from 'tools/lib/Builder.js';
+import { CPath, Path } from '../../../src/lib/ericchase/Platform/FilePath.js';
+import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
+import { BuilderInternal, Step } from '../Builder.js';
 
 const logger = Logger(Step_ArchiveDirectory.name);
 

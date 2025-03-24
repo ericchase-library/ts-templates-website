@@ -1,9 +1,9 @@
 import { Subprocess } from 'bun';
-import { U8StreamReadLines } from 'src/lib/ericchase/Algorithm/Stream.js';
-import { AddStdInListener } from 'src/lib/ericchase/Platform/StdinReader.js';
-import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { Orphan } from 'src/lib/ericchase/Utility/Promise.js';
-import { BuilderInternal, Step } from 'tools/lib/Builder.js';
+import { U8StreamReadLines } from '../../../src/lib/ericchase/Algorithm/Stream.js';
+import { AddStdInListener } from '../../../src/lib/ericchase/Platform/StdinReader.js';
+import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
+import { Orphan } from '../../../src/lib/ericchase/Utility/Promise.js';
+import { BuilderInternal, Step } from '../Builder.js';
 
 const logger = Logger(Step_StartServer.name);
 

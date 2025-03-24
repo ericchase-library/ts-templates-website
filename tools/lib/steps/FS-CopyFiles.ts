@@ -1,8 +1,8 @@
-import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
-import { globScan } from 'src/lib/ericchase/Platform/util.js';
-import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { BuilderInternal, Step } from 'tools/lib/Builder.js';
-import { Cache_AreFilesEqual, Cache_UpdateFileStats } from 'tools/lib/cache/FileStatsCache.js';
+import { CPath, Path } from '../../../src/lib/ericchase/Platform/FilePath.js';
+import { globScan } from '../../../src/lib/ericchase/Platform/util.js';
+import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
+import { BuilderInternal, Step } from '../Builder.js';
+import { Cache_AreFilesEqual, Cache_UpdateFileStats } from '../cache/FileStatsCache.js';
 
 const logger = Logger(Step_CopyFiles.name);
 

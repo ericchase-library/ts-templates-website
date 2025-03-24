@@ -1,6 +1,6 @@
 import { default as node_fs } from 'node:fs';
-import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
-import { SplitLines } from 'src/lib/ericchase/Utility/String.js';
+import { CPath, Path } from './FilePath.js';
+import { SplitLines } from '../Utility/String.js';
 
 export type FileData = string | ArrayBufferLike | Blob | NodeJS.TypedArray<ArrayBufferLike>;
 export type FileStats = node_fs.Stats;

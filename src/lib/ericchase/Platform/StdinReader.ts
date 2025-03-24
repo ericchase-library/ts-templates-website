@@ -1,4 +1,4 @@
-import { Orphan } from 'src/lib/ericchase/Utility/Promise.js';
+import { Orphan } from '../Utility/Promise.js';
 
 // Gotchas:
 // If the stdin stream is switched to utf8 mode, it cannot be switched back to

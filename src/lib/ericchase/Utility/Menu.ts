@@ -1,6 +1,6 @@
-import { HandlerCaller } from 'src/lib/ericchase/Design Pattern/Handler.js';
-import { SplitLines } from 'src/lib/ericchase/Utility/String.js';
-import { SyncAsync } from 'src/lib/ericchase/Utility/Types.js';
+import { HandlerCaller } from '../Design Pattern/Handler.js';
+import { SplitLines } from './String.js';
+import { SyncAsync } from './Types.js';
 
 export type Menu = { name: string; label?: string; items: (Menu | MenuItem)[] };
 export type MenuItem = { name: string; action?: (options: MenuNavigatorSelectArgs) => SyncAsync<void> };

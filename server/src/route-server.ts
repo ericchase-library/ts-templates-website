@@ -1,5 +1,5 @@
 import { default as node_fs } from 'node:fs';
-import { NormalizedPath } from 'src/lib/ericchase/Platform/FilePath.js';
+import { GetRelativePath, NormalizedPath } from './lib/ericchase/Platform/FilePath.js';
 import { ConsoleLog } from './lib/ericchase/Utility/Console.js';
 
 export namespace server {
@@ -42,7 +42,7 @@ async function getPublicListing(): Promise<Response | undefined> {
       withFileTypes: true,
     })) {
       if (entry.isFile()) {
-        entries.push(public_path.getRelative(`${entry.parentPath}\\${entry.name}`).standard);
+        entries.push(GetRelativePath({ path: public_path, isFile: false }, { path: `${entry.parentPath}\\${entry.name}`, isFile: true }).standard);
       }
     }
     return new Response(JSON.stringify(entries.sort()));

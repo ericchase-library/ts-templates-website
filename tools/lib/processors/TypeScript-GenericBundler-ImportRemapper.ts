@@ -1,6 +1,8 @@
-import { Path } from 'src/lib/ericchase/Platform/FilePath.js';
-import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { BuilderInternal, ProcessorModule, ProjectFile } from 'tools/lib/Builder.js';
+import { default as node_path } from 'node:path';
+import { BinarySearch } from '../../../src/lib/ericchase/Algorithm/Search/BinarySearch.js';
+import { CPath, GetRelativePath, Path } from '../../../src/lib/ericchase/Platform/FilePath.js';
+import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
+import { BuilderInternal, ProcessorModule, ProjectFile } from '../Builder.js';
 
 const logger = Logger(Processor_TypeScript_GenericBundlerImportRemapper.name);
 
@@ -13,7 +15,7 @@ class CProcessor_TypeScript_GenericBundlerImportRemapper implements ProcessorMod
 
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>) {
     for (const file of files) {
-      if (file.src_path.endsWith('.module.ts')) {
+      if (file.src_path.endsWith('.module.ts') || file.src_path.endsWith('.module.tsx')) {
         file.addProcessor(this, this.onProcess);
       }
     }
@@ -21,70 +23,40 @@ class CProcessor_TypeScript_GenericBundlerImportRemapper implements ProcessorMod
   async onRemove(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {}
 
   async onProcess(builder: BuilderInternal, file: ProjectFile): Promise<void> {
-    let text = await file.getText();
-    let find_results = findImportPath(text);
-    while (find_results.indexStart !== -1) {
-      const import_path = Path(find_results.importPath);
-      if (import_path.startsWith(builder.dir.src.standard)) {
-        // replace src dir of import with ./ or ../ chain depending on from path
-        const new_import_path =
-          file.src_path.segments.length === 2 //
-            ? import_path.standard.replace('src/', './')
-            : import_path.standard.replace('src/', '../'.repeat(file.src_path.segments.length - 2));
-        text = text.slice(0, find_results.indexStart) + new_import_path + text.slice(find_results.indexEnd);
-        find_results.indexEnd = find_results.indexStart + new_import_path.length;
+    const text = await file.getText();
+
+    // can't do lines, because import statements will become multilined if long enough
+    const list_imports: { start: number; end: number; path: CPath }[] = [];
+    const matches_imports = text.matchAll(/^import[ *{"'][\s\S]*?[ }"']from *["']([^"']*?)["'];$/dgm);
+    for (const match of matches_imports) {
+      if (match.indices !== undefined) {
+        list_imports.push({ start: match.indices[1][0], end: match.indices[1][1], path: Path(match[1]) });
       }
-      find_results = findImportPath(text, find_results.indexEnd);
-    }
-    file.setText(text);
-  }
-}
-
-function indexOf(source: string, target: string, position = 0) {
-  const index = source.indexOf(target, position);
-  return { start: index, end: index + target.length };
-}
-function lastIndexOf(source: string, target: string, position = 0) {
-  const index = source.lastIndexOf(target, position);
-  return { start: index, end: index + target.length };
-}
-function findImportPath(text: string, indexStart = 0) {
-  while (indexStart !== -1) {
-    // find next "import"
-    const index_import = indexOf(text, 'import', indexStart);
-    if (-1 === index_import.start) {
-      break;
-    }
-    // find next ";" after "import"
-    const index_semicolon = indexOf(text, ';', index_import.end);
-    if (-1 === index_semicolon.start) {
-      break;
     }
 
-    // look backwards from ";" for matching pair of single or double quotes
-    const index_quotes = findQuotePairFromEnd(text, index_import.end, index_semicolon.start);
-    if (-1 === index_quotes.start) {
-      break;
-    }
+    if (list_imports.length > 0) {
+      const list_sources: { start: number; end: number; path: CPath }[] = [];
+      const matches_sources = text.matchAll(/^\/\/ (.*?)$/dgm);
+      for (const match of matches_sources) {
+        if (match.indices !== undefined) {
+          list_sources.push({ start: match.indices[1][0], end: match.indices[1][1], path: Path(match[1]) });
+        }
+      }
 
-    // return import path if extension is ".js"
-    const text_import_path = text.slice(index_quotes.start + 1, index_quotes.end);
-    if (Path(text_import_path).ext === '.js') {
-      return { indexStart: index_quotes.start + 1, indexEnd: index_quotes.end, importPath: text_import_path };
+      const text_parts: string[] = [];
+      let text_index = 0;
+      for (const item_import of list_imports) {
+        const item_source = list_sources[BinarySearch.Insertion(list_sources, item_import, (a, b) => a.start < b.start) - 1]; // - 1 because insertion index would be 1 after
+        if (item_source.path.equals(file.src_path) === false) {
+          const path_join_source_import = Path(node_path.join(item_source.path.slice(0, -1).standard, item_import.path.standard));
+          const path_relative = GetRelativePath({ path: file.src_path, isFile: true }, { path: path_join_source_import, isFile: true });
+          const path_fixed_import = path_relative.segments[0] === '..' ? path_relative.standard : `./${path_relative.standard}`;
+          text_parts.push(text.slice(text_index, item_import.start), path_fixed_import);
+          text_index = item_import.end;
+        }
+      }
+      text_parts.push(text.slice(text_index));
+      file.setText(text_parts.join(''));
     }
-    indexStart = index_import.end;
   }
-  return { indexStart: -1, indexEnd: -1, importPath: Path() };
-}
-function findQuotePairFromEnd(text: string, start: number, end: number) {
-  const slice = text.slice(start, end);
-  const double_end = slice.lastIndexOf('"');
-  const single_end = slice.lastIndexOf("'");
-  if (double_end === -1 && single_end === -1) {
-    return { start: -1, end: -1 };
-  }
-  if (double_end > single_end) {
-    return { start: start + slice.lastIndexOf('"', double_end - 1), end: start + double_end };
-  }
-  return { start: start + slice.lastIndexOf("'", single_end - 1), end: start + single_end };
 }

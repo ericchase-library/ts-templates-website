@@ -1,6 +1,6 @@
-import { CPath } from 'src/lib/ericchase/Platform/FilePath.js';
-import { cache_db, cache_platform, CreateAllQuery, CreateGetQuery, CreateRunQuery, QueryError, QueryExistsResult, QueryResult } from 'tools/lib/cache/cache.js';
-import { Cache_Lock, Cache_Unlock } from 'tools/lib/cache/LockCache.js';
+import { CPath } from '../../../src/lib/ericchase/Platform/FilePath.js';
+import { cache_db, cache_platform, CreateAllQuery, CreateGetQuery, CreateRunQuery, QueryError, QueryExistsResult, QueryResult } from './cache.js';
+import { Cache_Lock, Cache_Unlock } from './LockCache.js';
 import { default as xxhash } from 'xxhash-wasm';
 
 const { h64Raw } = await xxhash();

@@ -1,7 +1,7 @@
-import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
-import { CPlatformProvider } from 'src/lib/ericchase/Platform/PlatformProvider.js';
-import { Map_GetOrDefault } from 'src/lib/ericchase/Utility/Map.js';
-import { RemoveWhiteSpaceOnlyLinesFromTopAndBottom } from 'src/lib/ericchase/Utility/String.js';
+import { CPath, Path } from '../Platform/FilePath.js';
+import { CPlatformProvider } from '../Platform/PlatformProvider.js';
+import { Map_GetOrDefault } from './Map.js';
+import { RemoveWhiteSpaceOnlyLinesFromTopAndBottom } from './String.js';
 
 const LoggerOptions: {
   ceremony: boolean;

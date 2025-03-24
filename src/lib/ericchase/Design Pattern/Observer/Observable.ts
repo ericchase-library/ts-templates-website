@@ -1,4 +1,4 @@
-import { SubscriptionCallback } from 'src/lib/ericchase/Design Pattern/Observer/ObserverCallbacks.js';
+import { SubscriptionCallback } from './ObserverCallbacks.js';
 
 export class Observable<Value> {
   public notify(data: Value): void {

@@ -1,17 +1,9 @@
-import { UpdateMarkerManager } from 'src/lib/ericchase/Utility/UpdateMarker.js';
-
-const marker_manager = new UpdateMarkerManager();
 let newline_count = 0;
-
-export function GetConsoleMarker() {
-  return marker_manager.getNewMarker();
-}
 
 export function ConsoleError(...items: any[]) {
   // biome-ignore lint: this let's us search for undesired console[error]s
   console['error'](...items);
   newline_count = 0;
-  marker_manager.updateMarkers();
 }
 
 export function ConsoleErrorNotEmpty(...items: any[]) {
@@ -23,7 +15,6 @@ export function ConsoleErrorNotEmpty(...items: any[]) {
     // biome-ignore lint: this let's us search for undesired console[log]s
     console['error'](...items);
     newline_count = 0;
-    marker_manager.updateMarkers();
     break;
   }
 }
@@ -32,14 +23,12 @@ export function ConsoleErrorWithDate(...items: any[]) {
   // biome-ignore lint: this let's us search for undesired console[error]s
   console['error'](`[${new Date().toLocaleString()}]`, ...items);
   newline_count = 0;
-  marker_manager.updateMarkers();
 }
 
 export function ConsoleLog(...items: any[]) {
   // biome-ignore lint: this let's us search for undesired console[log]s
   console['log'](...items);
   newline_count = 0;
-  marker_manager.updateMarkers();
 }
 
 export function ConsoleLogNotEmpty(...items: any[]) {
@@ -51,7 +40,6 @@ export function ConsoleLogNotEmpty(...items: any[]) {
     // biome-ignore lint: this let's us search for undesired console[log]s
     console['log'](...items);
     newline_count = 0;
-    marker_manager.updateMarkers();
     break;
   }
 }
@@ -60,7 +48,6 @@ export function ConsoleLogWithDate(...items: any[]) {
   // biome-ignore lint: this let's us search for undesired console[log]s
   console['log'](`[${new Date().toLocaleString()}]`, ...items);
   newline_count = 0;
-  marker_manager.updateMarkers();
 }
 
 export function ConsoleNewline(ensure_count = 1) {
@@ -69,7 +56,6 @@ export function ConsoleNewline(ensure_count = 1) {
     console['log']();
     newline_count++;
   }
-  marker_manager.updateMarkers();
 }
 
 export function ConsoleLogToLines(items: Iterable<any>) {

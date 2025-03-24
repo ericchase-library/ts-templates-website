@@ -1,10 +1,10 @@
-import { Builder } from 'tools/lib/Builder.js';
-import { Processor_BasicWriter } from 'tools/lib/processors/FS-BasicWriter.js';
-import { Processor_TypeScript_GenericBundlerImportRemapper } from 'tools/lib/processors/TypeScript-GenericBundler-ImportRemapper.js';
-import { Processor_TypeScript_GenericBundler } from 'tools/lib/processors/TypeScript-GenericBundler.js';
-import { Step_Bun_Run } from 'tools/lib/steps/Bun-Run.js';
-import { Step_CleanDirectory } from 'tools/lib/steps/FS-CleanDirectory.js';
-import { Step_Format } from 'tools/lib/steps/FS-Format.js';
+import { Builder } from '../Builder.js';
+import { Processor_BasicWriter } from '../processors/FS-BasicWriter.js';
+import { Processor_TypeScript_GenericBundlerImportRemapper } from '../processors/TypeScript-GenericBundler-ImportRemapper.js';
+import { Processor_TypeScript_GenericBundler } from '../processors/TypeScript-GenericBundler.js';
+import { Step_Bun_Run } from '../steps/Bun-Run.js';
+import { Step_CleanDirectory } from '../steps/FS-CleanDirectory.js';
+import { Step_Format } from '../steps/FS-Format.js';
 
 // Use command line arguments to set watch mode.
 const builder = new Builder(Bun.argv[2] === '--watch' ? 'watch' : 'build');

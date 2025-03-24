@@ -1,6 +1,6 @@
-import { getLocalhost } from 'src/lib/database/dbdriver-localhost.js';
-import { server_http } from 'src/lib/server/server.js';
-import { ConsoleError } from 'src/lib/ericchase/Utility/Console.js';
+import { ConsoleError } from '../ericchase/Utility/Console.js';
+import { server_http } from '../server/server.js';
+import { getLocalhost } from './dbdriver-localhost.js';
 
 // const db = DatabaseDriver.getNeon(<insert a valid connection string>);
 const db = getLocalhost(server_http);

@@ -1,8 +1,8 @@
-import { U8StreamReadAll } from 'src/lib/ericchase/Algorithm/Stream.js';
-import { U8ToString } from 'src/lib/ericchase/Algorithm/Uint8Array.js';
-import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
-import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { BuilderInternal, Step } from 'tools/lib/Builder.js';
+import { U8StreamReadAll } from '../../../src/lib/ericchase/Algorithm/Stream.js';
+import { U8ToString } from '../../../src/lib/ericchase/Algorithm/Uint8Array.js';
+import { CPath, Path } from '../../../src/lib/ericchase/Platform/FilePath.js';
+import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
+import { BuilderInternal, Step } from '../Builder.js';
 
 const logger = Logger(Step_Bun_Run.name);
 
@@ -22,6 +22,7 @@ class CStep_Bun_Run implements Step {
   async run(builder: BuilderInternal) {
     this.channel.log(`Command: "${this.cmd.join(' ')}" | Directory: "${this.dir}"`);
     const p0 = Bun.spawn(this.cmd, { cwd: this.dir, stderr: 'pipe', stdout: 'pipe' });
+    this.channel.log('spawned');
     await p0.exited;
     if (this.logging === 'normal') {
       this.channel.errorNotEmpty(U8ToString(await U8StreamReadAll(p0.stderr)));

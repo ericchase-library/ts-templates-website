@@ -1,6 +1,6 @@
-import { U8StreamReadSome } from 'src/lib/ericchase/Algorithm/Stream.js';
-import { U8 } from 'src/lib/ericchase/Algorithm/Uint8Array.js';
-import { Compat_Blob } from 'src/lib/ericchase/Web API/Blob.js';
+import { U8StreamReadSome } from '../Algorithm/Stream.js';
+import { U8 } from '../Algorithm/Uint8Array.js';
+import { Compat_Blob } from './Blob.js';
 
 export function ReadSome(blob: Blob, count: number): Promise<Uint8Array> {
   const stream = Compat_Blob(blob).stream();

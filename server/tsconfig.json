@@ -15,8 +15,9 @@
     "skipLibCheck": true,
     "strict": true,
 
-    // Import aliases
-    "paths": { "src/*": ["./src/*"], "tools/*": ["./tools/*"] }
+    // Other options
+    "resolveJsonModule": true,
+    "jsx": "react-jsx"
   },
 
   // Include files for typescript/intellisense

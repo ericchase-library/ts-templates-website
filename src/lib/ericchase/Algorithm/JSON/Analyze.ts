@@ -1,4 +1,4 @@
-import { RecursiveRecord } from 'src/lib/ericchase/Utility/Types.js';
+import { RecursiveRecord } from '../../Utility/Types.js';
 
 export type JSONArray = (JSONArray | JSONObject | JSONPrimitive)[];
 export type JSONPrimitive = null | boolean | number | string;

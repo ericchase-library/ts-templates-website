@@ -1,13 +1,13 @@
-import { Builder } from 'tools/lib/Builder.js';
-import { Processor_BasicWriter } from 'tools/lib/processors/FS-BasicWriter.js';
-import { Processor_HTML_CustomComponent } from 'tools/lib/processors/HTML-CustomComponent.js';
-import { Processor_HTML_ImportConverter } from 'tools/lib/processors/HTML-ImportConverter.js';
-import { Processor_TypeScript_GenericBundlerImportRemapper } from 'tools/lib/processors/TypeScript-GenericBundler-ImportRemapper.js';
-import { Processor_TypeScript_GenericBundler } from 'tools/lib/processors/TypeScript-GenericBundler.js';
-import { Step_Bun_Run } from 'tools/lib/steps/Bun-Run.js';
-import { Step_StartServer } from 'tools/lib/steps/Dev-StartServer.js';
-import { Step_CleanDirectory } from 'tools/lib/steps/FS-CleanDirectory.js';
-import { Step_Format } from 'tools/lib/steps/FS-Format.js';
+import { Builder } from './lib/Builder.js';
+import { Processor_BasicWriter } from './lib/processors/FS-BasicWriter.js';
+import { Processor_HTML_CustomComponent } from './lib/processors/HTML-CustomComponent.js';
+import { Processor_HTML_ImportConverter } from './lib/processors/HTML-ImportConverter.js';
+import { Processor_TypeScript_GenericBundlerImportRemapper } from './lib/processors/TypeScript-GenericBundler-ImportRemapper.js';
+import { Processor_TypeScript_GenericBundler } from './lib/processors/TypeScript-GenericBundler.js';
+import { Step_Bun_Run } from './lib/steps/Bun-Run.js';
+import { Step_StartServer } from './lib/steps/Dev-StartServer.js';
+import { Step_CleanDirectory } from './lib/steps/FS-CleanDirectory.js';
+import { Step_Format } from './lib/steps/FS-Format.js';
 
 // Use command line arguments to set watch mode.
 const builder = new Builder(Bun.argv[2] === '--watch' ? 'watch' : 'build');
@@ -39,9 +39,9 @@ builder.setProcessorModules([
   Processor_TypeScript_GenericBundler({ sourcemap: 'none', target: 'browser' }),
   Processor_TypeScript_GenericBundlerImportRemapper(),
   // all files except for .ts and lib files
-  Processor_BasicWriter(['**/*'], ['**/*.ts', `${builder.dir.lib.standard}/**/*`]),
+  Processor_BasicWriter(['**/*'], ['**/*{.ts,.tsx,.jsx}', `${builder.dir.lib.standard}/**/*`]),
   // all module and script files
-  Processor_BasicWriter(['**/*.module.ts', '**/*.script.ts'], []),
+  Processor_BasicWriter(['**/*{.module,.script}{.ts,.tsx,.jsx}'], []),
   //
 ]);
 

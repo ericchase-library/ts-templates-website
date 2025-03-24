@@ -1,6 +1,6 @@
-import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { BuilderInternal, Step } from 'tools/lib/Builder.js';
-import { Step_Bun_Run } from 'tools/lib/steps/Bun-Run.js';
+import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
+import { BuilderInternal, Step } from '../Builder.js';
+import { Step_Bun_Run } from './Bun-Run.js';
 
 const logger = Logger(Step_Lint.name);
 

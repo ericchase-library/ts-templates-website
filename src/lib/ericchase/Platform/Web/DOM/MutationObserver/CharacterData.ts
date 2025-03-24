@@ -1,4 +1,4 @@
-import { MutationObserverSubscriptionCallback } from 'src/lib/ericchase/Platform/Web/DOM/MutationObserver/MutationObserverCallbacks.js';
+import { MutationObserverSubscriptionCallback } from './MutationObserverCallbacks.js';
 
 export class CharacterDataObserver {
   constructor({

@@ -1,5 +1,5 @@
-import { Orphan } from 'src/lib/ericchase/Utility/Promise.js';
-import { SyncAsync } from 'src/lib/ericchase/Utility/Types.js';
+import { Orphan } from './Promise.js';
+import { SyncAsync } from './Types.js';
 
 export class TaskRepeater<ReturnType> {
   $result?: SyncAsync<ReturnType>;

@@ -1,4 +1,4 @@
-import { SyncAsync } from 'src/lib/ericchase/Utility/Types.js';
+import { SyncAsync } from './Types.js';
 
 export class LazyTask<ReturnType> {
   $result?: SyncAsync<ReturnType>;

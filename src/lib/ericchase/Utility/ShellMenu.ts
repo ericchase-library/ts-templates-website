@@ -1,6 +1,6 @@
-import { Shell } from 'src/lib/ericchase/Platform/Shell.js';
-import { ConsoleLog } from 'src/lib/ericchase/Utility/Console.js';
-import { Menu, MenuNavigator, ParseMenu } from 'src/lib/ericchase/Utility/Menu.js';
+import { Shell } from '../Platform/Shell.js';
+import { ConsoleLog } from './Console.js';
+import { Menu, MenuNavigator, ParseMenu } from './Menu.js';
 
 export class ShellMenu {
   $current_item_index = 0;

@@ -1,4 +1,4 @@
-import { MutationObserverSubscriptionCallback } from 'src/lib/ericchase/Platform/Web/DOM/MutationObserver/MutationObserverCallbacks.js';
+import { MutationObserverSubscriptionCallback } from './MutationObserverCallbacks.js';
 
 export class ChildListObserver {
   constructor({ source = document.documentElement, options = { subtree: true } }: { source?: Node; options?: { subtree?: boolean } }) {

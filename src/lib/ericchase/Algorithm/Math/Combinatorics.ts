@@ -2,7 +2,7 @@
 // source array of N items. Use the nCr and nPr functions to quickly count the
 // number of combinations or permutations that would be produced.
 
-import { Factorial } from 'src/lib/ericchase/Algorithm/Math/Factorial.js';
+import { Factorial } from './Factorial.js';
 
 export function nCr(n: number, r: number, repetitions = false): bigint {
   if (repetitions === true) {

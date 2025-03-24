@@ -1,4 +1,4 @@
-import { SubscriptionCallback, UpdateCallback } from 'src/lib/ericchase/Design Pattern/Observer/ObserverCallbacks.js';
+import { SubscriptionCallback, UpdateCallback } from './ObserverCallbacks.js';
 
 export class ConstantStore<Value> {
   protected subscriptionSet = new Set<SubscriptionCallback<Value>>();

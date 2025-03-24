@@ -1,7 +1,7 @@
-import { CPath, Path } from 'src/lib/ericchase/Platform/FilePath.js';
-import { globMatch } from 'src/lib/ericchase/Platform/util.js';
-import { Logger } from 'src/lib/ericchase/Utility/Logger.js';
-import { BuilderInternal, ProcessorModule, ProjectFile } from 'tools/lib/Builder.js';
+import { CPath, Path } from '../../../src/lib/ericchase/Platform/FilePath.js';
+import { globMatch } from '../../../src/lib/ericchase/Platform/util.js';
+import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
+import { BuilderInternal, ProcessorModule, ProjectFile } from '../Builder.js';
 
 const logger = Logger(Processor_BasicWriter.name);
 

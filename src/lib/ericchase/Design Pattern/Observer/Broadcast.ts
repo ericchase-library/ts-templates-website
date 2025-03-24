@@ -1,4 +1,4 @@
-import { SubscriptionCallback } from 'src/lib/ericchase/Design Pattern/Observer/ObserverCallbacks.js';
+import { SubscriptionCallback } from './ObserverCallbacks.js';
 
 export class Broadcast<Value> {
   protected subscriptionSet = new Set<SubscriptionCallback<Value>>();

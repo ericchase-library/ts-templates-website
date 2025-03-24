@@ -1,8 +1,9 @@
 // ? seems to work
 
-import { ArrayEndpoints } from 'src/lib/ericchase/Algorithm/Array.js';
-import { Midpoint } from 'src/lib/ericchase/Algorithm/Math.js';
+import { ArrayEndpoints } from '../Array.js';
+import { Midpoint } from '../Math.js';
 
+// Returns index of item that "equals" target; otherwise, -1.
 export function BinarySearch<T>(array: T[], target: T, isOrdered: (a: T, b: T) => boolean = (a: T, b: T) => a < b): number {
   let [begin, end] = ArrayEndpoints(array);
   let middle = Midpoint(begin, end);
@@ -10,21 +11,18 @@ export function BinarySearch<T>(array: T[], target: T, isOrdered: (a: T, b: T) =
     if (isOrdered(target, array[middle])) {
       end = middle;
     } else {
-      if (!isOrdered(array[middle], target)) {
-        break;
-      }
       begin = middle + 1;
     }
     middle = Midpoint(begin, end);
   }
-  return middle;
+  if (isOrdered(array[middle - 1], target) === false) {
+    return middle - 1;
+  }
+  return -1;
 }
 
-// dunno what these are anymore
-function Lower<T>(array: T[], target: T, isOrdered: (a: T, b: T) => boolean = (a: T, b: T) => a < b): number {
-  return BinarySearch.Upper(array, target, (a: T, b: T) => isOrdered(a, b) || !isOrdered(b, a)) + 1;
-}
-function Upper<T>(array: T[], target: T, isOrdered: (a: T, b: T) => boolean = (a: T, b: T) => a < b): number {
+// Returns index where target is or would be inserted.
+function Insertion<T>(array: T[], target: T, isOrdered: (a: T, b: T) => boolean = (a: T, b: T) => a < b): number {
   let [begin, end] = ArrayEndpoints(array);
   let middle = Midpoint(begin, end);
   while (begin < end) {
@@ -35,9 +33,10 @@ function Upper<T>(array: T[], target: T, isOrdered: (a: T, b: T) => boolean = (a
     }
     middle = Midpoint(begin, end);
   }
-  return middle - 1;
+  if (isOrdered(array[middle - 1], target) === false) {
+    return middle - 1;
+  }
+  return middle;
 }
 
-// there's an issue with Bun's Transpiler with generic arrow functions <T>()=>{}
-BinarySearch.Lower = Lower;
-BinarySearch.Upper = Upper;
+BinarySearch.Insertion = Insertion;

@@ -1,4 +1,4 @@
-import { SyncAsync } from 'src/lib/ericchase/Utility/Types.js';
+import { SyncAsync } from '../Utility/Types.js';
 
 export type Handler<Request = void, Actions = void> = (
   request: Request,

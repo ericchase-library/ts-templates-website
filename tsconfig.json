@@ -17,9 +17,7 @@
 
     // Other options
     "resolveJsonModule": true,
-
-    // Import aliases
-    "paths": { "src/*": ["./src/*"], "tools/*": ["./tools/*"] }
+    "jsx": "react-jsx"
   },
 
   // Include files for typescript/intellisense

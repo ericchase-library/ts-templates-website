@@ -1,4 +1,4 @@
-import { HasMethod } from 'src/lib/ericchase/Utility/Guard.js';
+import { HasMethod } from '../Utility/Guard.js';
 
 export function Compat_DataTransferItem(item?: DataTransferItem) {
   return {
