@@ -18,68 +18,18 @@ class CStep_Project_PullLib implements Step {
   async run(builder: BuilderInternal) {
     this.channel.log('Pull Lib');
     const steps = [
-      // // Mirror Database
-      // Step_MirrorDirectory({
-      //   from: Path(this.external_directory, 'database'),
-      //   to: 'database',
-      //   include_patterns: ['**/*'],
-      //   //
-      // }),
-
-      // // Mirror Server
-      // Step_MirrorDirectory({
-      //   from: Path(this.external_directory, 'server'),
-      //   to: 'server',
-      //   include_patterns: ['**/*'],
-      //   exclude_patterns: ['node_modules/**/*', 'bun.lockb'],
-      //   //
-      // }),
-
-      // Mirror Lib
-      // Step_MirrorDirectory({
-      //   from: Path(this.external_directory, 'src/lib/database'),
-      //   to: Path(builder.dir.lib, 'database'),
-      //   include_patterns: ['**/*.ts'],
-      //   exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
-      //   //
-      // }),
       Step_MirrorDirectory({
         from: Path(this.external_directory, 'src/lib/ericchase'),
         to: Path(builder.dir.lib, 'ericchase'),
         include_patterns: ['**/*.ts'],
-        exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
         //
       }),
-      // Step_MirrorDirectory({
-      //   from: Path(this.external_directory, 'src/lib/server'),
-      //   to: Path(builder.dir.lib, 'server'),
-      //   include_patterns: ['**/*.ts'],
-      //   exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
-      //   //
-      // }),
-
-      // Mirror Tools Lib
       Step_MirrorDirectory({
         from: Path(this.external_directory, 'tools/lib'),
         to: Path(builder.dir.tools, 'lib'),
         include_patterns: ['**/*.ts'],
-        exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
         //
       }),
-
-      // Copy Example Build Scripts
-      Step_CopyFiles({
-        from: Path(this.external_directory, 'tools/lib/examples'),
-        to: Path(builder.dir.tools),
-        include_patterns: [
-          'build.ts',
-          'pull.ts',
-          //
-        ],
-        overwrite: false,
-      }),
-
-      // Copy Root Files
       Step_CopyFiles({
         from: Path(this.external_directory, './'),
         to: './',
@@ -92,7 +42,7 @@ class CStep_Project_PullLib implements Step {
           'tsconfig.json',
           //
         ],
-        overwrite: false,
+        overwrite: true,
       }),
     ];
     for (const step of steps) {
