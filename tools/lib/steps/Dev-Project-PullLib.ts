@@ -42,7 +42,7 @@ class CStep_Project_PullLib implements Step {
           'tsconfig.json',
           //
         ],
-        overwrite: true,
+        overwrite: false,
       }),
     ];
     for (const step of steps) {
