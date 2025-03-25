@@ -1,15 +1,3 @@
-export function ArrayAreEqual(array_a: ArrayLike<any>, array_b: ArrayLike<any>): boolean {
-  if (array_a.length !== array_b.length) {
-    return false;
-  }
-  for (let i = 0; i < array_a.length; i++) {
-    if (array_a[i] !== array_b[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
 export function* ArrayChunks<T>(array: T[], count: number): Generator<{ begin: number; end: number; slice: T[] }> {
   if (count > array.length) {
     yield { begin: 0, end: array.length, slice: array.slice() };
@@ -29,6 +17,18 @@ export function ArrayEndpoints<T>(array: T[]): [number, number] {
     return [-1, -1];
   }
   return [0, array.length];
+}
+
+export function ArrayEquals(array: ArrayLike<any>, other: ArrayLike<any>): boolean {
+  if (array.length !== other.length) {
+    return false;
+  }
+  for (let i = 0; i < array.length; i++) {
+    if (array[i] !== other[i]) {
+      return false;
+    }
+  }
+  return true;
 }
 
 export function ArrayShuffle<T>(items: T[]) {

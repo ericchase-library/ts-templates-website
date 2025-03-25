@@ -34,6 +34,7 @@ class CStep_Project_PullLib implements Step {
         from: Path(this.external_directory, './'),
         to: './',
         include_patterns: [
+          '.vscode/settings.json',
           '.gitignore',
           '.prettierignore',
           '.prettierrc',

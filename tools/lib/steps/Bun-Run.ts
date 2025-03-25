@@ -6,8 +6,10 @@ import { BuilderInternal, Step } from '../Builder.js';
 
 const logger = Logger(Step_Bun_Run.name);
 
-export function Step_Bun_Run({ cmd, dir }: { cmd: string[]; dir?: CPath | string }, logging?: 'normal' | 'quiet'): Step {
-  return new CStep_Bun_Run(cmd, Path(dir ?? process.cwd()).raw, logging ?? 'normal');
+type SpawnOptions = NonNullable<Parameters<typeof Bun.spawn>[1]>;
+
+export function Step_Bun_Run({ cmd, dir, stdin }: { cmd: string[]; dir?: CPath | string; stdin?: SpawnOptions['stdin'] }, logging?: 'normal' | 'quiet'): Step {
+  return new CStep_Bun_Run(cmd, Path(dir ?? process.cwd()).raw, stdin ?? 'ignore', logging ?? 'normal');
 }
 
 class CStep_Bun_Run implements Step {
@@ -16,12 +18,13 @@ class CStep_Bun_Run implements Step {
   constructor(
     readonly cmd: string[],
     readonly dir: string,
+    readonly stdin: SpawnOptions['stdin'],
     readonly logging?: 'normal' | 'quiet',
   ) {}
   async end(builder: BuilderInternal) {}
   async run(builder: BuilderInternal) {
     this.channel.log(`Command: "${this.cmd.join(' ')}" | Directory: "${this.dir}"`);
-    const p0 = Bun.spawn(this.cmd, { cwd: this.dir, stderr: 'pipe', stdout: 'pipe' });
+    const p0 = Bun.spawn(this.cmd, { cwd: this.dir, stdin: this.stdin, stderr: 'pipe', stdout: 'pipe' });
     await p0.exited;
     if (this.logging === 'normal') {
       this.channel.logNotEmpty(`"${this.dir}"`);
