@@ -73,7 +73,7 @@ This folder contains the actual build tools that build the project.
 
 This folder is produced during the normal build process and will contain the final compiled/bundled source code.
 
-- This project produces a final vanilla HTML, CSS, and JavaScript website.
+- This project produces a vanilla HTML, CSS, and JavaScript website.
 - _You may modify the contents of this folder for testing and debugging purposes, but keep in mind that these files are overwritten during each build._
 
 ### ./server/
