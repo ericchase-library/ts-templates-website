@@ -29,7 +29,6 @@ class CStep_StartServer implements Step {
     if (builder.watchmode !== true) {
       return;
     }
-
     if (this.child_process === undefined) {
       // start the server
       this.channel.log('Start Server');
@@ -38,7 +37,6 @@ class CStep_StartServer implements Step {
       Orphan(U8StreamReadLines(p0.stderr, (line) => this.channel.error(line)));
       Orphan(U8StreamReadLines(stdout, (line) => this.channel.log(line)));
       this.child_process = p0;
-
       Orphan(
         // wait for server to finish starting up
         // grab host and setup listener to toggle hot reloading

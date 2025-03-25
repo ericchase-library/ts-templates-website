@@ -19,7 +19,6 @@ class CProcessor_BasicWriter implements ProcessorModule {
     readonly include_patterns: string[],
     readonly exclude_patterns: string[],
   ) {}
-
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {
     for (const file of files) {
       if (globMatch(builder.platform, file.src_path.standard, this.include_patterns, this.exclude_patterns) === true) {
@@ -28,7 +27,6 @@ class CProcessor_BasicWriter implements ProcessorModule {
     }
   }
   async onRemove(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {}
-
   async onProcess(builder: BuilderInternal, file: ProjectFile): Promise<void> {
     await file.write();
   }

@@ -21,10 +21,8 @@ class CProcessor_TypeScript_GenericBundlerImportRemapper implements ProcessorMod
     }
   }
   async onRemove(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {}
-
   async onProcess(builder: BuilderInternal, file: ProjectFile): Promise<void> {
     const text = await file.getText();
-
     // can't do lines, because import statements will become multilined if long enough
     const list_imports: { start: number; end: number; path: CPath }[] = [];
     const matches_imports = text.matchAll(/^import[ *{"'][\s\S]*?[ }"']from *["']([^"']*?)["'];$/dgm);
@@ -33,7 +31,6 @@ class CProcessor_TypeScript_GenericBundlerImportRemapper implements ProcessorMod
         list_imports.push({ start: match.indices[1][0], end: match.indices[1][1], path: Path(match[1]) });
       }
     }
-
     if (list_imports.length > 0) {
       const list_sources: { start: number; end: number; path: CPath }[] = [];
       const matches_sources = text.matchAll(/^\/\/ (.*?)$/dgm);
@@ -42,7 +39,6 @@ class CProcessor_TypeScript_GenericBundlerImportRemapper implements ProcessorMod
           list_sources.push({ start: match.indices[1][0], end: match.indices[1][1], path: Path(match[1]) });
         }
       }
-
       const text_parts: string[] = [];
       let text_index = 0;
       for (const item_import of list_imports) {

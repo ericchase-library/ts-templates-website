@@ -15,10 +15,10 @@ class CProcessor_TypeScript_GenericBundler implements ProcessorModule {
   channel = logger.newChannel();
 
   bundlefile_set = new Set<ProjectFile>();
+
   constructor(readonly config: Required<BuildConfig>) {
     this.config.external.push('*.module.js');
   }
-
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>) {
     let trigger_reprocess = false;
     for (const file of files) {
@@ -51,7 +51,6 @@ class CProcessor_TypeScript_GenericBundler implements ProcessorModule {
       }
     }
   }
-
   async onProcess(builder: BuilderInternal, file: ProjectFile): Promise<void> {
     try {
       const results = await Bun.build({
