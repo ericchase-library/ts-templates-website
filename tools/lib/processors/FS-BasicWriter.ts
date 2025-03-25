@@ -1,5 +1,5 @@
 import { CPath, Path } from '../../../src/lib/ericchase/Platform/FilePath.js';
-import { globMatch } from '../../../src/lib/ericchase/Platform/util.js';
+import { globMatch } from '../../../src/lib/ericchase/Platform/Glob_Utility.js';
 import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
 import { BuilderInternal, ProcessorModule, ProjectFile } from '../Builder.js';
 

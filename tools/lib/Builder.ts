@@ -1,4 +1,4 @@
-import { RefCounter } from '../../src/lib/ericchase/Design Pattern/Observer/RefCounter.js';
+import { RefCounter } from '../../src/lib/ericchase/DesignPattern/Observer/RefCounter.js';
 import { CPath, Path } from '../../src/lib/ericchase/Platform/FilePath.js';
 import { CPlatformProvider, FileStats, getPlatformProvider, PlatformProviderId, UnimplementedProvider } from '../../src/lib/ericchase/Platform/PlatformProvider.js';
 import { KEYS } from '../../src/lib/ericchase/Platform/Shell.js';
@@ -56,19 +56,19 @@ export class Builder {
 
   forceProcessFile() {}
 
-  setStartupSteps(steps: Step[]): void {
+  setStartupSteps(...steps: Step[]): void {
     this.$internal.startup_steps = steps;
   }
-  setBeforeProcessingSteps(steps: Step[]): void {
+  setBeforeProcessingSteps(...steps: Step[]): void {
     this.$internal.before_steps = steps;
   }
-  setProcessorModules(modules: ProcessorModule[]): void {
+  setProcessorModules(...modules: ProcessorModule[]): void {
     this.$internal.processor_modules = modules;
   }
-  setAfterProcessingSteps(steps: Step[]): void {
+  setAfterProcessingSteps(...steps: Step[]): void {
     this.$internal.after_steps = steps;
   }
-  setCleanupSteps(steps: Step[]): void {
+  setCleanupSteps(...steps: Step[]): void {
     this.$internal.cleanup_steps = steps;
   }
 

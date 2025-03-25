@@ -1,4 +1,4 @@
-import { Store } from '../Design Pattern/Observer/Store.js';
+import { Store } from '../DesignPattern/Observer/Store.js';
 import { ConsoleLog } from './Console.js';
 
 type SubscriptionCallback<Result, Tag> = (result?: Result, error?: Error, tag?: Tag) => { abort: boolean } | void;

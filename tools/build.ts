@@ -13,15 +13,15 @@ import { Step_Format } from './lib/steps/FS-Format.js';
 const builder = new Builder(Bun.argv[2] === '--watch' ? 'watch' : 'build');
 
 // These steps are run during the startup phase only.
-builder.setStartupSteps([
+builder.setStartupSteps(
   Step_Bun_Run({ cmd: ['bun', 'install'] }, 'quiet'),
   Step_CleanDirectory(builder.dir.out),
   Step_Format('quiet'),
   //
-]);
+);
 
 // These steps are run before each processing phase.
-builder.setBeforeProcessingSteps([]);
+builder.setBeforeProcessingSteps();
 
 // Basic setup for a typescript powered website. Typescript files that match
 // "*.module.ts" and "*.script.ts" are bundled and written to the out folder.
@@ -33,7 +33,7 @@ builder.setBeforeProcessingSteps([]);
 
 // HTML custom components are a lightweight alternative to web components made
 // possible by the processors below. There are examples
-builder.setProcessorModules([
+builder.setProcessorModules(
   Processor_HTML_CustomComponent(),
   Processor_HTML_ImportConverter(),
   Processor_TypeScript_GenericBundler({ sourcemap: 'none', target: 'browser' }),
@@ -43,17 +43,17 @@ builder.setProcessorModules([
   // all module and script files
   Processor_BasicWriter(['**/*{.module,.script}{.ts,.tsx,.jsx}'], []),
   //
-]);
+);
 
 // These steps are run after each processing phase.
-builder.setAfterProcessingSteps([
+builder.setAfterProcessingSteps(
   // During "dev" mode (when "--watch" is passed as an argument), the server
   // will start running with hot refreshing if enabled in your index file.
   Step_StartServer(),
   //
-]);
+);
 
 // These steps are run during the shutdown phase only.
-builder.setCleanupSteps([]);
+builder.setCleanupSteps();
 
 await builder.start();

@@ -1,5 +1,5 @@
 import { CPath, Path } from '../../../src/lib/ericchase/Platform/FilePath.js';
-import { globScan } from '../../../src/lib/ericchase/Platform/util.js';
+import { globScan } from '../../../src/lib/ericchase/Platform/Glob_Utility.js';
 import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
 import { BuilderInternal, Step } from '../Builder.js';
 import { Cache_AreFilesEqual, Cache_RemoveFileStats, Cache_UpdateFileStats } from '../cache/FileStatsCache.js';

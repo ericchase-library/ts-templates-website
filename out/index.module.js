@@ -5,7 +5,7 @@ function ConsoleError(...items) {
   newline_count = 0;
 }
 
-// src/lib/ericchase/Web API/Node_Utility.ts
+// src/lib/ericchase/WebAPI/Node_Utility.ts
 class CNodeRef {
   node;
   constructor(node) {

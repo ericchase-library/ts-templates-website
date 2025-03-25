@@ -1,4 +1,4 @@
-import { HandlerCaller } from '../Design Pattern/Handler.js';
+import { HandlerCaller } from '../DesignPattern/Handler.js';
 import { SplitLines } from './String.js';
 import { SyncAsync } from './Types.js';
 

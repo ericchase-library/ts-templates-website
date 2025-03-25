@@ -8,7 +8,7 @@ import { Step_MirrorDirectory } from './lib/steps/FS-MirrorDirectory.js';
 // updating templates and concrete projects.
 const builder = new Builder();
 
-builder.setStartupSteps([
+builder.setStartupSteps(
   Step_Bun_Run({ cmd: ['bun', 'install'] }, 'quiet'),
   Step_Project_PullLib('C:/Code/Base/Javascript-Typescript/Project@Template'),
   Step_MirrorDirectory({
@@ -17,6 +17,6 @@ builder.setStartupSteps([
     include_patterns: ['**/*'],
     exclude_patterns: ['node_modules', 'bun.lock'], //
   }), //
-]);
+);
 
 await builder.start();
