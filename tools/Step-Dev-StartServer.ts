@@ -1,9 +1,10 @@
 import { Subprocess } from 'bun';
-import { U8StreamReadLines } from '../../../src/lib/ericchase/Algorithm/Stream.js';
-import { AddStdInListener } from '../../../src/lib/ericchase/Platform/StdinReader.js';
-import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
-import { Orphan } from '../../../src/lib/ericchase/Utility/Promise.js';
-import { BuilderInternal, Step } from '../Builder.js';
+import { U8StreamReadLines } from '../src/lib/ericchase/Algorithm/Stream.js';
+import { Path } from '../src/lib/ericchase/Platform/FilePath.js';
+import { AddStdInListener } from '../src/lib/ericchase/Platform/StdinReader.js';
+import { Logger } from '../src/lib/ericchase/Utility/Logger.js';
+import { Orphan } from '../src/lib/ericchase/Utility/Promise.js';
+import { BuilderInternal, Step } from './lib/Builder.js';
 
 const logger = Logger(Step_StartServer.name);
 
@@ -32,7 +33,7 @@ class CStep_StartServer implements Step {
     if (this.child_process === undefined) {
       // start the server
       this.channel.log('Start Server');
-      const p0 = Bun.spawn(['bun', 'run', 'server/tools/start.ts'], { stderr: 'pipe', stdout: 'pipe' });
+      const p0 = Bun.spawn(['bun', 'run', 'server/tools/start.ts'], { env: { PUBLIC_PATH: Path('..', builder.dir.out).raw }, stderr: 'pipe', stdout: 'pipe' });
       const [stdout, stdout_tee] = p0.stdout.tee();
       Orphan(U8StreamReadLines(p0.stderr, (line) => this.channel.error(line)));
       Orphan(U8StreamReadLines(stdout, (line) => this.channel.log(line)));

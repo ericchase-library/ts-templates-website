@@ -1,9 +1,17 @@
 {
   "dependencies": {
-    "chalk": "^5.4.1",
-    "pg": "^8.14.0"
+    "pg": "^8.14.1"
   },
   "devDependencies": {
-    "@types/pg": "^8.11.11"
-  }
+    "@biomejs/biome": "^1.9.4",
+    "@types/bun": "^1.2.5",
+    "@types/pg": "^8.11.11",
+    "prettier": "^3.5.3"
+  },
+  "scripts": {
+    "format": "bun run tools/format.ts",
+    "lint": "biome lint --error-on-warnings --write",
+    "start": "bun run tools/start.ts"
+  },
+  "type": "module"
 }

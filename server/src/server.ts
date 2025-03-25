@@ -1,18 +1,16 @@
 import { ServerWebSocket } from 'bun';
-import chalk from 'chalk';
 import { ConsoleLog } from './lib/ericchase/Utility/Console.js';
 import { get } from './router.get.js';
 import { options } from './router.options.js';
 import { post } from './router.post.js';
 
-const PUBLIC_PATH = '../out';
-
 const PREFERRED_HOSTNAME = Bun.env.HOSTNAME ?? '127.0.0.1';
 const PREFERRED_PORT = Number.parseInt(Bun.env.PORT ?? '8000');
+const PREFERRED_PUBLIC_PATH = Bun.env.PUBLIC_PATH ?? 'public';
 
 Bun.env.HOSTNAME = PREFERRED_HOSTNAME;
 Bun.env.PORT = `${PREFERRED_PORT}`;
-Bun.env.PUBLIC_PATH = PUBLIC_PATH;
+Bun.env.PUBLIC_PATH = PREFERRED_PUBLIC_PATH;
 
 interface WebSocketData {}
 function createServer(hostname: string, port: number) {
@@ -86,7 +84,7 @@ async function tryStartServer(hostname: string, port: number) {
       if (await testLocalhostServer(port)) {
         error_code = 'EBADHOST';
       } else {
-        ConsoleLog(`${chalk.red(error_code)}${chalk.gray(': Failed to start server. Is port 8000 in use?')}`);
+        ConsoleLog(`%c${error_code}: %cFailed to start server. Is port ${port} in use?`, 'color:red', 'color:gray');
         ConsoleLog(`Trying port ${port + 1} next.`);
         setTimeout(() => tryStartServer(hostname, port + 1), 0);
         return;
@@ -94,7 +92,7 @@ async function tryStartServer(hostname: string, port: number) {
     }
 
     if (error_code === 'EBADHOST') {
-      ConsoleLog(`${chalk.red(error_code)}${chalk.gray(`: Hostname ${hostname} may be invalid.`)}`);
+      ConsoleLog(`%c${error_code}: %cHostname ${hostname} may be invalid.`);
       ConsoleLog('Please try another hostname or use localhost (127.0.0.1) to serve locally.');
       return;
     }

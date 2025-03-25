@@ -15,8 +15,9 @@ builder.setStartupSteps(
     from: Path('C:/Code/Base/Javascript-Typescript/Project@Library', 'server'),
     to: Path('server'),
     include_patterns: ['**/*'],
-    exclude_patterns: ['node_modules', 'bun.lock'], //
-  }), //
+    exclude_patterns: ['node_modules/**/*', 'bun.lock'],
+  }),
+  //
 );
 
 await builder.start();
