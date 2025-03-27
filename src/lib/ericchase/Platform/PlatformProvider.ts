@@ -1,6 +1,6 @@
 import { default as node_fs } from 'node:fs';
-import { CPath, Path } from './FilePath.js';
 import { SplitLines } from '../Utility/String.js';
+import { CPath, Path } from './FilePath.js';
 
 export type FileData = string | ArrayBufferLike | Blob | NodeJS.TypedArray<ArrayBufferLike>;
 export type FileStats = node_fs.Stats;
@@ -14,7 +14,7 @@ export class CPlatformProvider {
     delete: (path: CPath, recursive = true): Promise<boolean> => {
       throw new Error('Not Implemented');
     },
-    globScan: (path: CPath, pattern: string): Promise<string[]> => {
+    globScan: (path: CPath, pattern: string, absolutepaths = false, onlyfiles = true): AsyncIterableIterator<string> => {
       throw new Error('Not Implemented');
     },
     watch: (path: CPath, callback: WatchCallback, recursive = true): (() => void) => {
@@ -116,8 +116,8 @@ class CPlatformProviderErrorWrapper extends CPlatformProvider {
     delete: (path: CPath, recursive = true): Promise<boolean> => {
       return callAsync(Error().stack, this.provider.Directory.delete(path, recursive));
     },
-    globScan: (path: CPath, pattern: string): Promise<string[]> => {
-      return callAsync(Error().stack, this.provider.Directory.globScan(path, pattern));
+    globScan: (path: CPath, pattern: string, absolutepaths = false, onlyfiles = true): AsyncIterableIterator<string> => {
+      return this.provider.Directory.globScan(path, pattern, absolutepaths, onlyfiles);
     },
     watch: (path: CPath, callback: WatchCallback, recursive = true): (() => void) => {
       return this.provider.Directory.watch(path, callback, recursive);

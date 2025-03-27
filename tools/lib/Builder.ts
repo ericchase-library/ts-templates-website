@@ -24,8 +24,8 @@ export interface ProcessorModule {
 }
 
 export interface Step {
-  run: (builder: BuilderInternal) => Promise<void>;
   end: (builder: BuilderInternal) => Promise<void>;
+  run: (builder: BuilderInternal) => Promise<void>;
 }
 
 export class Builder {
@@ -240,7 +240,7 @@ export class BuilderInternal {
           }
         }
 
-        const scan_paths = new Set(await this.platform.Directory.globScan(Path('./'), `${this.dir.src.standard}/**/*`));
+        const scan_paths = new Set(await Array.fromAsync(this.platform.Directory.globScan(Path('./'), `${this.dir.src.standard}/**/*`)));
         const this_paths = new Set(Array.from(this.$map_path_to_file.keys()).map((str) => Path(str).raw));
         for (const path of scan_paths.difference(this_paths)) {
           this.addPath(Path(path), Path(this.dir.out, Path(path).slice(1)));
@@ -278,7 +278,7 @@ export class BuilderInternal {
     try {
       const unlock = this.$idle.lock();
 
-      for (const path of await this.platform.Directory.globScan(this.dir.src, '**/*')) {
+      for await (const path of this.platform.Directory.globScan(this.dir.src, '**/*')) {
         this.addPath(Path(this.dir.src, path), Path(this.dir.out, path));
       }
 
@@ -365,15 +365,17 @@ export class BuilderInternal {
       if (this.$set_unprocessed_added_files.size > 0) {
         await this.$processAddedFiles();
       }
-      for (const step of this.before_steps) {
-        await step.run(this);
-      }
+    }
+    for (const step of this.before_steps) {
+      await step.run(this);
+    }
+    if (this.processor_modules.length > 0) {
       if (this.$set_unprocessed_updated_files.size > 0) {
         await this.$processUpdatedFiles();
       }
-      for (const step of this.after_steps) {
-        await step.run(this);
-      }
+    }
+    for (const step of this.after_steps) {
+      await step.run(this);
     }
   }
 

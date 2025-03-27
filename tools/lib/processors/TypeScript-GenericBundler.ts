@@ -72,23 +72,26 @@ class CProcessor_TypeScript_GenericBundler implements ProcessorModule {
       if (results.success === true) {
         for (const artifact of results.outputs) {
           switch (artifact.kind) {
-            case 'entry-point':
-              {
-                const text = await artifact.text();
-                file.setText(text);
-                for (const [, ...paths] of text.matchAll(/\n?\/\/ (src\/.*)\n?/g)) {
-                  for (const path of paths) {
-                    if (file.src_path.equals(path) === false) {
-                      builder.addDependency(builder.getFile(Path(path)), file);
-                    }
+            case 'entry-point': {
+              const text = await artifact.text();
+              file.setText(text);
+              for (const [, ...paths] of text.matchAll(/\n?\/\/ (src\/.*)\n?/g)) {
+                for (const path of paths) {
+                  if (file.src_path.equals(path) === false) {
+                    builder.addDependency(builder.getFile(Path(path)), file);
                   }
                 }
               }
               break;
-            case 'sourcemap':
-              // TODO: add virtual file to project manager
-              // await Bun.write(file.out_file.newBase(new Path(artifact.path).base).path, await artifact.text());
-              break;
+            }
+            // for any non-code imports. there's probably a more elegant
+            // way to do this, but this is temporary
+            // case 'asset':
+            // case 'sourcemap':
+            default: {
+              const text = await artifact.text();
+              await builder.platform.File.writeText(Path(builder.dir.out, artifact.path), text);
+            }
           }
         }
       } else {

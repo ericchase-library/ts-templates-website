@@ -7,8 +7,8 @@ const BunProvider = PlatformProvider();
 // Directory
 BunProvider.Directory.create = NodeProvider.Directory.create;
 BunProvider.Directory.delete = NodeProvider.Directory.delete;
-BunProvider.Directory.globScan = async (path, pattern) => {
-  return await Array.fromAsync(new Bun.Glob(pattern).scan({ cwd: path.raw, dot: true }));
+BunProvider.Directory.globScan = (path, pattern, absolutepaths = false, onlyfiles = true) => {
+  return new Bun.Glob(pattern).scan({ cwd: path.raw, dot: true, absolute: absolutepaths, onlyFiles: onlyfiles });
 };
 BunProvider.Directory.watch = NodeProvider.Directory.watch;
 
