@@ -318,7 +318,7 @@ export class BuilderInternal {
 
       // Startup Steps
       for (const step of this.startup_steps) {
-        await step.run(this);
+        await this.safe$step$run(step);
       }
 
       // Processor Modules
@@ -333,27 +333,25 @@ export class BuilderInternal {
 
       unlock();
     } catch (error) {
-      this.channel.error(error);
-      // Release Locks
-      Cache_UnlockAll();
-      Cache_FileStats_Unlock();
+      this.channel.error('Unhandled exception in Builder:', error);
+      throw error;
     }
   }
 
   async shutdown() {
     for (const step of this.startup_steps) {
-      await step.end(this);
+      await this.safe$step$end(step);
     }
     for (const step of this.before_steps) {
-      await step.end(this);
+      await this.safe$step$end(step);
     }
     for (const step of this.after_steps) {
-      await step.end(this);
+      await this.safe$step$end(step);
     }
     // Cleanup Steps
     for (const step of this.cleanup_steps) {
-      await step.run(this);
-      await step.end(this);
+      await this.safe$step$run(step);
+      await this.safe$step$end(step);
     }
   }
 
@@ -367,7 +365,7 @@ export class BuilderInternal {
       }
     }
     for (const step of this.before_steps) {
-      await step.run(this);
+      await this.safe$step$run(step);
     }
     if (this.processor_modules.length > 0) {
       if (this.$set_unprocessed_updated_files.size > 0) {
@@ -375,7 +373,7 @@ export class BuilderInternal {
       }
     }
     for (const step of this.after_steps) {
-      await step.run(this);
+      await this.safe$step$run(step);
     }
   }
 
@@ -383,7 +381,7 @@ export class BuilderInternal {
   async $processAddedFiles() {
     this.channel.log('Processing Added Files');
     for (const processor of this.processor_modules) {
-      await processor.onAdd(this, this.$set_unprocessed_added_files);
+      await this.safe$processormodule$onadd(processor);
     }
     const tasks: Promise<void>[] = [];
     for (const file of this.$set_unprocessed_added_files) {
@@ -396,7 +394,7 @@ export class BuilderInternal {
   // always call processUpdatedFiles after this
   async $processRemovedFiles() {
     for (const processor of this.processor_modules) {
-      await processor.onRemove(this, this.$set_unprocessed_removed_files);
+      await this.safe$processormodule$onremove(processor);
     }
     this.$set_unprocessed_removed_files.clear();
   }
@@ -435,7 +433,7 @@ export class BuilderInternal {
     this.channel.log(`"${file.src_path.raw}"`);
     file.resetBytes();
     for (const { processor, method } of file.$processor_list) {
-      await method.call(processor, file.builder, file);
+      await this.safe$processormodule$method(processor, method, file);
     }
   }
 
@@ -447,6 +445,42 @@ export class BuilderInternal {
       await method.call(processor, file.builder, file);
     }
     defer?.resolve();
+  }
+
+  async safe$processormodule$onadd(processor: ProcessorModule) {
+    try {
+      await processor.onAdd(this, this.$set_unprocessed_added_files);
+    } catch (error) {
+      this.channel.error(`Unhandled exception in ${processor.constructor.name}.onAdd:`, error);
+    }
+  }
+  async safe$processormodule$onremove(processor: ProcessorModule) {
+    try {
+      await processor.onRemove(this, this.$set_unprocessed_removed_files);
+    } catch (error) {
+      this.channel.error(`Unhandled exception in ${processor.constructor.name}.onRemove:`, error);
+    }
+  }
+  async safe$processormodule$method(processor: ProcessorModule, method: ProcessorMethod, file: ProjectFile) {
+    try {
+      await method.call(processor, this, file);
+    } catch (error) {
+      this.channel.error(`Unhandled exception in ${processor.constructor.name} for "${file.src_path.raw}":`, error);
+    }
+  }
+  async safe$step$end(step: Step) {
+    try {
+      await step.end(this);
+    } catch (error) {
+      this.channel.error(`Unhandled exception in ${step.constructor.name}.end:`, error);
+    }
+  }
+  async safe$step$run(step: Step) {
+    try {
+      await step.run(this);
+    } catch (error) {
+      this.channel.error(`Unhandled exception in ${step.constructor.name}.run:`, error);
+    }
   }
 }
 

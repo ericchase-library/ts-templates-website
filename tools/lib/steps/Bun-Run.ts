@@ -23,13 +23,17 @@ class CStep_Bun_Run implements Step {
   ) {}
   async end(builder: BuilderInternal) {}
   async run(builder: BuilderInternal) {
-    this.channel.log(`Command: "${this.cmd.join(' ')}" | Directory: "${this.dir}"`);
-    const p0 = Bun.spawn(this.cmd, { cwd: this.dir, stdin: this.stdin, stderr: 'pipe', stdout: 'pipe' });
-    await p0.exited;
-    if (this.logging === 'normal') {
-      this.channel.logNotEmpty(`"${this.dir}"`);
-      this.channel.errorNotEmpty(U8ToString(await U8StreamReadAll(p0.stderr)));
-      this.channel.logNotEmpty(U8ToString(await U8StreamReadAll(p0.stdout)));
+    try {
+      const p0 = Bun.spawn(this.cmd, { cwd: this.dir, stdin: this.stdin, stderr: 'pipe', stdout: 'pipe' });
+      this.channel.log(`Run: Command: "${this.cmd.join(' ')}" | Directory: "${this.dir}"`);
+      await p0.exited;
+      if (this.logging === 'normal') {
+        this.channel.log(`Exited: Command: "${this.cmd.join(' ')}" | Directory: "${this.dir}"`);
+        this.channel.errorNotEmpty(U8ToString(await U8StreamReadAll(p0.stderr)));
+        this.channel.logNotEmpty(U8ToString(await U8StreamReadAll(p0.stdout)));
+      }
+    } catch (error) {
+      this.channel.error(`Command: "${this.cmd.join(' ')}" | Directory: "${this.dir}"`, error);
     }
   }
 }
