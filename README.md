@@ -2,7 +2,11 @@
 
 https://github.com/ericchase-library/ts-templates-website
 
-This is a template for website projects. Please read the `README.md` file at https://github.com/ericchase-library/ts-library for more information.
+## Library Project
+
+Please visit the library project for information about my build TypeScript library and templates.
+
+- https://github.com/ericchase-library/ts-library
 
 ## Disclaimer
 
