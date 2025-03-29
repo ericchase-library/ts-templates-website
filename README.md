@@ -6,7 +6,7 @@ This project houses the base website template project that I use to create new w
 
 ## TypeScript Library and Template Project
 
-For more information about my TypeScript library and template projects, please visit:
+For information about my TypeScript library and template projects, please visit:
 
 - https://github.com/ericchase-library/ts-library
 - https://github.com/ericchase-library/ts-template
