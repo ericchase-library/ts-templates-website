@@ -3,7 +3,6 @@ import { CPath, Path } from '../../src/lib/ericchase/Platform/FilePath.js';
 import { CPlatformProvider, FileStats, getPlatformProvider, PlatformProviderId, UnimplementedProvider } from '../../src/lib/ericchase/Platform/PlatformProvider.js';
 import { KEYS } from '../../src/lib/ericchase/Platform/Shell.js';
 import { AddStdInListener, GetStdInReaderLock, StartStdInRawModeReader } from '../../src/lib/ericchase/Platform/StdinReader.js';
-import { ConsoleError } from '../../src/lib/ericchase/Utility/Console.js';
 import { Debounce } from '../../src/lib/ericchase/Utility/Debounce.js';
 import { Defer } from '../../src/lib/ericchase/Utility/Defer.js';
 import { AddLoggerOutputDirectory, Logger } from '../../src/lib/ericchase/Utility/Logger.js';
@@ -302,14 +301,10 @@ export class BuilderInternal {
         });
         AddStdInListener(async (bytes, text, removeSelf) => {
           if (text === KEYS.SIGINT) {
-            try {
-              removeSelf();
-              this.channel.log('User Command: Force Quit');
-              this.$unwatchSource?.();
-              releaseStdIn();
-            } catch (error) {
-              ConsoleError(error);
-            }
+            removeSelf();
+            this.channel.log('User Command: Force Quit');
+            this.$unwatchSource?.();
+            releaseStdIn();
             process.exit();
           }
         });
@@ -379,7 +374,7 @@ export class BuilderInternal {
 
   // always call processUpdatedFiles after this
   async $processAddedFiles() {
-    this.channel.log('Processing Added Files');
+    this.channel.log('Processing Added Files:');
     for (const processor of this.processor_modules) {
       await this.safe$processormodule$onadd(processor);
     }
@@ -400,7 +395,7 @@ export class BuilderInternal {
   }
 
   async $processUpdatedFiles() {
-    this.channel.log('Processing Updated Files');
+    this.channel.log('Processing Updated Files:');
     const defers = new Map<ProjectFile, Defer<void>>();
     // add defers for updated file and all downstream files
     for (const file of this.$set_unprocessed_updated_files) {
@@ -442,7 +437,7 @@ export class BuilderInternal {
     this.channel.log(`"${file.src_path.raw}"`);
     file.resetBytes();
     for (const { processor, method } of file.$processor_list) {
-      await method.call(processor, file.builder, file);
+      await this.safe$processormodule$method(processor, method, file);
     }
     defer?.resolve();
   }

@@ -104,7 +104,7 @@ let exittrap = false;
 function listenerUncaughtException(error: Error, origin: NodeJS.UncaughtExceptionOrigin) {
   Shell.ShowCursor();
   if (process.listeners('uncaughtException').length === 1) {
-    ConsoleError(error);
+    ConsoleError('Uncaught exception:', error);
     process.exit();
   }
 }

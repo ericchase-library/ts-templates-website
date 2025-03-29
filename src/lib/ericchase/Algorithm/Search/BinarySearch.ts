@@ -21,7 +21,8 @@ export function BinarySearch<T>(array: T[], target: T, isOrdered: (a: T, b: T) =
   return -1;
 }
 
-// Returns index where target is or would be inserted.
+// Returns index of item that "equals" target; otherwise, index of item "less"
+// than target.
 function Insertion<T>(array: T[], target: T, isOrdered: (a: T, b: T) => boolean = (a: T, b: T) => a < b): number {
   let [begin, end] = ArrayEndpoints(array);
   let middle = Midpoint(begin, end);
@@ -33,10 +34,7 @@ function Insertion<T>(array: T[], target: T, isOrdered: (a: T, b: T) => boolean 
     }
     middle = Midpoint(begin, end);
   }
-  if (isOrdered(array[middle - 1], target) === false) {
-    return middle - 1;
-  }
-  return middle;
+  return middle - 1;
 }
 
 BinarySearch.Insertion = Insertion;

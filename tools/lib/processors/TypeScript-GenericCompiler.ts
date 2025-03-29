@@ -52,8 +52,7 @@ class CProcessor_TypeScript_GenericCompiler implements ProcessorModule {
     try {
       file.setText(await this.transpiler.transform(await file.getText()));
     } catch (error) {
-      this.channel.error(`ERROR: Processor: ${__filename}, File: ${file.src_path.raw}`);
-      this.channel.error(error);
+      this.channel.error(`ERROR: Processor: ${__filename}, File: ${file.src_path.raw}`, error);
     }
   }
 }
