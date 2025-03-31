@@ -1,19 +1,20 @@
 import { Subprocess } from 'bun';
-import { U8StreamReadLines } from '../src/lib/ericchase/Algorithm/Stream.js';
-import { Path } from '../src/lib/ericchase/Platform/FilePath.js';
-import { AddStdInListener } from '../src/lib/ericchase/Platform/StdinReader.js';
-import { Logger } from '../src/lib/ericchase/Utility/Logger.js';
-import { Orphan } from '../src/lib/ericchase/Utility/Promise.js';
-import { Sleep } from '../src/lib/ericchase/Utility/Sleep.js';
-import { BuilderInternal, Step } from './lib/Builder.js';
+import { U8StreamReadLines } from '../../../src/lib/ericchase/Algorithm/Stream.js';
+import { Path } from '../../../src/lib/ericchase/Platform/FilePath.js';
+import { AddStdInListener } from '../../../src/lib/ericchase/Platform/StdinReader.js';
+import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
+import { Orphan } from '../../../src/lib/ericchase/Utility/Promise.js';
+import { Sleep } from '../../../src/lib/ericchase/Utility/Sleep.js';
+import { BuilderInternal, Step } from '../Builder.js';
 
-const logger = Logger(Step_StartServer.name);
+const logger = Logger(Step_DevServer.name);
 
-export function Step_StartServer(): Step {
-  return new CStep_StartServer();
+/** An AfterProcessingStep for running the dev server. */
+export function Step_DevServer(): Step {
+  return new CStep_DevServer();
 }
 
-class CStep_StartServer implements Step {
+class CStep_DevServer implements Step {
   channel = logger.newChannel();
 
   child_process?: Subprocess<'ignore', 'pipe', 'pipe'>;
@@ -59,6 +60,7 @@ class CStep_StartServer implements Step {
           .then(() => {
             // a reminder to dev that the server is running
             this.channel.log(`Serving at ${this.server_href}`);
+            this.channel.log(`Console at ${this.server_href}console`);
           })
           .catch((error) => {
             this.channel.error(error);

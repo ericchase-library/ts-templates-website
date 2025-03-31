@@ -5,9 +5,9 @@ import { Processor_HTML_ImportConverter } from './lib/processors/HTML-ImportConv
 import { Processor_TypeScript_GenericBundlerImportRemapper } from './lib/processors/TypeScript-GenericBundler-ImportRemapper.js';
 import { module_script, Processor_TypeScript_GenericBundler, ts_tsx_js_jsx } from './lib/processors/TypeScript-GenericBundler.js';
 import { Step_Bun_Run } from './lib/steps/Bun-Run.js';
+import { Step_DevServer } from './lib/steps/Dev-Server.js';
 import { Step_CleanDirectory } from './lib/steps/FS-CleanDirectory.js';
 import { Step_Format } from './lib/steps/FS-Format.js';
-import { Step_StartServer } from './Step-Dev-StartServer.js';
 
 // Use command line arguments to set watch mode.
 const builder = new Builder(Bun.argv[2] === '--watch' ? 'watch' : 'build');
@@ -52,7 +52,7 @@ builder.setProcessorModules(
 builder.setAfterProcessingSteps(
   // During "dev" mode (when "--watch" is passed as an argument), the server
   // will start running with hot refreshing if enabled in your index file.
-  Step_StartServer(),
+  Step_DevServer(),
   //
 );
 
