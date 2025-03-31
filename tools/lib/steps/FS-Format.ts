@@ -12,10 +12,9 @@ class CStep_Format implements Step {
   channel = logger.newChannel();
 
   constructor(readonly logging: 'normal' | 'quiet') {}
-  async end(builder: BuilderInternal) {}
-  async run(builder: BuilderInternal) {
+  async onRun(builder: BuilderInternal): Promise<void> {
     this.channel.log('Format');
-    await Step_Bun_Run({ cmd: ['biome', 'format', '--verbose', '--write'] }, this.logging).run(builder);
-    await Step_Bun_Run({ cmd: ['prettier', '--write', '.'] }, this.logging).run(builder);
+    await Step_Bun_Run({ cmd: ['biome', 'format', '--verbose', '--write'] }, this.logging).onRun?.(builder);
+    await Step_Bun_Run({ cmd: ['prettier', '--write', '.'] }, this.logging).onRun?.(builder);
   }
 }

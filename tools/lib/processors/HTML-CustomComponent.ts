@@ -52,6 +52,7 @@ class CProcessor_HTML_CustomComponent implements ProcessorModule {
       }
     }
   }
+
   async onProcess(builder: BuilderInternal, file: ProjectFile): Promise<void> {
     let update_text = false;
     const root_element = ParseHTML((await file.getText()).trim(), { convert_tagnames_to_lowercase: true, self_close_void_tags: true });

@@ -26,7 +26,7 @@ class CProcessor_BasicWriter implements ProcessorModule {
       }
     }
   }
-  async onRemove(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {}
+
   async onProcess(builder: BuilderInternal, file: ProjectFile): Promise<void> {
     await file.write();
   }

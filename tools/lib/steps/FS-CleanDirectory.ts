@@ -12,8 +12,7 @@ class CStep_CleanDirectory implements Step {
   channel = logger.newChannel();
 
   constructor(readonly paths: CPath[]) {}
-  async end(builder: BuilderInternal) {}
-  async run(builder: BuilderInternal) {
+  async onRun(builder: BuilderInternal): Promise<void> {
     this.channel.log('Clean Directory');
     for (const path of this.paths) {
       await builder.platform.Directory.delete(path);

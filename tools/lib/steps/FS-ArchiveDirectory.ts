@@ -12,18 +12,16 @@ export function Step_ArchiveDirectory(dir: CPath | string, outfile: CPath | stri
 class CStep_ArchiveDirectory implements Step {
   channel = logger.newChannel();
 
-  zip = new AdmZip();
-
   constructor(
     readonly dir: CPath,
     readonly outpath: CPath,
   ) {}
-  async end(builder: BuilderInternal) {}
-  async run(builder: BuilderInternal) {
+  async onRun(builder: BuilderInternal): Promise<void> {
     this.channel.log('Archive Directory');
     try {
-      this.zip.addLocalFolder(this.dir.raw);
-      this.zip.writeZip(this.outpath.raw);
+      const zip_instance = new AdmZip();
+      zip_instance.addLocalFolder(this.dir.raw);
+      zip_instance.writeZip(this.outpath.raw);
       const stats = await builder.platform.Path.getStats(this.outpath);
       if (stats.isFile() === true) {
         this.channel.log(`ZIP: [${stats.size}] ${this.outpath.raw}`);

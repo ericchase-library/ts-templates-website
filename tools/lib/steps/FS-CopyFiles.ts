@@ -28,8 +28,7 @@ class CStep_CopyFiles implements Step {
       overwrite: boolean;
     },
   ) {}
-  async end(builder: BuilderInternal) {}
-  async run(builder: BuilderInternal) {
+  async onRun(builder: BuilderInternal): Promise<void> {
     this.channel.log('Copy Files');
     try {
       await builder.platform.Path.getStats(this.options.from);

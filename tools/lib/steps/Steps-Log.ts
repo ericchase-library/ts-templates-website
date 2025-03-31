@@ -9,8 +9,7 @@ export function Step_Log(...items: any[]): Step {
 
 class CStep_Log implements Step {
   constructor(readonly items: any[]) {}
-  async end(builder: BuilderInternal) {}
-  async run(builder: BuilderInternal) {
+  async onRun(builder: BuilderInternal): Promise<void> {
     logger.log(...this.items);
   }
 }

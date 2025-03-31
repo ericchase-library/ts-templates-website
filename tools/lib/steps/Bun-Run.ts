@@ -21,8 +21,7 @@ class CStep_Bun_Run implements Step {
     readonly stdin: SpawnOptions['stdin'],
     readonly logging?: 'normal' | 'quiet',
   ) {}
-  async end(builder: BuilderInternal) {}
-  async run(builder: BuilderInternal) {
+  async onRun(builder: BuilderInternal): Promise<void> {
     try {
       const p0 = Bun.spawn(this.cmd, { cwd: this.dir, stdin: this.stdin, stderr: 'pipe', stdout: 'pipe' });
       this.channel.log(`Run: Command: "${this.cmd.join(' ')}" | Directory: "${this.dir}"`);

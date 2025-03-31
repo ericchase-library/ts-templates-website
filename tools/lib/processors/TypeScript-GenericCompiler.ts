@@ -39,7 +39,7 @@ class CProcessor_TypeScript_GenericCompiler implements ProcessorModule {
       trimUnusedImports: true,
     });
   }
-  async onAdd(builder: BuilderInternal, files: Set<ProjectFile>) {
+  async onAdd(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {
     for (const file of files) {
       if (globMatch(builder.platform, file.src_path.standard, this.include_patterns, this.exclude_patterns) === true) {
         file.out_path.ext = '.js';
@@ -47,7 +47,7 @@ class CProcessor_TypeScript_GenericCompiler implements ProcessorModule {
       }
     }
   }
-  async onRemove(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {}
+
   async onProcess(builder: BuilderInternal, file: ProjectFile): Promise<void> {
     try {
       file.setText(await this.transpiler.transform(await file.getText()));

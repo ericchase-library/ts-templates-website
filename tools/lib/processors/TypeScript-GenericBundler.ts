@@ -19,7 +19,7 @@ class CProcessor_TypeScript_GenericBundler implements ProcessorModule {
   constructor(readonly config: Required<BuildConfig>) {
     this.config.external.push('*.module.js');
   }
-  async onAdd(builder: BuilderInternal, files: Set<ProjectFile>) {
+  async onAdd(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {
     let trigger_reprocess = false;
     for (const file of files) {
       if (builder.platform.Utility.globMatch(file.src_path.standard, '**/*{.module,.script}{.ts,.tsx,.jsx}')) {
@@ -51,6 +51,7 @@ class CProcessor_TypeScript_GenericBundler implements ProcessorModule {
       }
     }
   }
+
   async onProcess(builder: BuilderInternal, file: ProjectFile): Promise<void> {
     try {
       const results = await Bun.build({

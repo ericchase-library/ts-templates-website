@@ -18,14 +18,14 @@ class CProcessor_TypeScript_GenericBundlerImportRemapper implements ProcessorMod
   channel = logger.newChannel();
 
   alias_cache = new Map<string, string>();
-  async onAdd(builder: BuilderInternal, files: Set<ProjectFile>) {
+  async onAdd(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {
     for (const file of files) {
       if (file.src_path.endsWith('.module.ts') || file.src_path.endsWith('.module.tsx')) {
         file.addProcessor(this, this.onProcess);
       }
     }
   }
-  async onRemove(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {}
+
   async onProcess(builder: BuilderInternal, file: ProjectFile): Promise<void> {
     const text = await file.getText();
     // can't do lines, because import statements will become multiline if long enough

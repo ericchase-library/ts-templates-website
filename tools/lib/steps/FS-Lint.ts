@@ -12,9 +12,8 @@ class CStep_Lint implements Step {
   channel = logger.newChannel();
 
   constructor(readonly logging: 'normal' | 'quiet') {}
-  async end(builder: BuilderInternal) {}
-  async run(builder: BuilderInternal) {
+  async onRun(builder: BuilderInternal): Promise<void> {
     this.channel.log('Lint');
-    await Step_Bun_Run({ cmd: ['biome', 'lint', '--error-on-warnings', '--write'] }, this.logging).run(builder);
+    await Step_Bun_Run({ cmd: ['biome', 'lint', '--error-on-warnings', '--write'] }, this.logging).onRun?.(builder);
   }
 }

@@ -1,5 +1,5 @@
 import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
-import { BuilderInternal, Step } from '../Builder.js';
+import { BuilderInternal, Safe$Step$onCleanUp, Safe$Step$onRun, Safe$Step$onStartUp, Step } from '../Builder.js';
 
 const logger = Logger(Step_Sync.name);
 
@@ -11,29 +11,19 @@ class CStep_Sync implements Step {
   channel = logger.newChannel();
 
   constructor(readonly steps: Step[]) {}
-  async end(builder: BuilderInternal) {
+  async onStartUp(builder: BuilderInternal): Promise<void> {
     for (const step of this.steps) {
-      await this.safe$step$end(builder, step);
+      await Safe$Step$onStartUp(builder, step);
     }
   }
-  async run(builder: BuilderInternal) {
+  async onRun(builder: BuilderInternal): Promise<void> {
     for (const step of this.steps) {
-      await this.safe$step$run(builder, step);
+      await Safe$Step$onRun(builder, step);
     }
   }
-
-  async safe$step$end(builder: BuilderInternal, step: Step) {
-    try {
-      await step.end(builder);
-    } catch (error) {
-      this.channel.error(`Unhandled exception in ${step.constructor.name}.end:`, error);
-    }
-  }
-  async safe$step$run(builder: BuilderInternal, step: Step) {
-    try {
-      await step.run(builder);
-    } catch (error) {
-      this.channel.error(`Unhandled exception in ${step.constructor.name}.run:`, error);
+  async onCleanUp(builder: BuilderInternal): Promise<void> {
+    for (const step of this.steps) {
+      await Safe$Step$onCleanUp(builder, step);
     }
   }
 }

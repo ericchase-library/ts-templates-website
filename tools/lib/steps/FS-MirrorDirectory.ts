@@ -28,8 +28,7 @@ class CStep_MirrorDirectory implements Step {
       exclude_patterns: string[];
     },
   ) {}
-  async end(builder: BuilderInternal) {}
-  async run(builder: BuilderInternal) {
+  async onRun(builder: BuilderInternal): Promise<void> {
     this.channel.log('Mirror Directory');
     try {
       await builder.platform.Path.getStats(this.options.from);

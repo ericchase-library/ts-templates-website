@@ -58,7 +58,7 @@ class CLogger {
 
 let buffer: BufferItem[] = [];
 let timeout: ReturnType<typeof setTimeout> | undefined;
-const output_list: Promise<{ path: CPath; platform: CPlatformProvider }>[] = [];
+const output_map = new Map<CPath, CPlatformProvider>();
 
 const name_to_buffer = new Map<string, string[]>();
 const name_to_logger = new Map<string, CLogger>();
@@ -142,8 +142,7 @@ async function processBuffer() {
       }
     }
   }
-  for (const output of output_list) {
-    const { path, platform } = await output;
+  for (const [path, platform] of output_map) {
     for (const [name, lines] of name_to_buffer) {
       if (lines.length > 0) {
         await platform.File.appendText(Path(path, `${name}.log`), `${lines.join('\n')}\n`);
@@ -166,14 +165,14 @@ export function Logger(name = 'default'): CLogger {
   return Map_GetOrDefault(name_to_logger, name, () => new CLogger(getUuid(name), '00', name));
 }
 
-export function AddLoggerOutputDirectory(path: CPath | string, platform: CPlatformProvider) {
+/** Important: don't forget to await this! */
+export async function AddLoggerOutputDirectory(path: CPath | string, platform: CPlatformProvider) {
+  DefaultLogger.log(`Add Logger Output Directory: "${Path(path).raw}"`);
   path = Path(path, 'logs');
-  output_list.push(
-    (async () => {
-      await platform.Directory.create(path);
-      return { path, platform };
-    })(),
-  );
+  if (output_map.has(path) === false) {
+    output_map.set(path, platform);
+    await platform.Directory.create(path);
+  }
 }
 
 export function SetLoggerOptions(options: { ceremony?: boolean; console?: boolean; list?: string[]; listmode?: 'allow' | 'block' }) {
