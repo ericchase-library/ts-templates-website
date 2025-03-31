@@ -95,9 +95,6 @@ export class CPath {
 }
 
 export function Path(...paths: (CPath | string)[]): CPath {
-  if (paths.length === 1 && paths[0] instanceof CPath) {
-    return paths[0];
-  }
   return new CPath(...paths);
 }
 

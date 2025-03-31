@@ -3,7 +3,7 @@ import { Processor_BasicWriter } from './lib/processors/FS-BasicWriter.js';
 import { Processor_HTML_CustomComponent } from './lib/processors/HTML-CustomComponent.js';
 import { Processor_HTML_ImportConverter } from './lib/processors/HTML-ImportConverter.js';
 import { Processor_TypeScript_GenericBundlerImportRemapper } from './lib/processors/TypeScript-GenericBundler-ImportRemapper.js';
-import { Processor_TypeScript_GenericBundler } from './lib/processors/TypeScript-GenericBundler.js';
+import { module_script, Processor_TypeScript_GenericBundler, ts_tsx_js_jsx } from './lib/processors/TypeScript-GenericBundler.js';
 import { Step_Bun_Run } from './lib/steps/Bun-Run.js';
 import { Step_CleanDirectory } from './lib/steps/FS-CleanDirectory.js';
 import { Step_Format } from './lib/steps/FS-Format.js';
@@ -42,9 +42,9 @@ builder.setProcessorModules(
   Processor_TypeScript_GenericBundler({ sourcemap: 'none', target: 'browser' }),
   Processor_TypeScript_GenericBundlerImportRemapper(),
   // all files except for .ts and lib files
-  Processor_BasicWriter(['**/*'], ['**/*{.ts,.tsx,.jsx}', `${builder.dir.lib.standard}/**/*`]),
+  Processor_BasicWriter(['**/*'], [`**/*${ts_tsx_js_jsx}`, `${builder.dir.lib.standard}/**/*`]),
   // all module and script files
-  Processor_BasicWriter(['**/*{.module,.script}{.ts,.tsx,.jsx}'], []),
+  Processor_BasicWriter([`**/*${module_script}${ts_tsx_js_jsx}`], []),
   //
 );
 

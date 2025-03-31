@@ -3,6 +3,7 @@ import { BinarySearch } from '../../../src/lib/ericchase/Algorithm/Search/Binary
 import { GetRelativePath, Path } from '../../../src/lib/ericchase/Platform/FilePath.js';
 import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
 import { BuilderInternal, ProcessorModule, ProjectFile } from '../Builder.js';
+import { ts_tsx_js_jsx } from './TypeScript-GenericBundler.js';
 
 // Modules that import other modules will end up with broken import urls. These
 // urls will need to be fixed (remapped) to the correct output file path. This
@@ -20,7 +21,7 @@ class CProcessor_TypeScript_GenericBundlerImportRemapper implements ProcessorMod
   alias_cache = new Map<string, string>();
   async onAdd(builder: BuilderInternal, files: Set<ProjectFile>): Promise<void> {
     for (const file of files) {
-      if (file.src_path.endsWith('.module.ts') || file.src_path.endsWith('.module.tsx')) {
+      if (builder.platform.Utility.globMatch(file.src_path.standard, `**/*{.module}${ts_tsx_js_jsx}`)) {
         file.addProcessor(this, this.onProcess);
       }
     }
@@ -30,7 +31,7 @@ class CProcessor_TypeScript_GenericBundlerImportRemapper implements ProcessorMod
     const text = await file.getText();
     // can't do lines, because import statements will become multiline if long enough
     const list_imports: { start: number; end: number; path: string }[] = [];
-    const matches_imports = text.matchAll(/^import[ *{"'][\s\S]*?[ }"']from *["']([^"']*.module.js?)["'];$/dgm);
+    const matches_imports = text.matchAll(/^import[ *{"'][\s\S]*?[ }"']from *["']([^"']*?)["'];$/dgm);
     for (const match of matches_imports) {
       if (match.indices !== undefined) {
         list_imports.push({ start: match.indices[1][0], end: match.indices[1][1], path: match[1] });
@@ -54,7 +55,7 @@ class CProcessor_TypeScript_GenericBundlerImportRemapper implements ProcessorMod
             text_parts.push(text.slice(text_index, item_import.start), remapped_import_path);
             text_index = item_import.end;
           } catch (error) {
-            this.channel.error('Failed to resolve a module import:', error);
+            this.channel.log(`Skipping "${item_import.path}"`);
           }
         }
       }
@@ -70,6 +71,13 @@ function getRelativePath(file_path: string, item_source_path: string, item_impor
     rawpath = `${process.cwd()}/${Path(Path(item_source_path).parentpath, rawpath).standard}`;
   }
   const relative = GetRelativePath(`${process.cwd()}/${file_path}`, true, node_url.fileURLToPath(import.meta.resolve(rawpath)));
-  relative.ext = '.js';
+  switch (relative.ext) {
+    case '.js':
+    case '.jsx':
+    case '.ts':
+    case '.tsx':
+      relative.ext = '.js';
+      break;
+  }
   return relative.segments[0] === '..' ? relative.standard : `./${relative.standard}`;
 }
