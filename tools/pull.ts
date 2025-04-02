@@ -18,6 +18,17 @@ builder.setStartUpSteps(
     include_patterns: ['**/*'],
     exclude_patterns: ['{.git,node_modules,public}/**/*', 'bun.lock'],
   }),
+  Step_MirrorDirectory({
+    from: Path('C:/Code/Base/JavaScript-TypeScript/Templates/Website', 'src/lib/server'),
+    to: Path(builder.dir.lib, 'server'),
+    include_patterns: ['**/*'],
+  }),
+  // Pull Website Template Tools Lib
+  Step_MirrorDirectory({
+    from: Path('C:/Code/Base/JavaScript-TypeScript/Templates/Browser-Extension', 'tools/lib-website'),
+    to: Path(builder.dir.tools, 'lib-website'),
+    include_patterns: ['**/*'],
+  }),
   //
 );
 

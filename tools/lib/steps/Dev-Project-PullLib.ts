@@ -18,15 +18,21 @@ class CStep_Project_PullLib implements Step {
   constructor(readonly external_directory: CPath | string) {}
   async onStartUp(builder: BuilderInternal): Promise<void> {
     this.steps = [
+      Step_CopyFiles({
+        from: Path(this.external_directory, 'src/@types'),
+        to: Path(builder.dir.src, '@types'),
+        include_patterns: ['**/*.ts'],
+        overwrite: false,
+      }),
       Step_MirrorDirectory({
         from: Path(this.external_directory, 'src/lib/ericchase'),
         to: Path(builder.dir.lib, 'ericchase'),
-        include_patterns: ['**/*.ts'], //
+        include_patterns: ['**/*.ts'],
       }),
       Step_MirrorDirectory({
         from: Path(this.external_directory, 'tools/lib'),
         to: Path(builder.dir.tools, 'lib'),
-        include_patterns: ['**/*.ts'], //
+        include_patterns: ['**/*.ts'],
       }),
       Step_CopyFiles({
         from: Path(this.external_directory, './'),
