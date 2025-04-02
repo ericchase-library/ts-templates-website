@@ -1,5 +1,5 @@
 import { RefCounter } from '../../src/lib/ericchase/DesignPattern/Observer/RefCounter.js';
-import { CPath, Path } from '../../src/lib/ericchase/Platform/FilePath.js';
+import { CPath, IntoPattern, Path } from '../../src/lib/ericchase/Platform/FilePath.js';
 import { CPlatformProvider, FileStats, getPlatformProvider, PlatformProviderId, UnimplementedProvider } from '../../src/lib/ericchase/Platform/PlatformProvider.js';
 import { KEYS } from '../../src/lib/ericchase/Platform/Shell.js';
 import { AddStdInListener, GetStdInReaderLock, StartStdInRawModeReader } from '../../src/lib/ericchase/Platform/StdinReader.js';
@@ -246,7 +246,7 @@ export class BuilderInternal {
           }
         }
 
-        const scan_paths = new Set(await Array.fromAsync(this.platform.Directory.globScan(Path('./'), `${this.dir.src.standard}/**/*`)));
+        const scan_paths = new Set(await Array.fromAsync(this.platform.Directory.globScan(Path('./'), IntoPattern(this.dir.src, '**/*'))));
         const this_paths = new Set(Array.from(this.$map_path_to_file.keys()).map((str) => Path(str).raw));
         for (const path of scan_paths.difference(this_paths)) {
           this.addPath(Path(path), Path(this.dir.out, Path(path).slice(1)));

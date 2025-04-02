@@ -20,7 +20,7 @@ enum Kind {
   Log = 1,
 }
 
-class CLogger {
+export class CLogger {
   constructor(
     readonly uuid: string,
     readonly channel: string,

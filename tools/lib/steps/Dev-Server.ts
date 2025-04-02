@@ -9,6 +9,8 @@ import { BuilderInternal, Step } from '../Builder.js';
 
 const logger = Logger(Step_DevServer.name);
 
+export let DEVSERVERHOST = '127.0.0.1:8000';
+
 /** An AfterProcessingStep for running the dev server. */
 export function Step_DevServer(): Step {
   return new CStep_DevServer();
@@ -33,6 +35,7 @@ class CStep_DevServer implements Step {
     await U8StreamReadLines(stdout_tee, (line) => {
       if (line.startsWith('Serving at')) {
         this.server_href = line.slice('Serving at'.length).trim();
+        DEVSERVERHOST = new URL(this.server_href).host;
       } else if (line.startsWith('Console at')) {
         AddStdInListener(async (bytes, text) => {
           if (text === 'h') {

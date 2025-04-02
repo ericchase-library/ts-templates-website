@@ -5,9 +5,8 @@ function ConsoleError(...items) {
   newline_count = 0;
 }
 
-// src/lib/server/server.ts
-var server_http = `http://${window.location.host}/`;
-var server_ws = `ws://${window.location.host}/`;
+// src/lib/server/constants.ts
+var SERVER_HOST = "127.0.0.1:8000";
 
 // src/lib/database/dbdriver-localhost.ts
 function getLocalhost(address) {
@@ -26,7 +25,7 @@ function getLocalhost(address) {
 }
 
 // src/lib/database/queries.module.ts
-var db = getLocalhost(server_http);
+var db = getLocalhost(`http://${SERVER_HOST}/`);
 async function DatabaseConnected() {
   const q = "SELECT 1";
   await db.query(q, []);

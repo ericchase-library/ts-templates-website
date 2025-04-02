@@ -1,8 +1,8 @@
 import { ConsoleError } from './lib/ericchase/Utility/Console.js';
 import { NodeRef } from './lib/ericchase/WebAPI/Node_Utility.js';
-import { EnableHotRefresh } from './lib/server/HotRefresh.js';
+import { HotRefresh } from './lib/server/HotRefresh.js';
 
-EnableHotRefresh();
+HotRefresh();
 
 class Page {
   divMessages: HTMLDivElement;
@@ -27,7 +27,7 @@ class Page {
 
 const page = new Page();
 
-page.addMessage('Hello, Script!');
+page.addMessage('Hello, Module!');
 
 // Database requires docker to be installed and running.
 

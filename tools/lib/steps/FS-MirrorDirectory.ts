@@ -1,4 +1,4 @@
-import { CPath, Path } from '../../../src/lib/ericchase/Platform/FilePath.js';
+import { CPath, IntoPattern, Path, ResolvePath } from '../../../src/lib/ericchase/Platform/FilePath.js';
 import { globScan } from '../../../src/lib/ericchase/Platform/Glob_Utility.js';
 import { Logger } from '../../../src/lib/ericchase/Utility/Logger.js';
 import { BuilderInternal, Step } from '../Builder.js';
@@ -12,8 +12,8 @@ export function Step_MirrorDirectory(options: { from: CPath | string; to: CPath 
   return new CStep_MirrorDirectory({
     from: Path(options.from),
     to: Path(options.to),
-    include_patterns: (options.include_patterns ?? ['*']).map((pattern) => Path(pattern).standard),
-    exclude_patterns: (options.exclude_patterns ?? []).map((pattern) => Path(pattern).standard),
+    include_patterns: (options.include_patterns ?? ['*']).map((pattern) => IntoPattern(pattern)),
+    exclude_patterns: (options.exclude_patterns ?? []).map((pattern) => IntoPattern(pattern)),
   });
 }
 
@@ -30,6 +30,10 @@ class CStep_MirrorDirectory implements Step {
   ) {}
   async onRun(builder: BuilderInternal): Promise<void> {
     this.channel.log('Mirror Directory');
+    if (ResolvePath(this.options.from).equals(ResolvePath(this.options.to))) {
+      // same directory, skip
+      return;
+    }
     try {
       await builder.platform.Path.getStats(this.options.from);
     } catch (error) {

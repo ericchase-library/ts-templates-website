@@ -11,7 +11,7 @@ const builder = new Builder();
 builder.setStartUpSteps(
   Step_Bun_Run({ cmd: ['bun', 'install'] }, 'quiet'),
   Step_Project_PullLib('C:/Code/Base/JavaScript-TypeScript/@Template'),
-  // pull updates for server
+  // Get Server Updates
   Step_MirrorDirectory({
     from: Path('C:/Code/Base/JavaScript-TypeScript/@Library', 'server'),
     to: Path('server'),

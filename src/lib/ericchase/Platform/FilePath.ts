@@ -103,6 +103,10 @@ export function NormalizedPath(...paths: (CPath | string)[]): CPath {
   return Path(node_path.normalize(Path(...paths).standard));
 }
 
+export function ResolvePath(...paths: (CPath | string)[]): CPath {
+  return Path(node_path.resolve(Path(...paths).standard));
+}
+
 // Returns a relative path between the directory of one path and another path.
 export function GetRelativePath(from_path: CPath | string, from_is_file: boolean, to_path: CPath | string): CPath {
   return Path(node_path.relative(from_is_file === true ? Path(from_path).parentpath.raw : Path(from_path).raw, Path(to_path).raw));
@@ -116,4 +120,8 @@ export function GetSanitizedFileName(name: CPath | string): string {
     .standard.replace(/ /g, '-')
     .replace(/[^a-z0-9\.\_\-]/gi, '_')
     .toLowerCase();
+}
+
+export function IntoPattern(...paths: (CPath | string)[]): string {
+  return new CPath(...paths).standard;
 }

@@ -1,11 +1,12 @@
+import { IntoPattern } from '../src/lib/ericchase/Platform/FilePath.js';
 import { Builder } from './lib/Builder.js';
 import { Processor_BasicWriter } from './lib/processors/FS-BasicWriter.js';
 import { Processor_HTML_CustomComponent } from './lib/processors/HTML-CustomComponent.js';
 import { Processor_HTML_ImportConverter } from './lib/processors/HTML-ImportConverter.js';
 import { Processor_TypeScript_GenericBundlerImportRemapper } from './lib/processors/TypeScript-GenericBundler-ImportRemapper.js';
-import { module_script, Processor_TypeScript_GenericBundler, ts_tsx_js_jsx } from './lib/processors/TypeScript-GenericBundler.js';
+import { Processor_TypeScript_GenericBundler, pattern } from './lib/processors/TypeScript-GenericBundler.js';
 import { Step_Bun_Run } from './lib/steps/Bun-Run.js';
-import { Step_DevServer } from './lib/steps/Dev-Server.js';
+import { DEVSERVERHOST, Step_DevServer } from './lib/steps/Dev-Server.js';
 import { Step_CleanDirectory } from './lib/steps/FS-CleanDirectory.js';
 import { Step_Format } from './lib/steps/FS-Format.js';
 
@@ -39,12 +40,13 @@ builder.setBeforeProcessingSteps();
 builder.setProcessorModules(
   Processor_HTML_CustomComponent(),
   Processor_HTML_ImportConverter(),
-  Processor_TypeScript_GenericBundler({ sourcemap: 'none', target: 'browser' }),
+  // Bundle the modules.
+  Processor_TypeScript_GenericBundler({ define: () => ({ 'process.env.DEVSERVERHOST': JSON.stringify(DEVSERVERHOST) }) }),
   Processor_TypeScript_GenericBundlerImportRemapper(),
-  // all files except for .ts and lib files
-  Processor_BasicWriter(['**/*'], [`**/*${ts_tsx_js_jsx}`, `${builder.dir.lib.standard}/**/*`]),
-  // all module and script files
-  Processor_BasicWriter([`**/*${module_script}${ts_tsx_js_jsx}`], []),
+  // Write non-bundle files and non-library files.
+  Processor_BasicWriter(['**/*'], ['**/*{.ts,.tsx,.jsx}', IntoPattern(builder.dir.lib, '**/*')]),
+  // Write bundled files.
+  Processor_BasicWriter([`**/*${pattern.moduleoriife}`], []),
   //
 );
 

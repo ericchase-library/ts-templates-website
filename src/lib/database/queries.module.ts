@@ -1,9 +1,14 @@
 import { ConsoleError } from '../ericchase/Utility/Console.js';
-import { server_http } from '../server/server.js';
+import { SERVER_HOST } from '../server/constants.js';
 import { getLocalhost } from './dbdriver-localhost.js';
 
 // const db = DatabaseDriver.getNeon(<insert a valid connection string>);
-const db = getLocalhost(server_http);
+
+//
+//
+// Note: Change this host string if needed. It should be automatically injected
+// by the build tools.
+const db = getLocalhost(`http://${SERVER_HOST}/`);
 
 //                                                                          \\
 //

@@ -2,7 +2,7 @@
 
 https://github.com/ericchase-library/ts-templates-website
 
-This project houses the base website template project that I use to create new website template projects.
+This project houses the base website template project that I use to create new website projects.
 
 ## TypeScript Library and Template Project
 
