@@ -25,7 +25,7 @@ builder.setStartUpSteps(
   }),
   // Pull Website Template Tools Lib
   Step_MirrorDirectory({
-    from: Path('C:/Code/Base/JavaScript-TypeScript/Templates/Browser-Extension', 'tools/lib-website'),
+    from: Path('C:/Code/Base/JavaScript-TypeScript/Templates/Website', 'tools/lib-website'),
     to: Path(builder.dir.tools, 'lib-website'),
     include_patterns: ['**/*'],
   }),

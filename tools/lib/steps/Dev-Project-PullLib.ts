@@ -22,7 +22,7 @@ class CStep_Project_PullLib implements Step {
         from: Path(this.external_directory, 'src/@types'),
         to: Path(builder.dir.src, '@types'),
         include_patterns: ['**/*.ts'],
-        overwrite: false,
+        overwrite: true,
       }),
       Step_MirrorDirectory({
         from: Path(this.external_directory, 'src/lib/ericchase'),
