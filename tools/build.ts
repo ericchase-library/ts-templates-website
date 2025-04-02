@@ -24,11 +24,11 @@ builder.setStartUpSteps(
 // These steps are run before each processing phase.
 builder.setBeforeProcessingSteps();
 
-// Basic setup for a typescript powered extension. Typescript files that match
-// "*.module.ts" and "*.script.ts" are bundled and written to the out folder.
+// Basic setup for a typescript powered project. Typescript files that match
+// "*.module.ts" and "*.iife.ts" are bundled and written to the out folder.
 // The other typescript files do not produce bundles. Module ("*.module.ts")
 // files will not bundle other module files. Instead, they'll import whatever
-// exports are needed from other module files. Script ("*.script.ts") files, on
+// exports are needed from other module files. IIFE ("*.iife.ts") files, on
 // the other hand, produce fully contained bundles. They do not import anything
 // from anywhere. Use them accordingly.
 

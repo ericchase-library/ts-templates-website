@@ -19,9 +19,8 @@ export function Step_DevServer(): Step {
 class CStep_DevServer implements Step {
   channel = logger.newChannel();
 
-  child_process?: Subprocess<'ignore', 'pipe', 'pipe'>;
   hotreload_enabled = true;
-  server_href?: string;
+  process_server?: Subprocess<'ignore', 'pipe', 'pipe'>;
 
   async onStartUp(builder: BuilderInternal): Promise<void> {
     // only start server if in watch mode
@@ -34,8 +33,7 @@ class CStep_DevServer implements Step {
     // grab host and setup listener to toggle hot reloading
     await U8StreamReadLines(stdout_tee, (line) => {
       if (line.startsWith('Serving at')) {
-        this.server_href = line.slice('Serving at'.length).trim();
-        DEVSERVERHOST = new URL(this.server_href).host;
+        DEVSERVERHOST = new URL(line.slice('Serving at'.length).trim()).host;
       } else if (line.startsWith('Console at')) {
         AddStdInListener(async (bytes, text) => {
           if (text === 'h') {
@@ -53,28 +51,24 @@ class CStep_DevServer implements Step {
     });
     Orphan(U8StreamReadLines(p0.stderr, (line) => this.channel.error(line)));
     Orphan(U8StreamReadLines(stdout, (line) => this.channel.log(line)));
-    this.child_process = p0;
+    this.process_server = p0;
   }
   async onRun(builder: BuilderInternal): Promise<void> {
-    if (this.child_process !== undefined && this.hotreload_enabled === true) {
-      if (this.server_href !== undefined) {
-        fetch(`${this.server_href}server/reload`)
-          .then(() => Sleep(1000))
-          .then(() => {
-            // a reminder to dev that the server is running
-            this.channel.log(`Serving at ${this.server_href}`);
-            this.channel.log(`Console at ${this.server_href}console`);
-          })
-          .catch((error) => {
-            this.channel.error(error);
-          });
-      }
+    if (this.process_server !== undefined && this.hotreload_enabled === true) {
+      fetch(`http://${DEVSERVERHOST}/server/reload`)
+        .then(() => Sleep(1000))
+        .then(() => {
+          // a reminder to dev that the server is running
+          this.channel.log(`Serving at http://${DEVSERVERHOST}/`);
+          this.channel.log(`Console at http://${DEVSERVERHOST}/console`);
+        })
+        .catch((error) => {
+          this.channel.error(error);
+        });
     }
   }
   async onCleanUp(builder: BuilderInternal): Promise<void> {
-    if (this.child_process !== undefined) {
-      this.child_process.kill();
-      this.child_process = undefined;
-    }
+    this.process_server?.kill();
+    this.process_server = undefined;
   }
 }
