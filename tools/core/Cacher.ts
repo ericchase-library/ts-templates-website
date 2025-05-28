@@ -1,0 +1,473 @@
+import { Database } from 'bun:sqlite';
+import { default as xxhash } from 'xxhash-wasm';
+import { Core_Console_Error, Core_Promise_Orphan } from '../../src/lib/ericchase/api.core.js';
+import { BunPlatform_File_Async_ReadBytes } from '../../src/lib/ericchase/api.platform-bun.js';
+import { NodePlatform_Directory_Async_Create, NodePlatform_Path_Async_GetStats, NodePlatform_Path_Join } from '../../src/lib/ericchase/api.platform-node.js';
+
+// constants
+const { h64Raw } = await xxhash();
+export const cachepath = NodePlatform_Path_Join('cache');
+if ((await NodePlatform_Directory_Async_Create(cachepath)) === false) {
+  throw 'Could not create cache database path.';
+}
+export const cachedb = new Database(NodePlatform_Path_Join(cachepath, 'cache.db'), { create: true, strict: true });
+
+// types
+
+type SQLQueryBindings = Record<string, string | bigint | NodeJS.TypedArray | number | boolean | null>;
+type SQLQueryError = { data?: undefined; error: { message: any; options?: Record<string, any> } };
+type SQLQueryResult<T = void> = (T extends void | null | undefined ? { data?: T; error?: undefined } : { data: T; error?: undefined }) | SQLQueryError;
+
+// classes
+
+class TaskRepeater<ReturnType> {
+  $result?: Promise<ReturnType> | ReturnType;
+  $running = false;
+  readonly $executor: () => Promise<void> | void;
+  constructor(task: () => Promise<ReturnType> | ReturnType, interval_ms: number, keep_script_running_while_repeater_is_running = true) {
+    if (keep_script_running_while_repeater_is_running) {
+      this.$executor = async () => {
+        if (this.$running === true) {
+          this.$result = await task();
+          setTimeout(this.$executor, interval_ms).ref();
+        }
+      };
+    } else {
+      this.$executor = async () => {
+        if (this.$running === true) {
+          this.$result = await task();
+          setTimeout(this.$executor, interval_ms).unref();
+        }
+      };
+    }
+  }
+  get result() {
+    return this.$result;
+  }
+  start() {
+    if (this.$running === false) {
+      this.$running = true;
+      Core_Promise_Orphan(this.$executor());
+    }
+  }
+  stop() {
+    this.$running = false;
+  }
+}
+class QueryExistsResult {
+  result?: 0 | 1;
+}
+
+class CACHELOCK_ID {
+  static TAG = 'tag';
+  static PID = 'pid';
+  static LAST_ACCESS_TIME = 'last_access_time';
+}
+class CACHELOCK_RECORD {
+  [CACHELOCK_ID.TAG]?: string;
+  [CACHELOCK_ID.PID]?: number;
+  [CACHELOCK_ID.LAST_ACCESS_TIME]?: number;
+}
+class CACHELOCK_DB {
+  static TABLE = 'lock';
+  static CREATE_TABLE = /* sql */ `
+  CREATE TABLE IF NOT EXISTS ${CACHELOCK_DB.TABLE} (
+    ${CACHELOCK_ID.TAG} TEXT PRIMARY KEY NOT NULL,
+    ${CACHELOCK_ID.PID} INTEGER NOT NULL,
+    ${CACHELOCK_ID.LAST_ACCESS_TIME} INTEGER NOT NULL
+  )
+`;
+  static {
+    cachedb.run(CACHELOCK_DB.CREATE_TABLE);
+  }
+  ////
+  static GET_ALL_RECORDS = /* sql */ `
+  SELECT *
+    FROM ${CACHELOCK_DB.TABLE}
+`;
+  static GetAllRecords = CreateAllQuery(CACHELOCK_RECORD, CACHELOCK_DB.GET_ALL_RECORDS);
+  ////
+  static GET_RECORD = /* sql */ `
+  SELECT *
+    FROM ${CACHELOCK_DB.TABLE}
+   WHERE ${CACHELOCK_ID.TAG} = $${CACHELOCK_ID.TAG}
+`;
+  static GetRecord = {
+    [CACHELOCK_ID.TAG]: CreateGetQuery(CACHELOCK_RECORD, CACHELOCK_DB.GET_RECORD, { [CACHELOCK_ID.TAG]: '' }),
+  };
+  static GetRecords = {
+    [CACHELOCK_ID.TAG]: CreateAllQuery(CACHELOCK_RECORD, CACHELOCK_DB.GET_RECORD, { [CACHELOCK_ID.TAG]: '' }),
+  };
+  ////
+  static INSERT_LOCK = /* sql */ `
+  INSERT INTO ${CACHELOCK_DB.TABLE} (${CACHELOCK_ID.TAG}, ${CACHELOCK_ID.PID}, ${CACHELOCK_ID.LAST_ACCESS_TIME})
+  VALUES ($${CACHELOCK_ID.TAG}, $${CACHELOCK_ID.PID}, strftime('%s', 'now'))
+`;
+  static InsertLock = CreateRunQuery(CACHELOCK_DB.INSERT_LOCK, { [CACHELOCK_ID.TAG]: '', [CACHELOCK_ID.PID]: 0 });
+  ////
+  static IS_LOCK_ACTIVE = /* sql */ `
+  SELECT EXISTS(
+    SELECT 1
+      FROM ${CACHELOCK_DB.TABLE}
+     WHERE ${CACHELOCK_ID.TAG} = $${CACHELOCK_ID.TAG}
+       AND ${CACHELOCK_ID.LAST_ACCESS_TIME} > strftime('%s', 'now', '-3 seconds')
+  ) AS result;
+`;
+  static IsLockActive = CreateGetQuery(QueryExistsResult, CACHELOCK_DB.IS_LOCK_ACTIVE, { [CACHELOCK_ID.TAG]: '' });
+  ////
+  static DELETE_ALL_RECORDS = /* sql */ `
+  DELETE FROM ${CACHELOCK_DB.TABLE}
+   WHERE ${CACHELOCK_ID.PID} = $${CACHELOCK_ID.PID}
+`;
+  static DeleteAllRecords = CreateRunQuery(CACHELOCK_DB.DELETE_ALL_RECORDS, { [CACHELOCK_ID.PID]: 0 });
+  ////
+  static DELETE_RECORD = /* sql */ `
+  DELETE FROM ${CACHELOCK_DB.TABLE}
+   WHERE ${CACHELOCK_ID.TAG} = $${CACHELOCK_ID.TAG}
+     AND ${CACHELOCK_ID.PID} = $${CACHELOCK_ID.PID}
+`;
+  static DeleteRecord = CreateRunQuery(CACHELOCK_DB.DELETE_RECORD, { [CACHELOCK_ID.TAG]: '', [CACHELOCK_ID.PID]: 0 });
+
+  static DELETE_RECORD_BY_FORCE = /* sql */ `
+  DELETE FROM ${CACHELOCK_DB.TABLE}
+   WHERE ${CACHELOCK_ID.TAG} = $${CACHELOCK_ID.TAG}
+`;
+  static DeleteRecordByForce = CreateRunQuery(CACHELOCK_DB.DELETE_RECORD_BY_FORCE, { [CACHELOCK_ID.TAG]: '' });
+  ////
+  static UPDATE_RECORD = /* sql */ `
+  UPDATE ${CACHELOCK_DB.TABLE}
+     SET ${CACHELOCK_ID.LAST_ACCESS_TIME} = strftime('%s', 'now')
+   WHERE ${CACHELOCK_ID.PID} = $${CACHELOCK_ID.PID}
+`;
+  static UpdateRecord = CreateRunQuery(CACHELOCK_DB.UPDATE_RECORD, { [CACHELOCK_ID.PID]: 0 });
+  ////
+  static Updater = {
+    locks: new Set<string>(),
+    updater: new TaskRepeater(
+      () => {
+        try {
+          CACHELOCK_DB.UpdateRecord({ [CACHELOCK_ID.PID]: process.pid });
+        } catch (error) {}
+      },
+      2000,
+      false,
+    ),
+    add(tag: string) {
+      CACHELOCK_DB.Updater.locks.add(tag);
+      CACHELOCK_DB.Updater.updater.start();
+    },
+    remove(tag: string) {
+      CACHELOCK_DB.Updater.locks.delete(tag);
+      if (CACHELOCK_DB.Updater.locks.size < 1) {
+        CACHELOCK_DB.Updater.updater.stop();
+      }
+    },
+    removeAll() {
+      CACHELOCK_DB.Updater.updater.stop();
+      CACHELOCK_DB.Updater.locks.clear();
+    },
+  };
+}
+export class CACHELOCK {
+  static IsLocked(tag: string): SQLQueryResult<boolean> {
+    try {
+      return { data: CACHELOCK_DB.IsLockActive({ tag })?.result === 1 };
+    } catch (error) {
+      return CreateQueryError(error);
+    }
+  }
+  static Lock(tag: string): SQLQueryResult<boolean> {
+    try {
+      const r0 = CACHELOCK.LockStatus(tag);
+      if (r0.error) return r0;
+      if (r0.data.mine) {
+        CACHELOCK_DB.Updater.add(tag);
+        return { data: true };
+      }
+      if (r0.data.locked) {
+        return { data: false };
+      }
+      CACHELOCK_DB.DeleteRecordByForce({ tag });
+      CACHELOCK_DB.InsertLock({ tag, pid: process.pid });
+      const r1 = CACHELOCK.LockStatus(tag);
+      if (r1.error) return r1;
+      if (r1.data.mine) {
+        CACHELOCK_DB.Updater.add(tag);
+        return { data: true };
+      }
+      return { data: false };
+    } catch (error) {
+      return CreateQueryError(error);
+    }
+  }
+  static LockEach(tags: string[]):
+    | { success: true; tag?: undefined; error?: undefined } //
+    | { success: false; tag: string; error?: any } {
+    for (const tag of tags) {
+      try {
+        const r0 = CACHELOCK.Lock(tag);
+        if (r0.error || r0.data === false) {
+          CACHELOCK.UnlockEach(tags);
+          return { success: false, tag, error: r0.error };
+        }
+      } catch (error) {
+        CACHELOCK.UnlockEach(tags);
+        return { success: false, tag, error };
+      }
+    }
+    return { success: true };
+  }
+  static LockOrExit(tag: string, on_exit?: (error?: unknown) => void): void {
+    try {
+      const r0 = CACHELOCK.Lock(tag);
+      if (r0.error || r0.data === false) {
+        on_exit?.(r0.error);
+        process.exit();
+      }
+    } catch (error) {
+      on_exit?.(error);
+      process.exit();
+    }
+  }
+  static LockEachOrExit(tags: string[], on_exit?: (tag: string, error?: unknown) => void): void {
+    const r0 = CACHELOCK.LockEach(tags);
+    if (r0.success === false) {
+      on_exit?.(r0.tag, r0.error);
+      process.exit();
+    }
+  }
+  static LockStatus(tag: string): SQLQueryResult<{ locked: boolean; mine: boolean }> {
+    try {
+      const q0 = CACHELOCK_DB.GetRecord[CACHELOCK_ID.TAG]({ [CACHELOCK_ID.TAG]: tag });
+      if (q0) {
+        const mine = q0.pid === process.pid;
+        return { data: { locked: CACHELOCK_DB.IsLockActive({ tag })?.result === 1, mine } };
+      }
+      return { data: { locked: false, mine: false } };
+    } catch (error) {
+      return CreateQueryError(error);
+    }
+  }
+  static TryLock(script: string) {
+    CACHELOCK.LockOrExit(script, (error) => {
+      Core_Console_Error(`Another process is locking ${script}. Please wait for that process to end.`, error ?? '');
+    });
+  }
+  static TryLockEach(scripts: string[]) {
+    CACHELOCK.LockEachOrExit(scripts, (script, error) => {
+      Core_Console_Error(`Another process is locking ${script}. Please wait for that process to end.`, error ?? '');
+    });
+  }
+  static Unlock(tag: string): void {
+    CACHELOCK_DB.Updater.remove(tag);
+    CACHELOCK_DB.DeleteRecord({ tag, pid: process.pid });
+  }
+  static UnlockAll(): void {
+    CACHELOCK_DB.Updater.removeAll();
+    CACHELOCK_DB.DeleteAllRecords({ [CACHELOCK_ID.PID]: process.pid });
+  }
+  static UnlockEach(tags: string[]): void {
+    for (const tag of tags) {
+      CACHELOCK.Unlock(tag);
+    }
+  }
+}
+
+class FILESTATS_ID {
+  static PATH = 'path';
+  static MTIMEMS = 'mtimeMs';
+  static CURRENT_MTIMEMS = 'current_mtimeMs';
+  static HASH = 'xxhash';
+  static CURRENT_HASH = 'current_xxhash';
+}
+class FILESTATS_RECORD {
+  [FILESTATS_ID.PATH]?: string;
+  [FILESTATS_ID.MTIMEMS]?: number;
+  [FILESTATS_ID.HASH]?: string;
+}
+class FILESTATS_DB {
+  static TABLE = 'filestats';
+  static CREATE_TABLE = /* sql */ `
+  CREATE TABLE IF NOT EXISTS ${FILESTATS_DB.TABLE} (
+    ${FILESTATS_ID.PATH} TEXT PRIMARY KEY NOT NULL,
+    ${FILESTATS_ID.MTIMEMS} REAL NOT NULL,
+    ${FILESTATS_ID.HASH} TEXT NOT NULL
+  )
+`;
+  static {
+    cachedb.run(FILESTATS_DB.CREATE_TABLE);
+  }
+  ////
+  static GET_ALL_RECORDS = /* sql */ `
+  SELECT *
+    FROM ${FILESTATS_DB.TABLE}
+`;
+  static GetAllRecords = CreateAllQuery(FILESTATS_RECORD, FILESTATS_DB.GET_ALL_RECORDS);
+  ////
+  static GET_RECORD = /* sql */ `
+  SELECT *
+    FROM ${FILESTATS_DB.TABLE}
+   WHERE ${FILESTATS_ID.PATH} = $${FILESTATS_ID.PATH}
+`;
+  static GetRecord = {
+    [FILESTATS_ID.PATH]: CreateGetQuery(FILESTATS_RECORD, FILESTATS_DB.GET_RECORD, { [FILESTATS_ID.PATH]: '' }),
+  };
+  static GetRecords = {
+    [FILESTATS_ID.PATH]: CreateAllQuery(FILESTATS_RECORD, FILESTATS_DB.GET_RECORD, { [FILESTATS_ID.PATH]: '' }),
+  };
+  ////
+  static IS_EMPTY = /* sql */ `
+  SELECT NOT EXISTS(
+    SELECT 1
+      FROM ${FILESTATS_DB.TABLE}
+  ) AS result;
+`;
+  static IsEmpty = CreateGetQuery(QueryExistsResult, FILESTATS_DB.IS_EMPTY);
+  ////
+  static IS_FILE_MODIFIED = /* sql */ `
+  SELECT NOT EXISTS(
+    SELECT 1
+      FROM ${FILESTATS_DB.TABLE}
+     WHERE ${FILESTATS_ID.PATH} = $${FILESTATS_ID.PATH}
+       AND ${FILESTATS_ID.MTIMEMS} = $${FILESTATS_ID.CURRENT_MTIMEMS}
+  ) AS result;
+`;
+  static IsFileTimeModified = CreateGetQuery(QueryExistsResult, FILESTATS_DB.IS_FILE_MODIFIED, { [FILESTATS_ID.PATH]: '', [FILESTATS_ID.CURRENT_MTIMEMS]: 0 });
+  ////
+  static IS_HASH_MODIFIED = /* sql */ `
+  SELECT NOT EXISTS(
+    SELECT 1
+      FROM ${FILESTATS_DB.TABLE}
+     WHERE ${FILESTATS_ID.PATH} = $${FILESTATS_ID.PATH}
+       AND ${FILESTATS_ID.HASH} = $${FILESTATS_ID.CURRENT_HASH}
+  ) AS result;
+`;
+  static IsFileHashModified = CreateGetQuery(QueryExistsResult, FILESTATS_DB.IS_HASH_MODIFIED, { [FILESTATS_ID.PATH]: '', [FILESTATS_ID.CURRENT_HASH]: '' });
+  ////
+  static DELETE_ALL_RECORDS = /* sql */ `
+  DELETE FROM ${FILESTATS_DB.TABLE}
+`;
+  static DeleteAllRecords = CreateRunQuery(FILESTATS_DB.DELETE_ALL_RECORDS);
+  ////
+  static DELETE_RECORD = /* sql */ `
+  DELETE FROM ${FILESTATS_DB.TABLE}
+   WHERE ${FILESTATS_ID.PATH} = $${FILESTATS_ID.PATH}
+`;
+  static DeleteRecord = CreateRunQuery(FILESTATS_DB.DELETE_RECORD, { [FILESTATS_ID.PATH]: '' });
+  ////
+  static UPDATE_RECORD = /* sql */ `
+  INSERT OR REPLACE INTO ${FILESTATS_DB.TABLE} (${FILESTATS_ID.PATH}, ${FILESTATS_ID.MTIMEMS}, ${FILESTATS_ID.HASH})
+  VALUES ($${FILESTATS_ID.PATH}, $${FILESTATS_ID.MTIMEMS}, $${FILESTATS_ID.HASH})
+`;
+  static UpdateRecord = CreateRunQuery(FILESTATS_DB.UPDATE_RECORD, { [FILESTATS_ID.PATH]: '', [FILESTATS_ID.MTIMEMS]: 0, [FILESTATS_ID.HASH]: '' });
+}
+export class FILESTATS {
+  static LockTable(): SQLQueryResult<boolean> {
+    return CACHELOCK.Lock(FILESTATS_DB.TABLE);
+  }
+  static UnlockTable() {
+    CACHELOCK.Unlock(FILESTATS_DB.TABLE);
+  }
+  static QueryStats(path: string): SQLQueryResult<FILESTATS_RECORD | undefined> {
+    try {
+      return { data: FILESTATS_DB.GetRecord[FILESTATS_ID.PATH]({ [FILESTATS_ID.PATH]: NodePlatform_Path_Join(path) }), error: undefined };
+    } catch (error) {
+      return CreateQueryError(error);
+    }
+  }
+  static async UpdateStats(path: string): Promise<SQLQueryResult<FILESTATS_RECORD | undefined>> {
+    try {
+      FILESTATS_DB.UpdateRecord({ [FILESTATS_ID.PATH]: NodePlatform_Path_Join(path), [FILESTATS_ID.MTIMEMS]: await FILESTATS.GetMTimeMS(path), [FILESTATS_ID.HASH]: await FILESTATS.GetB64Hash(path) });
+      return FILESTATS.QueryStats(path);
+    } catch (error) {
+      return CreateQueryError(error);
+    }
+  }
+  static RemoveStats(path: string): SQLQueryResult<boolean> {
+    try {
+      FILESTATS_DB.DeleteRecord({ path: NodePlatform_Path_Join(path) });
+      return { data: true };
+    } catch (error) {
+      return CreateQueryError(error);
+    }
+  }
+  static RemoveAllStats(): SQLQueryResult<boolean> {
+    try {
+      FILESTATS_DB.DeleteAllRecords();
+      const q0 = FILESTATS_DB.IsEmpty();
+      return { data: q0?.result === 1 };
+    } catch (error) {
+      return CreateQueryError(error);
+    }
+  }
+  static async PathIsStale(path: string): Promise<SQLQueryResult<boolean>> {
+    try {
+      const q0 = FILESTATS_DB.GetRecord[FILESTATS_ID.PATH]({ [FILESTATS_ID.PATH]: NodePlatform_Path_Join(path) });
+      if (q0 === undefined || q0[FILESTATS_ID.MTIMEMS] !== (await FILESTATS.GetMTimeMS(path)) || q0[FILESTATS_ID.HASH] !== (await FILESTATS.GetB64Hash(path))) {
+        return { data: true };
+      }
+      return { data: false };
+    } catch (error) {
+      return CreateQueryError(error);
+    }
+  }
+  static async PathsAreEqual(path0: string, path1: string): Promise<SQLQueryResult<boolean>> {
+    try {
+      const q0 = FILESTATS_DB.GetRecord[FILESTATS_ID.PATH]({ [FILESTATS_ID.PATH]: NodePlatform_Path_Join(path0) });
+      const q1 = FILESTATS_DB.GetRecord[FILESTATS_ID.PATH]({ [FILESTATS_ID.PATH]: NodePlatform_Path_Join(path1) });
+      if (q0 !== undefined && q1 !== undefined) {
+        const current_mtimems0 = await FILESTATS.GetMTimeMS(path0);
+        const current_mtimems1 = await FILESTATS.GetMTimeMS(path1);
+        if (q0[FILESTATS_ID.MTIMEMS] === current_mtimems0 && q1[FILESTATS_ID.MTIMEMS] === current_mtimems1 && q0[FILESTATS_ID.HASH] === q1[FILESTATS_ID.HASH]) {
+          return { data: true };
+        }
+        const current_hash0 = await FILESTATS.GetHash(path0);
+        const current_hash1 = await FILESTATS.GetHash(path1);
+        if (current_hash0 === current_hash1) {
+          FILESTATS_DB.UpdateRecord({ [FILESTATS_ID.PATH]: NodePlatform_Path_Join(path0), [FILESTATS_ID.MTIMEMS]: current_mtimems1, [FILESTATS_ID.HASH]: btoa(current_hash1.toString()) });
+          FILESTATS_DB.UpdateRecord({ [FILESTATS_ID.PATH]: NodePlatform_Path_Join(path1), [FILESTATS_ID.MTIMEMS]: current_mtimems0, [FILESTATS_ID.HASH]: btoa(current_hash0.toString()) });
+          return { data: true };
+        }
+      }
+      return { data: false };
+    } catch (error) {
+      return CreateQueryError(error);
+    }
+  }
+  static async GetB64Hash(path: string): Promise<string> {
+    return btoa((await FILESTATS.GetHash(path)).toString());
+  }
+  static async GetHash(path: string): Promise<bigint> {
+    return h64Raw(await BunPlatform_File_Async_ReadBytes(path));
+  }
+  static async GetMTimeMS(path: string): Promise<number> {
+    return (await NodePlatform_Path_Async_GetStats(path)).mtimeMs;
+  }
+}
+
+// functions
+
+function CreateGetQuery<ReturnType, Bindings extends SQLQueryBindings>(return_type: new (...args: any[]) => ReturnType, query: string, bindings?: Bindings) {
+  const statement = cachedb.query(query).as(return_type);
+  return (bindings?: Bindings) => statement.get(bindings ?? {}) ?? undefined;
+}
+function CreateAllQuery<ReturnType, Bindings extends SQLQueryBindings>(return_type: new (...args: any[]) => ReturnType, query: string, bindings?: Bindings) {
+  const statement = cachedb.query(query).as(return_type);
+  return (bindings?: Bindings) => statement.all(bindings ?? {}) ?? undefined;
+}
+function CreateRunQuery<Bindings extends SQLQueryBindings>(query: string, bindings?: Bindings) {
+  const statement = cachedb.query(query);
+  return (bindings?: Bindings) => statement.run(bindings ?? {});
+}
+function CreateQueryError(message: any, options?: Record<string, any>): SQLQueryError {
+  return { error: { message, options } };
+}
+
+// cleanup
+
+process.on('beforeExit', () => {
+  CACHELOCK.UnlockAll();
+});
+process.on('exit', () => {
+  CACHELOCK.UnlockAll();
+});

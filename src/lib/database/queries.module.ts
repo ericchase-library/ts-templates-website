@@ -1,4 +1,4 @@
-import { ConsoleError } from '../ericchase/Utility/Console.js';
+import { Core_Console_Error } from '../ericchase/api.core.js';
 import { SERVER_HOST } from '../server/constants.js';
 import { getLocalhost } from './dbdriver-localhost.js';
 
@@ -57,7 +57,7 @@ export async function EnsureTableExists(name: string): Promise<{ created: boolea
       return { created: true, exists: true };
     }
   } catch (error) {
-    ConsoleError(error);
+    Core_Console_Error(error);
   }
   return { created: false, exists: false };
 }

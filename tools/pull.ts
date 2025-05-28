@@ -1,35 +1,20 @@
-import { Path } from '../src/lib/ericchase/Platform/FilePath.js';
-import { Builder } from './lib/Builder.js';
-import { Step_Bun_Run } from './lib/steps/Bun-Run.js';
-import { Step_Project_PullLib } from './lib/steps/Dev-Project-PullLib.js';
-import { Step_MirrorDirectory } from './lib/steps/FS-MirrorDirectory.js';
+import { Builder } from './core/Builder.js';
+import { Processor_Set_Writable } from './core/processor/Processor_Set_Writable.js';
+import { Step_Bun_Run } from './core/step/Step_Bun_Run.js';
+import { Step_Dev_Project_Sync_Lib } from './lib-dev/step/Step_Dev_Project_Sync_Lib.js';
 
 // This script pulls base lib files from another project. I use it for quickly
 // updating templates and concrete projects.
-const builder = new Builder();
 
-builder.setStartUpSteps(
-  Step_Bun_Run({ cmd: ['bun', 'install'] }, 'quiet'),
-  Step_Project_PullLib('C:/Code/Base/JavaScript-TypeScript/@Template'),
-  // Get Server Updates
-  Step_MirrorDirectory({
-    from: Path('C:/Code/Base/JavaScript-TypeScript/@Library', 'server'),
-    to: Path('server'),
-    include_patterns: ['**/*'],
-    exclude_patterns: ['{.git,node_modules,public}/**/*', 'bun.lock'],
-  }),
-  Step_MirrorDirectory({
-    from: Path('C:/Code/Base/JavaScript-TypeScript/Templates/Website', 'src/lib/server'),
-    to: Path(builder.dir.lib, 'server'),
-    include_patterns: ['**/*'],
-  }),
-  // Pull Website Template Tools Lib
-  Step_MirrorDirectory({
-    from: Path('C:/Code/Base/JavaScript-TypeScript/Templates/Website', 'tools/lib-website'),
-    to: Path(builder.dir.tools, 'lib-website'),
-    include_patterns: ['**/*'],
-  }),
+Builder.SetStartUpSteps(
+  Step_Bun_Run({ cmd: ['bun', 'install'], showlogs: false }),
+  Step_Dev_Project_Sync_Lib({ from: 'C:/Code/Base/JavaScript-TypeScript/@Template', to: './' }),
   //
 );
 
-await builder.start();
+Builder.SetProcessorModules(
+  Processor_Set_Writable({ exclude_patterns: ['**/*'] }),
+  //
+);
+
+await Builder.Start();

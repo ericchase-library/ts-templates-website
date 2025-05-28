@@ -1,12 +1,236 @@
-// src/lib/ericchase/Utility/Console.ts
-var newline_count = 0;
-function ConsoleError(...items) {
-  console["error"](...items);
-  newline_count = 0;
+// src/lib/ericchase/core.ts
+var ARRAY__UINT8__BYTE_TO_B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+var ARRAY__UINT8__B64_TO_BYTE = new Map([...ARRAY__UINT8__BYTE_TO_B64].map((char, byte) => [char, byte]));
+var ARRAY__UINT8__EMPTY = Uint8Array.from([]);
+var MATH__FACTORIAL__CACHE = [BigInt(1), BigInt(1)];
+var UTILITY__CRC32__TABLE = new Uint32Array(256);
+var UTILITY__CRC32__MAGIC = new Uint32Array([3988292384]);
+for (let i = 0;i < 256; i++) {
+  UTILITY__CRC32__TABLE[i] = i;
+  for (let k = 0;k < 8; k++) {
+    if (UTILITY__CRC32__TABLE[i] >>> 0 & 1) {
+      UTILITY__CRC32__TABLE[i] = UTILITY__CRC32__MAGIC[0] ^ UTILITY__CRC32__TABLE[i] >>> 1;
+    } else {
+      UTILITY__CRC32__TABLE[i] >>>= 1;
+    }
+  }
 }
 
-// src/lib/ericchase/WebAPI/Node_Utility.ts
-class CNodeRef {
+class ClassArrayUint8Group {
+  arrays = new Array;
+  byteLength = 0;
+  add(bytes) {
+    this.arrays.push(bytes);
+    this.byteLength += bytes.byteLength;
+    return this.byteLength;
+  }
+  get(count, offset = 0) {
+    const out = new Uint8Array(count);
+    let i_out = 0;
+    if (offset === 0) {
+      for (const bytes of this.arrays) {
+        for (let i_bytes = 0;i_bytes < bytes.byteLength; i_bytes++) {
+          out[i_out] = bytes[i_bytes];
+          i_out++;
+          if (i_out >= count) {
+            return out;
+          }
+        }
+      }
+    } else {
+      let i_total = 0;
+      for (const bytes of this.arrays) {
+        for (let i_bytes = 0;i_bytes < bytes.byteLength; i_bytes++) {
+          i_total++;
+          if (i_total >= offset) {
+            out[i_out] = bytes[i_bytes];
+            i_out++;
+            if (i_out >= count) {
+              return out;
+            }
+          }
+        }
+      }
+    }
+    return out;
+  }
+}
+class ClassUtilityCRC32 {
+  $state = new Uint32Array([4294967295]);
+  update(bytes) {
+    for (let index = 0;index < bytes.length; index++) {
+      this.$state[0] = UTILITY__CRC32__TABLE[(this.$state[0] ^ bytes[index]) & 255] ^ this.$state[0] >>> 8;
+    }
+  }
+  get value() {
+    return (this.$state[0] ^ 4294967295 >>> 0) >>> 0;
+  }
+}
+
+// src/lib/ericchase/api.core.ts
+function Core_Console_Error(...items) {
+  console["error"](...items);
+}
+
+// src/lib/ericchase/platform-web.ts
+class ClassDomAttributeObserver {
+  constructor({
+    source = document.documentElement,
+    options = { attributeOldValue: true, subtree: true }
+  }) {
+    this.mutationObserver = new MutationObserver((mutationRecords) => {
+      for (const record of mutationRecords) {
+        this.send(record);
+      }
+    });
+    this.mutationObserver.observe(source, {
+      attributes: true,
+      attributeFilter: options.attributeFilter,
+      attributeOldValue: options.attributeOldValue ?? true,
+      subtree: options.subtree ?? true
+    });
+  }
+  subscribe(callback) {
+    this.subscriptionSet.add(callback);
+    return () => {
+      this.subscriptionSet.delete(callback);
+    };
+  }
+  mutationObserver;
+  subscriptionSet = new Set;
+  send(record) {
+    for (const callback of this.subscriptionSet) {
+      callback(record, () => {
+        this.subscriptionSet.delete(callback);
+      });
+    }
+  }
+}
+
+class ClassDomCharacterDataObserver {
+  constructor({ source = document.documentElement, options = { characterDataOldValue: true, subtree: true } }) {
+    this.mutationObserver = new MutationObserver((mutationRecords) => {
+      for (const record of mutationRecords) {
+        this.send(record);
+      }
+    });
+    this.mutationObserver.observe(source, {
+      characterData: true,
+      characterDataOldValue: options.characterDataOldValue ?? true,
+      subtree: options.subtree ?? true
+    });
+  }
+  subscribe(callback) {
+    this.subscriptionSet.add(callback);
+    return () => {
+      this.subscriptionSet.delete(callback);
+    };
+  }
+  mutationObserver;
+  subscriptionSet = new Set;
+  send(record) {
+    for (const callback of this.subscriptionSet) {
+      callback(record, () => {
+        this.subscriptionSet.delete(callback);
+      });
+    }
+  }
+}
+
+class ClassDomChildListObserver {
+  constructor({ source = document.documentElement, options = { subtree: true } }) {
+    this.mutationObserver = new MutationObserver((mutationRecords) => {
+      for (const record of mutationRecords) {
+        this.send(record);
+      }
+    });
+    this.mutationObserver.observe(source, {
+      childList: true,
+      subtree: options.subtree ?? true
+    });
+  }
+  subscribe(callback) {
+    this.subscriptionSet.add(callback);
+    return () => {
+      this.subscriptionSet.delete(callback);
+    };
+  }
+  mutationObserver;
+  subscriptionSet = new Set;
+  send(record) {
+    for (const callback of this.subscriptionSet) {
+      callback(record, () => {
+        this.subscriptionSet.delete(callback);
+      });
+    }
+  }
+}
+
+class ClassDomElementAddedObserver {
+  constructor({ source = document.documentElement, options = { subtree: true }, selector, includeExistingElements = true }) {
+    this.mutationObserver = new MutationObserver((mutationRecords) => {
+      for (const record of mutationRecords) {
+        if (record.target instanceof Element && record.target.matches(selector)) {
+          this.send(record.target);
+        }
+        const treeWalker = document.createTreeWalker(record.target, NodeFilter.SHOW_ELEMENT);
+        while (treeWalker.nextNode()) {
+          if (treeWalker.currentNode.matches(selector)) {
+            this.send(treeWalker.currentNode);
+          }
+        }
+      }
+    });
+    this.mutationObserver.observe(source, {
+      childList: true,
+      subtree: options.subtree ?? true
+    });
+    if (includeExistingElements === true) {
+      const treeWalker = document.createTreeWalker(document, NodeFilter.SHOW_ELEMENT);
+      while (treeWalker.nextNode()) {
+        if (treeWalker.currentNode.matches(selector)) {
+          this.send(treeWalker.currentNode);
+        }
+      }
+    }
+  }
+  disconnect() {
+    this.mutationObserver.disconnect();
+    for (const callback of this.subscriptionSet) {
+      this.subscriptionSet.delete(callback);
+    }
+  }
+  subscribe(callback) {
+    this.subscriptionSet.add(callback);
+    let abort = false;
+    for (const element of this.matchSet) {
+      callback(element, () => {
+        this.subscriptionSet.delete(callback);
+        abort = true;
+      });
+      if (abort)
+        return () => {};
+    }
+    return () => {
+      this.subscriptionSet.delete(callback);
+    };
+  }
+  mutationObserver;
+  matchSet = new Set;
+  subscriptionSet = new Set;
+  send(element) {
+    if (!this.matchSet.has(element)) {
+      this.matchSet.add(element);
+      for (const callback of this.subscriptionSet) {
+        callback(element, () => {
+          this.subscriptionSet.delete(callback);
+        });
+      }
+    }
+  }
+}
+
+class ClassNodeReference {
   node;
   constructor(node) {
     if (node === null) {
@@ -57,8 +281,10 @@ class CNodeRef {
     this.as(HTMLElement).style.setProperty(property, value, priority);
   }
 }
-function NodeRef(node) {
-  return new CNodeRef(node);
+
+// src/lib/ericchase/api.platform-web.ts
+function WebPlatform_Node_Class_NodeReference(node) {
+  return new ClassNodeReference(node);
 }
 
 // src/lib/server/constants.ts
@@ -114,7 +340,7 @@ HotRefresh();
 class Page {
   divMessages;
   constructor() {
-    this.divMessages = NodeRef(document.querySelector("#messages")).as(HTMLDivElement);
+    this.divMessages = WebPlatform_Node_Class_NodeReference(document.querySelector("#messages")).as(HTMLDivElement);
   }
   addMessage(text) {
     try {
@@ -126,7 +352,7 @@ class Page {
       div.scrollIntoView(false);
       return div;
     } catch (error) {
-      ConsoleError(error);
+      Core_Console_Error(error);
     }
   }
 }

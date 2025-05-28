@@ -1,5 +1,5 @@
-import { ConsoleError } from './lib/ericchase/Utility/Console.js';
-import { NodeRef } from './lib/ericchase/WebAPI/Node_Utility.js';
+import { Core_Console_Error } from './lib/ericchase/api.core.js';
+import { WebPlatform_Node_Class_NodeReference } from './lib/ericchase/api.platform-web.js';
 import { HotRefresh } from './lib/server/HotRefresh.js';
 
 HotRefresh();
@@ -7,7 +7,7 @@ HotRefresh();
 class Page {
   divMessages: HTMLDivElement;
   constructor() {
-    this.divMessages = NodeRef(document.querySelector('#messages')).as(HTMLDivElement);
+    this.divMessages = WebPlatform_Node_Class_NodeReference(document.querySelector('#messages')).as(HTMLDivElement);
   }
   addMessage(text: string) {
     try {
@@ -20,7 +20,7 @@ class Page {
       div.scrollIntoView(false);
       return div;
     } catch (error) {
-      ConsoleError(error);
+      Core_Console_Error(error);
     }
   }
 }

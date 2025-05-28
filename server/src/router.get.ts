@@ -1,10 +1,9 @@
-import { default as node_fs } from 'node:fs';
-import { NormalizedPath } from './lib/ericchase/Platform/FilePath.js';
-import { ConsoleLog } from './lib/ericchase/Utility/Console.js';
+import { Core_Console_Log } from './lib/ericchase/api.core.js';
+import { NodePlatform_Path_Async_IsDirectory, NodePlatform_Path_Join, NodePlatform_Path_Resolve } from './lib/ericchase/api.platform-node.js';
 import { server } from './route-server.js';
 
-export async function get(req: Request, url: URL, pathname: string): Promise<Response | undefined> {
-  ConsoleLog(`GET      ${pathname}`);
+export function get(req: Request, url: URL, pathname: string): Promise<Response | undefined> {
+  Core_Console_Log(`GET      ${pathname}`);
 
   // server api
   if (url.pathname === '/console') return server.getConsole();
@@ -16,23 +15,24 @@ export async function get(req: Request, url: URL, pathname: string): Promise<Res
       return getPublicResource('index.html');
     }
   }
-
   return getPublicResource(pathname);
 }
 
+// pathname starts with '/'
 async function getPublicResource(pathname: string): Promise<Response | undefined> {
   if (Bun.env.PUBLIC_PATH) {
-    const public_path = NormalizedPath(Bun.env.PUBLIC_PATH);
+    const public_path = NodePlatform_Path_Resolve(Bun.env.PUBLIC_PATH);
     try {
-      if ((await node_fs.promises.stat(public_path.raw)).isDirectory() === false) {
+      if ((await NodePlatform_Path_Async_IsDirectory(public_path)) === false) {
         throw undefined;
       }
     } catch (error) {
       throw new Error(`PUBLIC_PATH "${Bun.env.PUBLIC_PATH}" does not exist or is not a directory.`);
     }
-    const resource_path = NormalizedPath(public_path, pathname);
+    // join handles the '/'
+    const resource_path = NodePlatform_Path_Resolve(NodePlatform_Path_Join(Bun.env.PUBLIC_PATH, pathname));
     if (resource_path.startsWith(public_path)) {
-      const resource_file = Bun.file(resource_path.raw);
+      const resource_file = Bun.file(resource_path);
       if (await resource_file.exists()) {
         return new Response(resource_file);
       }

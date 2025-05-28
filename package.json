@@ -1,20 +1,17 @@
 {
   "dependencies": {},
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
     "@types/adm-zip": "^0.5.7",
-    "@types/bun": "^1.2.8",
-    "@types/chrome": "^0.0.313",
-    "@types/node": "^22.13.14",
+    "@types/bun": "^1.2.14",
+    "@types/chrome": "^0.0.323",
+    "@types/node": "^22.15.23",
     "adm-zip": "^0.5.16",
-    "node-html-parser": "^7.0.1",
     "prettier": "^3.5.3",
     "xxhash-wasm": "^1.1.0"
   },
   "scripts": {
     "build": "bun run tools/build.ts",
-    "dev": "bun run tools/build.ts --watch",
-    "lint": "biome lint --error-on-warnings --write",
+    "dev": "bun run tools/build.ts --dev",
     "pull": "bun run tools/pull.ts"
   },
   "type": "module"

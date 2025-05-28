@@ -1,3 +1,17 @@
+## 2025-05-26
+
+- removed namespaces from library files
+  - updated build tool files
+- removing biome.js from project, going back to prettier
+  - i constantly have issues with biome, both with the language server and extension. it's just not ready for power devs
+- removed `Processor_Basic_Writer` in favor of `Processor_Set_Writable`
+  - the new processor allows finer control over which files should and shouldn't be written
+  - each file is written after its "first-run" processing phase if writable, regardless of modification
+  - all modified, writable files are written after each normal processing phase
+- restructured Builder.ts for readability
+- fixed a few bugs here and there
+- separate library public api from library internal api
+
 ## 2025-03-28
 
 - Repo build tools has been upgraded to version 2.0
