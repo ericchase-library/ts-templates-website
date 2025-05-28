@@ -164,10 +164,10 @@ export namespace Builder {
       _started = true;
       switch (_mode) {
         case MODE.BUILD:
-          StartBuild();
+          await StartBuild();
           break;
         case MODE.DEV:
-          StartDev();
+          await StartDev();
           break;
       }
     }
@@ -693,7 +693,7 @@ async function ScanSourceFolder() {
 async function StartBuild() {
   try {
     SecureLocks();
-    ScanSourceFolder();
+    await ScanSourceFolder();
     await BuildPhase.StartUp();
     await BuildPhase.Process();
     await BuildPhase.CleanUp();
@@ -712,7 +712,7 @@ async function StartBuild() {
 async function StartDev() {
   try {
     SecureLocks();
-    ScanSourceFolder();
+    await ScanSourceFolder();
     const mutex = LockCounter();
     const unlock = mutex.lock();
     {
