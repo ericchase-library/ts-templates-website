@@ -1,5 +1,5 @@
 import { BunPlatform_Glob_Ex_Match } from '../../../src/lib/ericchase/api.platform-bun.js';
-import { NodePlatform_Path_NewExtension } from '../../../src/lib/ericchase/api.platform-node.js';
+import { NodePlatform_Path_JoinStandard, NodePlatform_Path_NewExtension } from '../../../src/lib/ericchase/api.platform-node.js';
 import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
 
@@ -24,8 +24,8 @@ class Class implements Builder.Processor {
   ) {}
   async onAdd(files: Set<Builder.File>): Promise<void> {
     for (const file of files) {
-      if (BunPlatform_Glob_Ex_Match(file.src_path.toStandard(), this.include_patterns, this.exclude_patterns) === true) {
-        file.out_path.value = NodePlatform_Path_NewExtension(file.out_path.value, '.js');
+      if (BunPlatform_Glob_Ex_Match(NodePlatform_Path_JoinStandard(file.src_path), this.include_patterns, this.exclude_patterns) === true) {
+        file.out_path = NodePlatform_Path_NewExtension(file.out_path, '.js');
         file.iswritable = true;
         file.addProcessor(this, this.onProcess);
       }
@@ -50,7 +50,7 @@ class Class implements Builder.Processor {
       }).transform(text);
       file.setText(transpiled_text);
     } catch (error) {
-      this.channel.error(`ERROR: Builder.Processor: ${__filename}, File: ${file.src_path.value}`, error);
+      this.channel.error(`ERROR: Builder.Processor: ${__filename}, File: ${file.src_path}`, error);
     }
   }
 }

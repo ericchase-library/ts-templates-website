@@ -1,5 +1,16 @@
 import { Core_Stream_Uint8_Async_ReadSome } from './api.core.js';
-import { ClassCompatBlob, ClassCompatDataTransfer, ClassCompatDataTransferItem, ClassCompatFile, ClassDomAttributeObserver, ClassDomCharacterDataObserver, ClassDomChildListObserver, ClassDomElementAddedObserver, ClassNodeReference, ClassNodeReferenceList } from './platform-web.js';
+import { ClassCompatBlob, ClassCompatDataTransfer, ClassCompatDataTransferItem, ClassCompatFile, ClassDomAttributeObserver, ClassDomCharacterDataObserver, ClassDomChildListObserver, ClassDomElementAddedObserver, ClassNodeListReference, ClassNodeReference } from './platform-web.js';
+
+export type WebPlatform_Type_Blob_ClassCompat_Blob = ClassCompatBlob;
+export type WebPlatform_Type_DataTransfer_ClassCompat_DataTransfer = ClassCompatDataTransfer;
+export type WebPlatform_Type_DataTransferItem_ClassCompat_DataTransferItem = ClassCompatDataTransferItem;
+export type WebPlatform_Type_DOM_Class_AttributeObserver = ClassDomAttributeObserver;
+export type WebPlatform_Type_DOM_Class_CharacterDataObserver = ClassDomCharacterDataObserver;
+export type WebPlatform_Type_DOM_Class_ChildListObserver = ClassDomChildListObserver;
+export type WebPlatform_Type_DOM_Class_ElementAddedObserver = ClassDomElementAddedObserver;
+export type WebPlatform_Type_File_ClassCompat_File = ClassCompatFile;
+export type WebPlatform_Type_Node_Class_NodeListReference = ClassNodeListReference;
+export type WebPlatform_Type_Node_Class_NodeReference = ClassNodeReference;
 
 export function WebPlatform_Blob_Async_ReadSome(blob: Blob, count: number): Promise<Uint8Array> {
   const stream = WebPlatform_Blob_ClassCompat_Blob(blob).stream();
@@ -65,17 +76,7 @@ export function WebPlatform_DataTransferItem_ClassCompat_DataTransferItem(item: 
   return new ClassCompatDataTransferItem(item);
 }
 
-export function WebPlatform_DOM_Class_AttributeObserver({
-  options = { attributeOldValue: true, subtree: true },
-  source = document.documentElement,
-}: {
-  options?: {
-    attributeFilter?: string[];
-    attributeOldValue?: boolean;
-    subtree?: boolean;
-  };
-  source?: Node;
-}): ClassDomAttributeObserver {
+export function WebPlatform_DOM_Class_AttributeObserver({ options = { attributeOldValue: true, subtree: true }, source = document.documentElement }: { options?: { attributeFilter?: string[]; attributeOldValue?: boolean; subtree?: boolean }; source?: Node }): ClassDomAttributeObserver {
   return new ClassDomAttributeObserver({ options, source });
 }
 
@@ -149,8 +150,8 @@ export function WebPlatform_HTMLInputElement_WebkitDirectoryIsSupported(): boole
   return WebPlatform_Utility_DeviceIsMobile() ? false : true;
 }
 
-export function WebPlatform_Node_Class_NodeListReference(nodes?: NodeList | Node[] | null): ClassNodeReferenceList {
-  return new ClassNodeReferenceList(nodes);
+export function WebPlatform_Node_Class_NodeListReference(nodes?: NodeList | Node[] | null): ClassNodeListReference {
+  return new ClassNodeListReference(nodes);
 }
 
 export function WebPlatform_Node_Class_NodeReference(node?: Node | null): ClassNodeReference {
@@ -162,7 +163,7 @@ export function WebPlatform_Node_SelectElement(selector: string): ClassNodeRefer
   return WebPlatform_Node_Class_NodeReference(document.querySelector(selector));
 }
 
-export function WebPlatform_Node_SelectElements(...selectors: string[]): ClassNodeReferenceList {
+export function WebPlatform_Node_SelectElements(...selectors: string[]): ClassNodeListReference {
   return WebPlatform_Node_Class_NodeListReference(document.querySelectorAll(selectors.join(',')));
 }
 
@@ -170,16 +171,7 @@ export function WebPlatform_Utility_DeviceIsMobile(): boolean {
   return /android|iphone|mobile/i.test(window.navigator.userAgent);
 }
 
-export function WebPlatform_Utility_Download(
-  data: {
-    blob?: Blob;
-    bytes?: Uint8Array<ArrayBuffer>;
-    json?: string;
-    text?: string;
-    url?: string;
-  },
-  filename: string,
-): void {
+export function WebPlatform_Utility_Download(data: { blob?: Blob; bytes?: Uint8Array<ArrayBuffer>; json?: string; text?: string; url?: string }, filename: string): void {
   const dataurl = (() => {
     if (data.blob !== undefined) {
       return URL.createObjectURL(data.blob);
@@ -207,11 +199,7 @@ export function WebPlatform_Utility_Download(
   }
 }
 
-export function WebPlatform_Utility_OpenWindow(
-  url: string, //
-  onLoad?: (proxy: Window, event: Event) => void,
-  onUnload?: (proxy: Window, event: Event) => void,
-): void {
+export function WebPlatform_Utility_OpenWindow(url: string, onLoad?: (proxy: Window, event: Event) => void, onUnload?: (proxy: Window, event: Event) => void): void {
   const proxy = window.open(url, '_blank');
   if (proxy) {
     if (onLoad) {

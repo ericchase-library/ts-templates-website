@@ -1,4 +1,5 @@
 import { BunPlatform_Glob_Match } from '../../../src/lib/ericchase/api.platform-bun.js';
+import { NodePlatform_Path_JoinStandard } from '../../../src/lib/ericchase/api.platform-node.js';
 import { Builder } from '../Builder.js';
 import { Logger } from '../Logger.js';
 
@@ -25,7 +26,7 @@ class Class implements Builder.Processor {
     // Determine which files should be processed.
     for (const file of files) {
       // Example glob matcher for text (.txt) files:
-      if (BunPlatform_Glob_Match(file.src_path.toStandard(), '**/*.txt')) {
+      if (BunPlatform_Glob_Match(NodePlatform_Path_JoinStandard(file.src_path), '**/*.txt')) {
         file.addProcessor(this, this.onProcess);
       }
     }
@@ -46,6 +47,6 @@ class Class implements Builder.Processor {
     // ProcessorModule interface. You could potentially add an anonymous
     // function during the onAdd call if you want; but, using a class method is
     // a bit cleaner and easier to work with.
-    this.channel.log(`Example Processor: "${file.src_path.value}"`);
+    this.channel.log(`Example Processor: "${file.src_path}"`);
   }
 }

@@ -56,11 +56,11 @@ export class ClassLogger {
     readonly $name: string,
   ) {}
   error(...items: any[]) {
-    if (items[0] instanceof Error) {
+    // if (items[0] instanceof Error) {
       addlog(Kind.Err, this, items.slice(1), items[0]);
-    } else {
-      addlog(Kind.Err, this, items);
-    }
+    // } else {
+      // addlog(Kind.Err, this, items);
+    // }
   }
   errorNotEmpty(...items: any[]) {
     if (items[0] instanceof Error) {

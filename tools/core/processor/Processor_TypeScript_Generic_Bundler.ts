@@ -53,15 +53,15 @@ class Class implements Builder.Processor {
   async onAdd(files: Set<Builder.File>): Promise<void> {
     let trigger_reprocess = false;
     for (const file of files) {
-      const query = file.src_path.toStandard();
+      const query = NodePlatform_Path_JoinStandard(file.src_path);
       if (BunPlatform_Glob_Match(query, `**/*${PATTERN.MODULE}`)) {
-        file.out_path.value = NodePlatform_Path_NewExtension(file.out_path.value, '.js');
+        file.out_path = NodePlatform_Path_NewExtension(file.out_path, '.js');
         file.addProcessor(this, this.onProcessModule);
         this.bundle_set.add(file);
         continue;
       }
       if (BunPlatform_Glob_Match(query, `**/*${PATTERN.IIFE}`)) {
-        file.out_path.value = NodePlatform_Path_NewExtension(file.out_path.value, '.js');
+        file.out_path = NodePlatform_Path_NewExtension(file.out_path, '.js');
         file.addProcessor(this, this.onProcessIIFEScript);
         this.bundle_set.add(file);
         continue;
@@ -79,7 +79,7 @@ class Class implements Builder.Processor {
   async onRemove(files: Set<Builder.File>): Promise<void> {
     let trigger_reprocess = false;
     for (const file of files) {
-      const query = file.src_path.toStandard();
+      const query = NodePlatform_Path_JoinStandard(file.src_path);
       if (BunPlatform_Glob_Match(query, `**/*${PATTERN.MODULE_IIFE}`)) {
         this.bundle_set.delete(file);
         continue;
@@ -100,7 +100,7 @@ class Class implements Builder.Processor {
       file,
       Bun.build({
         define: typeof this.config.define === 'function' ? this.config.define() : this.config.define,
-        entrypoints: [file.src_path.value],
+        entrypoints: [file.src_path],
         env: this.config.env,
         external: this.config.external,
         format: 'esm',
@@ -122,7 +122,7 @@ class Class implements Builder.Processor {
       file,
       Bun.build({
         define: typeof this.config.define === 'function' ? this.config.define() : this.config.define,
-        entrypoints: [file.src_path.value],
+        entrypoints: [file.src_path],
         env: this.config.env,
         format: 'esm',
         minify: {
@@ -167,22 +167,22 @@ async function processBuildResults(file: Builder.File, buildtask: Promise<Bun.Bu
         }
       }
     } else {
-      channel.error(`File: ${file.src_path.value}, Warnings: [`);
-      for (const log of results.logs) {
-        channel.error(' ', log);
-      }
-      channel.error(']');
+      // channel.error(`File: ${file.src_path}, Warnings: [`);
+      // for (const log of results.logs) {
+      //   channel.error(' ', log);
+      // }
+      // channel.error(']');
     }
   } catch (error) {
-    channel.error(`File: ${file.src_path.value}, Errors: [`);
-    if (error instanceof AggregateError) {
-      for (const e of error.errors) {
-        channel.error(' ', e);
-      }
-    } else {
-      channel.error(error);
-    }
-    channel.error(']');
+    // channel.error(`File: ${file.src_path}, Errors: [`);
+    // if (error instanceof AggregateError) {
+    //   for (const e of error.errors) {
+    //     channel.error(' ', e);
+    //   }
+    // } else {
+    //   channel.error(error);
+    // }
+    // channel.error(']');
   }
 }
 async function remapModuleImports(file: Builder.File, channel: ClassLogger) {
@@ -208,13 +208,9 @@ async function remapModuleImports(file: Builder.File, channel: ClassLogger) {
     for (const item_import of list_imports) {
       const item_source = list_sources.at(Core_Array_BinarySearch_InsertionIndex(list_sources, item_import, (a, b) => a.start < b.start));
       if (item_source !== undefined) {
-        try {
-          const remapped_import_path = getRelativePath(file.src_path.value, item_source.path, item_import.path);
-          text_parts.push(text.slice(text_index, item_import.start), remapped_import_path);
-          text_index = item_import.end;
-        } catch (error) {
-          channel.log(`Skipping "${item_import.path}"`);
-        }
+        const remapped_import_path = getRelativePath(file.src_path, item_source.path, item_import.path);
+        text_parts.push(text.slice(text_index, item_import.start), remapped_import_path);
+        text_index = item_import.end;
       }
     }
     text_parts.push(text.slice(text_index));
@@ -222,15 +218,29 @@ async function remapModuleImports(file: Builder.File, channel: ClassLogger) {
   }
 }
 function getRelativePath(file_path: string, item_source_path: string, item_import_path: string) {
+  console.error('before item_import_path:', item_import_path);
   if (item_import_path.startsWith('.') === true) {
     item_import_path = NodePlatform_Path_JoinStandard(NodePlatform_Path_GetParentPath(item_source_path), item_import_path);
   }
-  let relative = NODE_PATH.relative(NodePlatform_Path_GetParentPath(file_path), NODE_URL.fileURLToPath(import.meta.resolve(item_import_path)));
-  switch (NodePlatform_Path_GetExtension(relative)) {
-    case '.js':
-    case '.jsx':
+  console.error('after item_import_path:', item_import_path);
+
+  let resolved: string;
+  let relative: string;
+  try {
+    resolved = import.meta.resolve(NodePlatform_Path_Join(item_import_path));
+  } catch (error) {
+    console.error(item_import_path);
+    console.error(import.meta.filename);
+    console.error('resolve error');
+    throw error;
+  }
+  relative = NODE_PATH.relative(NodePlatform_Path_GetParentPath(file_path), NODE_URL.fileURLToPath(resolved));
+  const ext = NodePlatform_Path_GetExtension(relative);
+  switch (ext) {
     case '.ts':
     case '.tsx':
+    // case '.js':
+    case '.jsx':
       relative = NodePlatform_Path_NewExtension(relative, '.js');
       break;
   }

@@ -1,11 +1,15 @@
 import { ARRAY__UINT8__B64_TO_BYTE, ARRAY__UINT8__BYTE_TO_B64, ARRAY__UINT8__EMPTY, ClassArrayUint8Group, ClassStreamUint8Reader, ClassUtilityCRC32, ClassUtilityDefer, MATH__FACTORIAL__CACHE, UTILITY__CRC32__TABLE } from './core.js';
 
+export type Core_Type_Core_Array_Uint8_Class_Group = ClassArrayUint8Group;
+export type Core_Type_Core_Stream_Uint8_Class_Reader = ClassStreamUint8Reader;
+export type Core_Type_Core_Utility_Class_CRC32 = ClassUtilityCRC32;
 export type Core_Type_JSON_Array = (Core_Type_JSON_Array | Core_Type_JSON_Object | Core_Type_JSON_Primitive)[];
 export type Core_Type_JSON_Object = Core_Type_Record_Recursive<string, Core_Type_JSON_Array | Core_Type_JSON_Primitive>;
 export type Core_Type_JSON_ParseResult = Core_Type_JSON_Array | Core_Type_JSON_Object | Core_Type_JSON_Primitive;
 export type Core_Type_JSON_Primitive = null | boolean | number | string;
 export type Core_Type_Record_Empty = Record<string, never>;
 export type Core_Type_Record_Recursive<K extends keyof any, T> = { [P in K]: T | Core_Type_Record_Recursive<K, T> };
+export type Core_Type_Utility_Class_Defer<T> = ClassUtilityDefer<T>;
 
 export function Core_Array_AreEqual(array: ArrayLike<unknown>, other: ArrayLike<unknown>): boolean {
   if (array.length !== other.length) {

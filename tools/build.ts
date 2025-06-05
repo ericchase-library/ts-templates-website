@@ -17,7 +17,7 @@ Builder.SetVerbosity(Builder.VERBOSITY._1_LOG);
 Builder.SetStartUpSteps(
   Step_Bun_Run({ cmd: ['bun', 'install'], showlogs: false }),
   Step_FS_Clean_Directory(Builder.Dir.Out),
-  Step_Dev_Format({ showlogs: false }),
+  // Step_Dev_Format({ showlogs: false }),
   // Step_Dev_Lint({ showlogs: false }),
   //
 );

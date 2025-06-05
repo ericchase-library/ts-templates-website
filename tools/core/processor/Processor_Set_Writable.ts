@@ -1,4 +1,5 @@
 import { BunPlatform_Glob_Ex_Match } from '../../../src/lib/ericchase/api.platform-bun.js';
+import { NodePlatform_Path_JoinStandard } from '../../../src/lib/ericchase/api.platform-node.js';
 import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
 
@@ -29,10 +30,10 @@ class Class implements Builder.Processor {
   }
   async onAdd(files: Set<Builder.File>): Promise<void> {
     for (const file of files) {
-      if (BunPlatform_Glob_Ex_Match(file.src_path.toStandard(), this.include_patterns, []) === true) {
+      if (BunPlatform_Glob_Ex_Match(NodePlatform_Path_JoinStandard(file.src_path), this.include_patterns, []) === true) {
         file.iswritable = true;
       }
-      if (BunPlatform_Glob_Ex_Match(file.src_path.toStandard(), this.exclude_patterns, []) === true) {
+      if (BunPlatform_Glob_Ex_Match(NodePlatform_Path_JoinStandard(file.src_path), this.exclude_patterns, []) === true) {
         file.iswritable = false;
       }
     }
