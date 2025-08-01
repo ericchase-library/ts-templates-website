@@ -17,7 +17,12 @@ class Class implements Builder.Step {
   }
   async onRun(): Promise<void> {
     try {
-      const p0 = Bun.spawn(this.config.cmd, { cwd: this.config.dir, stdin: this.config.stdin, stderr: 'pipe', stdout: 'pipe' });
+      const p0 = Bun.spawn(this.config.cmd, {
+        cwd: this.config.dir,
+        stdin: this.config.stdin,
+        stderr: 'pipe',
+        stdout: 'pipe',
+      });
       this.channel.log(`Run: "${this.config.cmd.join(' ')}" | Directory: "${this.config.dir}"`);
       await p0.exited;
       if (this.config.showlogs === true) {

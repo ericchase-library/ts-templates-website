@@ -4,6 +4,7 @@ import { Processor_Set_Writable } from './core/processor/Processor_Set_Writable.
 import { Processor_TypeScript_Generic_Bundler } from './core/processor/Processor_TypeScript_Generic_Bundler.js';
 import { Step_Bun_Run } from './core/step/Step_Bun_Run.js';
 import { Step_FS_Clean_Directory } from './core/step/Step_FS_Clean_Directory.js';
+import { Step_Dev_Format } from './lib-dev/step/Step_Dev_Format.js';
 import { Processor_HTML_Custom_Component_Processor } from './lib-web/processor/Processor_HTML_Custom_Component_Processor.js';
 import { DEVSERVERHOST, Step_Dev_Server } from './lib-web/step/Step_Dev_Server.js';
 
@@ -17,7 +18,7 @@ Builder.SetStartUpSteps(
   Step_Bun_Run({ cmd: ['bun', 'update', '--latest'], showlogs: false }),
   Step_Bun_Run({ cmd: ['bun', 'install'], showlogs: false }),
   Step_FS_Clean_Directory(Builder.Dir.Out),
-  // Step_Dev_Format({ showlogs: false }),
+  Step_Dev_Format({ showlogs: false }),
   //
 );
 

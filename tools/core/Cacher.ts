@@ -523,15 +523,6 @@ function CreateQueryError(message: any, options?: Record<string, any>): SQLQuery
   return { error: { message, options } };
 }
 
-// cleanup
-
-process.on('beforeExit', () => {
-  CACHELOCK.UnlockAll();
-});
-process.on('exit', () => {
-  CACHELOCK.UnlockAll();
-});
-
 // watcher
 
 export async function Async_Cacher_Watch_Directory(
@@ -541,6 +532,7 @@ export async function Async_Cacher_Watch_Directory(
   callback: (added: Set<string>, deleted: Set<string>, modified: Set<string>) => Promise<void>,
 ) {
   let delay_ms = min_delay_ms;
+  let timer_id: Parameters<typeof clearTimeout>[0] = undefined;
   let abort = false;
 
   const glob = new Bun.Glob('**/*');
@@ -600,12 +592,20 @@ export async function Async_Cacher_Watch_Directory(
       }
     }
 
-    setTimeout(scan, delay_ms);
+    timer_id = setTimeout(() => Core_Promise_Orphan(scan()), delay_ms);
   }
 
-  await scan();
+  Core_Promise_Orphan(scan());
 
   return () => {
+    clearTimeout(timer_id);
     abort = true;
   };
 }
+
+// cleanup
+
+process.on('beforeExit', () => {});
+process.on('exit', () => {
+  CACHELOCK.UnlockAll();
+});

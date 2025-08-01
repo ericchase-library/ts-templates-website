@@ -7,11 +7,13 @@
     "@types/node": "^24.1.0",
     "adm-zip": "^0.5.16",
     "prettier": "^3.6.2",
+    "tree-kill": "^1.2.2",
     "xxhash-wasm": "^1.1.0"
   },
   "scripts": {
     "build": "bun run tools/build.ts",
     "dev": "bun run tools/build.ts --dev",
+    "format": "bun prettier --write .",
     "pull": "bun run tools/pull.ts"
   },
   "type": "module"

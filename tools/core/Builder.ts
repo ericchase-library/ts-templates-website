@@ -1,15 +1,19 @@
+import treekill from 'tree-kill';
 import { Async_BunPlatform_File_Read_Bytes } from '../../src/lib/ericchase/BunPlatform_File_Read_Bytes.js';
 import { Async_BunPlatform_File_Read_Text } from '../../src/lib/ericchase/BunPlatform_File_Read_Text.js';
 import { Async_BunPlatform_File_Write_Bytes } from '../../src/lib/ericchase/BunPlatform_File_Write_Bytes.js';
 import { Async_BunPlatform_File_Write_Text } from '../../src/lib/ericchase/BunPlatform_File_Write_Text.js';
+import { Core_Console_Error } from '../../src/lib/ericchase/Core_Console_Error.js';
 import { Core_Map_Get_Or_Default } from '../../src/lib/ericchase/Core_Map_Get_Or_Default.js';
+import { Core_String_Split_Lines } from '../../src/lib/ericchase/Core_String_Split_Lines.js';
+import { Core_Utility_Decode_Bytes } from '../../src/lib/ericchase/Core_Utility_Decode_Bytes.js';
 import { NODE_PATH } from '../../src/lib/ericchase/NodePlatform.js';
 import { Async_NodePlatform_File_Delete } from '../../src/lib/ericchase/NodePlatform_File_Delete.js';
 import { NodePlatform_PathObject_Relative_Class } from '../../src/lib/ericchase/NodePlatform_PathObject_Relative_Class.js';
 import { NodePlatform_Shell_Keys } from '../../src/lib/ericchase/NodePlatform_Shell_Keys.js';
 import { NodePlatform_Shell_StdIn_AddListener, NodePlatform_Shell_StdIn_LockReader, NodePlatform_Shell_StdIn_StartReaderInRawMode } from '../../src/lib/ericchase/NodePlatform_Shell_StdIn.js';
 import { Async_Cacher_Watch_Directory, CACHELOCK, FILESTATS } from './Cacher.js';
-import { AddLoggerOutputDirectory, Logger } from './Logger.js';
+import { AddLoggerOutputDirectory, Logger, WaitForLogger } from './Logger.js';
 
 await AddLoggerOutputDirectory('cache');
 
@@ -278,12 +282,14 @@ const set__error_paths = new Set<string>();
 
 let unwatch_source_directory: () => void;
 let unlock_stdin_reader: () => void;
+let waiting_for_cleanup = false;
 
 async function Init() {
   // Secure Locks
   {
     FILESTATS.LockTable();
     CACHELOCK.TryLockEach(['Build', 'Format']);
+    FILESTATS.RemoveAllStats();
   }
 
   // Setup Stdin Reader
@@ -293,14 +299,14 @@ async function Init() {
       if (text === 'q') {
         removeSelf();
         Log(_logs._user_command_('Quit'));
-        await Async_CleanUp();
+        waiting_for_cleanup = true;
       }
     });
-    NodePlatform_Shell_StdIn_AddListener((bytes, text, removeSelf) => {
+    NodePlatform_Shell_StdIn_AddListener(async (bytes, text, removeSelf) => {
       if (text === NodePlatform_Shell_Keys.SIGINT) {
         removeSelf();
         Log(_logs._user_command_('ForceQuit'));
-        ForceQuit();
+        await ForceQuit();
       }
     });
     NodePlatform_Shell_StdIn_StartReaderInRawMode();
@@ -324,7 +330,9 @@ async function Init() {
   }
 
   await Async_StartUp();
+  await Async_BeforeProcess();
   await Async_Process();
+  await Async_AfterProcess();
 
   switch (_mode) {
     case Builder.MODE.BUILD:
@@ -360,7 +368,12 @@ async function Async_SetupWatcher() {
         set__modified_paths.add(path);
       }
       set__error_paths.clear();
+      await Async_BeforeProcess();
       await Async_Process();
+      await Async_AfterProcess();
+    }
+    if (waiting_for_cleanup === true) {
+      await Async_CleanUp();
     }
   });
 }
@@ -375,7 +388,7 @@ async function Async_StartUp() {
       await step.onStartUp?.();
     } catch (error) {
       Err(error, `Unhandled exception in ${step.StepName} onStartUp:`);
-      throw new Error();
+      throw error;
     }
   }
 
@@ -386,7 +399,7 @@ async function Async_StartUp() {
       await step.onRun?.();
     } catch (error) {
       Err(error, `Unhandled exception in ${step.StepName} onRun:`);
-      throw new Error();
+      throw error;
     }
   }
 
@@ -397,12 +410,25 @@ async function Async_StartUp() {
       await processor.onStartUp?.();
     } catch (error) {
       Err(error, `Unhandled exception in ${processor.ProcessorName} onStartUp:`);
-      throw new Error();
+      throw error;
     }
   }
 
   Log(_logs._phase_end_('StartUp'));
   _channel.newLine();
+}
+
+async function Async_BeforeProcess() {
+  // Before Steps onRun
+  for (const step of array__before_steps) {
+    try {
+      Log(_logs._step_onrun_(step.StepName), Builder.VERBOSITY._2_DEBUG);
+      await step.onRun?.();
+    } catch (error) {
+      Err(error, `Unhandled exception in ${step.StepName} onRun:`);
+      throw error;
+    }
+  }
 }
 
 async function Async_Process() {
@@ -517,16 +543,6 @@ async function Async_Process() {
       }
     }
     if (set__files_to_update.size > 0) {
-      // Before Steps onRun
-      for (const step of array__before_steps) {
-        try {
-          Log(_logs._step_onrun_(step.StepName), Builder.VERBOSITY._2_DEBUG);
-          await step.onRun?.();
-        } catch (error) {
-          Err(error, `Unhandled exception in ${step.StepName} onRun:`);
-          caught_error = true;
-        }
-      }
       // Processor Modules onProcess
       const set__unprocessed_files = new Set<Builder.File>();
       for (const file of set__files_to_update) {
@@ -576,16 +592,6 @@ async function Async_Process() {
           file.ismodified = false;
         }
       }
-      // After Steps onRun
-      for (const step of array__after_steps) {
-        try {
-          Log(_logs._step_onrun_(step.StepName), Builder.VERBOSITY._2_DEBUG);
-          await step.onRun?.();
-        } catch (error) {
-          Err(error, `Unhandled exception in ${step.StepName} onRun:`);
-          caught_error = true;
-        }
-      }
     }
   }
 
@@ -601,6 +607,19 @@ async function Async_Process() {
     set__modified_paths.clear();
   } else if (set__added_paths.size > 0 || set__deleted_paths.size > 0 || set__modified_paths.size > 0) {
     await Async_Process();
+  }
+}
+
+async function Async_AfterProcess() {
+  // After Steps onRun
+  for (const step of array__after_steps) {
+    try {
+      Log(_logs._step_onrun_(step.StepName), Builder.VERBOSITY._2_DEBUG);
+      await step.onRun?.();
+    } catch (error) {
+      Err(error, `Unhandled exception in ${step.StepName} onRun:`);
+      throw error;
+    }
   }
 }
 
@@ -642,8 +661,6 @@ async function Async_CleanUp() {
     }
   }
 
-  unlock_stdin_reader?.();
-
   // Release Locks
   {
     CACHELOCK.UnlockEach(['Build', 'Format']);
@@ -652,13 +669,17 @@ async function Async_CleanUp() {
 
   Log(_logs._phase_end_('CleanUp'));
   _channel.newLine();
+
+  unlock_stdin_reader?.();
+  await KillChildren();
+  await WaitForLogger();
+  process.exit();
 }
 
-function ForceQuit() {
+async function ForceQuit() {
   Log('ForceQuit');
 
   unwatch_source_directory?.();
-  unlock_stdin_reader?.();
 
   // Release Locks
   {
@@ -666,6 +687,8 @@ function ForceQuit() {
     FILESTATS.UnlockTable();
   }
 
+  unlock_stdin_reader?.();
+  await KillChildren();
   process.exit();
 }
 
@@ -677,4 +700,44 @@ function Log(text: string, verbosity = Builder.VERBOSITY._1_LOG) {
 
 function Err(error: any, text: string) {
   _channel.error(error, text);
+}
+
+function GetChildrenPIDs(pid: number) {
+  const { stdout: bytes } = Bun.spawnSync(['pgrep', '-P', `${pid}`], { stdout: 'pipe' });
+  const stdout = Core_Utility_Decode_Bytes(bytes);
+  return Core_String_Split_Lines(stdout, true).map((pid) => Number.parseInt(pid));
+}
+
+async function KillChildren() {
+  if (process.platform !== 'win32') {
+    try {
+      const pids = GetChildrenPIDs(process.pid);
+      for (const pid of pids) {
+        pids.push(...GetChildrenPIDs(pid));
+      }
+      const tasks: Promise<string>[] = [];
+      for (const pid of pids) {
+        tasks.push(KillProcess(pid));
+      }
+      for (const task of await Promise.allSettled(tasks)) {
+        if (task.status === 'rejected') {
+          Core_Console_Error(task.reason);
+        }
+      }
+    } catch (error) {
+      Core_Console_Error(error);
+    }
+  }
+}
+
+async function KillProcess(pid: number) {
+  return new Promise<string>((resolve, reject) => {
+    treekill(pid, 'SIGKILL', (error) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(`Killed PID ${pid}`);
+      }
+    });
+  });
 }

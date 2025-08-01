@@ -1,3 +1,8 @@
+## 2025-08-01
+
+- massively restructured entirety of api
+- finally fixed(?) build tools
+
 ## 2025-05-26
 
 - removed namespaces from library files
