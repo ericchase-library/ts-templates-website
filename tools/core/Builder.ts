@@ -295,7 +295,7 @@ async function Init() {
   // Setup Stdin Reader
   {
     unlock_stdin_reader = NodePlatform_Shell_StdIn_LockReader();
-    NodePlatform_Shell_StdIn_AddListener(async (bytes, text, removeSelf) => {
+    NodePlatform_Shell_StdIn_AddListener((bytes, text, removeSelf) => {
       if (text === 'q') {
         removeSelf();
         Log(_logs._user_command_('Quit'));
@@ -730,7 +730,7 @@ async function KillChildren() {
   }
 }
 
-async function KillProcess(pid: number) {
+function KillProcess(pid: number) {
   return new Promise<string>((resolve, reject) => {
     treekill(pid, 'SIGKILL', (error) => {
       if (error) {

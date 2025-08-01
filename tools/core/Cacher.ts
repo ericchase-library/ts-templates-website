@@ -525,7 +525,7 @@ function CreateQueryError(message: any, options?: Record<string, any>): SQLQuery
 
 // watcher
 
-export async function Async_Cacher_Watch_Directory(
+export function Async_Cacher_Watch_Directory(
   path: string, //
   min_delay_ms: number,
   max_delay_ms: number,
