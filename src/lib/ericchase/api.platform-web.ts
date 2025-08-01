@@ -1,4 +1,4 @@
-import { Core_Stream_Uint8_Async_ReadSome } from './api.core.js';
+import { Async_Core_Stream_Uint8_Read_Some } from './Core_Stream_Uint8_Read_Some.js';
 import { ClassCompatBlob, ClassCompatDataTransfer, ClassCompatDataTransferItem, ClassCompatFile, ClassDomAttributeObserver, ClassDomCharacterDataObserver, ClassDomChildListObserver, ClassDomElementAddedObserver, ClassNodeListReference, ClassNodeReference } from './platform-web.js';
 
 export type WebPlatform_Type_Blob_ClassCompat_Blob = ClassCompatBlob;
@@ -15,7 +15,7 @@ export type WebPlatform_Type_Node_Class_NodeReference = ClassNodeReference;
 export function WebPlatform_Blob_Async_ReadSome(blob: Blob, count: number): Promise<Uint8Array> {
   const stream = WebPlatform_Blob_ClassCompat_Blob(blob).stream();
   if (stream !== undefined) {
-    return Core_Stream_Uint8_Async_ReadSome(stream, count);
+    return Async_Core_Stream_Uint8_Read_Some(stream, count);
   }
   return Promise.resolve(new Uint8Array());
 }

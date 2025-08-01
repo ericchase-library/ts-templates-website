@@ -1,0 +1,3 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NodePlatform_Shell_Keys 1`] = `"{"ARROWS":{"DOWN":"\\u001b[B","LEFT":"\\u001b[D","RIGHT":"\\u001b[C","UP":"\\u001b[A"},"GENERAL":{"BEL":"\\u0007","BS":"\\b","CR":"\\r","CSI":"\\u001b[","DCS":"\\u001bP","DEL":"","ESC":"\\u001b","FF":"\\f","HT":"\\t","LF":"\\n","OSC":"\\u001b]","VT":"\\u000b"},"SIGINT":"\\u0003"}"`;

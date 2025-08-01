@@ -1,4 +1,5 @@
-import { NodePlatform_Path_GetExtension, NodePlatform_Path_GetName, NodePlatform_Path_Join } from '../../../src/lib/ericchase/api.platform-node.js';
+import { NODE_PATH } from '../../../src/lib/ericchase/NodePlatform.js';
+import { NodePlatform_PathObject_Relative_Class } from '../../../src/lib/ericchase/NodePlatform_PathObject_Relative_Class.js';
 import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
 import { HTML_UTIL } from '../bundle/htmlutil.js';
@@ -14,12 +15,13 @@ class Class implements Builder.Processor {
   htmlfile_set = new Set<Builder.File>();
 
   async onAdd(files: Set<Builder.File>): Promise<void> {
-    const component_path = NodePlatform_Path_Join(Builder.Dir.Lib, 'components');
+    const component_path = NODE_PATH.join(Builder.Dir.Lib, 'components');
     let trigger_reprocess = false;
     for (const file of files) {
-      if (NodePlatform_Path_GetExtension(file.src_path) === '.html') {
+      const src_pathobject = NodePlatform_PathObject_Relative_Class(file.src_path);
+      if (src_pathobject.ext === '.html') {
         if (file.src_path.startsWith(component_path)) {
-          this.component_map.set(NodePlatform_Path_GetName(file.src_path), file);
+          this.component_map.set(src_pathobject.name, file);
           trigger_reprocess = true;
         }
         file.addProcessor(this, this.onProcess);
@@ -33,12 +35,13 @@ class Class implements Builder.Processor {
     }
   }
   async onRemove(files: Set<Builder.File>): Promise<void> {
-    const component_path = NodePlatform_Path_Join(Builder.Dir.Lib, 'components');
+    const component_path = NODE_PATH.join(Builder.Dir.Lib, 'components');
     let trigger_reprocess = false;
     for (const file of files) {
-      if (NodePlatform_Path_GetExtension(file.src_path) === '.html') {
+      const src_pathobject = NodePlatform_PathObject_Relative_Class(file.src_path);
+      if (src_pathobject.ext === '.html') {
         if (file.src_path.startsWith(component_path)) {
-          this.component_map.delete(NodePlatform_Path_GetName(file.src_path));
+          this.component_map.delete(src_pathobject.name);
           trigger_reprocess = true;
         }
         this.htmlfile_set.delete(file);
@@ -68,11 +71,10 @@ class Class implements Builder.Processor {
     for (const script of HTML_UTIL.QuerySelectorAll(source_node, 'script')) {
       const src = HTML_UTIL.GetAttribute(script, 'src');
       if (src !== undefined) {
-        const ext = NodePlatform_Path_GetExtension(src);
+        const ext = NODE_PATH.parse(src).ext;
         switch (ext) {
           case '.ts':
           case '.tsx':
-          // case '.js':
           case '.jsx':
             HTML_UTIL.SetAttribute(script, 'src', `${src.slice(0, src.lastIndexOf(ext))}.js`);
             modified = true;

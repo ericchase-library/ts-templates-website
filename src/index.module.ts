@@ -1,5 +1,5 @@
-import { Core_Console_Error } from './lib/ericchase/api.core.js';
 import { WebPlatform_Node_Class_NodeReference } from './lib/ericchase/api.platform-web.js';
+import { Core_Console_Error } from './lib/ericchase/Core_Console_Error.js';
 import { HotRefresh } from './lib/server/HotRefresh.js';
 
 HotRefresh();

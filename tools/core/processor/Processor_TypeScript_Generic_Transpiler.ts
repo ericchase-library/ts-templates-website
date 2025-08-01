@@ -1,9 +1,13 @@
-import { BunPlatform_Glob_Ex_Match } from '../../../src/lib/ericchase/api.platform-bun.js';
-import { NodePlatform_Path_JoinStandard, NodePlatform_Path_NewExtension } from '../../../src/lib/ericchase/api.platform-node.js';
+import { BunPlatform_Glob_Match_Ex } from '../../../src/lib/ericchase/BunPlatform_Glob_Match_Ex.js';
+import { NodePlatform_PathObject_Relative_Class } from '../../../src/lib/ericchase/NodePlatform_PathObject_Relative_Class.js';
 import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
 
 /**
+ * Scripts that match an include_pattern will be set as writable.\
+ * Scripts that match both an include_pattern and an exclude_pattern will be set as not writable.\
+ * Use Processor_Set_Writable to directly include or exclude file patterns for writing.
+ *
  * @defaults
  * @param include_patterns `[]`
  * @param exclude_patterns `[]`
@@ -21,12 +25,19 @@ class Class implements Builder.Processor {
     readonly include_patterns: string[],
     readonly exclude_patterns: string[],
     readonly config: Config,
-  ) {}
+  ) {
+    this.config.target ??= 'browser';
+  }
   async onAdd(files: Set<Builder.File>): Promise<void> {
     for (const file of files) {
-      if (BunPlatform_Glob_Ex_Match(NodePlatform_Path_JoinStandard(file.src_path), this.include_patterns, this.exclude_patterns) === true) {
-        file.out_path = NodePlatform_Path_NewExtension(file.out_path, '.js');
+      const src_path = NodePlatform_PathObject_Relative_Class(file.src_path).join();
+      if (BunPlatform_Glob_Match_Ex(src_path, this.exclude_patterns, []) === true) {
+        file.iswritable = false;
+        continue;
+      }
+      if (BunPlatform_Glob_Match_Ex(src_path, this.include_patterns, []) === true) {
         file.iswritable = true;
+        file.out_path = NodePlatform_PathObject_Relative_Class(file.out_path).replaceExt('.js').join();
         file.addProcessor(this, this.onProcess);
       }
     }
@@ -38,7 +49,7 @@ class Class implements Builder.Processor {
       const transpiled_text = await new Bun.Transpiler({
         define: typeof this.config.define === 'function' ? this.config.define() : this.config.define,
         loader: 'tsx',
-        target: this.config.target ?? 'browser',
+        target: this.config.target,
         // disable any altering processes
         deadCodeElimination: false,
         inline: false,

@@ -1,9 +1,11 @@
-import { NodePlatform_Directory_Async_Create, NodePlatform_Directory_Async_Delete, NodePlatform_Path_Join } from '../../../src/lib/ericchase/api.platform-node.js';
+import { NODE_PATH } from '../../../src/lib/ericchase/NodePlatform.js';
+import { Async_NodePlatform_Directory_Create } from '../../../src/lib/ericchase/NodePlatform_Directory_Create.js';
+import { Async_NodePlatform_Directory_Delete } from '../../../src/lib/ericchase/NodePlatform_Directory_Delete.js';
 import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
 
 export function Step_FS_Clean_Directory(...paths: string[]): Builder.Step {
-  return new Class(paths.map((path) => NodePlatform_Path_Join(path)));
+  return new Class(paths.map((path) => NODE_PATH.join(path)));
 }
 class Class implements Builder.Step {
   StepName = Step_FS_Clean_Directory.name;
@@ -12,8 +14,8 @@ class Class implements Builder.Step {
   constructor(readonly paths: string[]) {}
   async onRun(): Promise<void> {
     for (const path of this.paths) {
-      if ((await NodePlatform_Directory_Async_Delete(path, true)) === true) {
-        if ((await NodePlatform_Directory_Async_Create(path, true)) === true) {
+      if ((await Async_NodePlatform_Directory_Delete(path, true)).value === true) {
+        if ((await Async_NodePlatform_Directory_Create(path, true)).value === true) {
           this.channel.log(`Cleaned "${path}"`);
         }
       }

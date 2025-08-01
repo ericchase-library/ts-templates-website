@@ -1,16 +1,20 @@
 import { Database } from 'bun:sqlite';
 import { default as xxhash } from 'xxhash-wasm';
-import { Core_Console_Error, Core_Promise_Orphan } from '../../src/lib/ericchase/api.core.js';
-import { BunPlatform_File_Async_ReadBytes } from '../../src/lib/ericchase/api.platform-bun.js';
-import { NodePlatform_Directory_Async_Create, NodePlatform_Path_Async_GetStats, NodePlatform_Path_Join } from '../../src/lib/ericchase/api.platform-node.js';
+import { Async_BunPlatform_File_Read_Bytes } from '../../src/lib/ericchase/BunPlatform_File_Read_Bytes.js';
+import { Core_Console_Error } from '../../src/lib/ericchase/Core_Console_Error.js';
+import { Core_Promise_Orphan } from '../../src/lib/ericchase/Core_Promise_Orphan.js';
+import { NODE_PATH } from '../../src/lib/ericchase/NodePlatform.js';
+import { Async_NodePlatform_Directory_Create } from '../../src/lib/ericchase/NodePlatform_Directory_Create.js';
+import { Async_NodePlatform_Path_Get_Stats } from '../../src/lib/ericchase/NodePlatform_Path_Get_Stats.js';
 
 // constants
+
 const { h64Raw } = await xxhash();
-export const cachepath = NodePlatform_Path_Join('cache');
-if ((await NodePlatform_Directory_Async_Create(cachepath)) === false) {
+export const cachepath = NODE_PATH.join('cache');
+if ((await Async_NodePlatform_Directory_Create(cachepath, true)).value !== true) {
   throw 'Could not create cache database path.';
 }
-export const cachedb = new Database(NodePlatform_Path_Join(cachepath, 'cache.db'), { create: true, strict: true });
+export const cachedb = new Database(NODE_PATH.join(cachepath, 'cache.db'), { create: true, strict: true });
 
 // types
 
@@ -309,11 +313,20 @@ class FILESTATS_DB {
     FROM ${FILESTATS_DB.TABLE}
    WHERE ${FILESTATS_ID.PATH} = $${FILESTATS_ID.PATH}
 `;
+  ////
+  static GET_RECORDS_LIKE = /* sql */ `
+  SELECT *
+    FROM ${FILESTATS_DB.TABLE}
+   WHERE ${FILESTATS_ID.PATH} LIKE $${FILESTATS_ID.PATH}
+`;
   static GetRecord = {
     [FILESTATS_ID.PATH]: CreateGetQuery(FILESTATS_RECORD, FILESTATS_DB.GET_RECORD, { [FILESTATS_ID.PATH]: '' }),
   };
   static GetRecords = {
     [FILESTATS_ID.PATH]: CreateAllQuery(FILESTATS_RECORD, FILESTATS_DB.GET_RECORD, { [FILESTATS_ID.PATH]: '' }),
+  };
+  static GetRecordsLike = {
+    [FILESTATS_ID.PATH]: CreateAllQuery(FILESTATS_RECORD, FILESTATS_DB.GET_RECORDS_LIKE, { [FILESTATS_ID.PATH]: '' }),
   };
   ////
   static IS_EMPTY = /* sql */ `
@@ -369,23 +382,58 @@ export class FILESTATS {
     CACHELOCK.Unlock(FILESTATS_DB.TABLE);
   }
   static QueryStats(path: string): SQLQueryResult<FILESTATS_RECORD | undefined> {
+    path = NODE_PATH.join(path);
     try {
-      return { data: FILESTATS_DB.GetRecord[FILESTATS_ID.PATH]({ [FILESTATS_ID.PATH]: NodePlatform_Path_Join(path) }), error: undefined };
+      return { data: FILESTATS_DB.GetRecord[FILESTATS_ID.PATH]({ [FILESTATS_ID.PATH]: path }), error: undefined };
+    } catch (error) {
+      return CreateQueryError(error);
+    }
+  }
+  static QueryStatsLike(partial_path: string): SQLQueryResult<FILESTATS_RECORD[] | undefined> {
+    if (partial_path === undefined) {
+      throw new Error();
+    }
+    partial_path = NODE_PATH.join(partial_path);
+    try {
+      return { data: FILESTATS_DB.GetRecordsLike[FILESTATS_ID.PATH]({ [FILESTATS_ID.PATH]: partial_path + '%' }), error: undefined };
     } catch (error) {
       return CreateQueryError(error);
     }
   }
   static async UpdateStats(path: string): Promise<SQLQueryResult<FILESTATS_RECORD | undefined>> {
+    path = NODE_PATH.join(path);
     try {
-      FILESTATS_DB.UpdateRecord({ [FILESTATS_ID.PATH]: NodePlatform_Path_Join(path), [FILESTATS_ID.MTIMEMS]: await FILESTATS.GetMTimeMS(path), [FILESTATS_ID.HASH]: await FILESTATS.GetB64Hash(path) });
+      FILESTATS_DB.UpdateRecord({ [FILESTATS_ID.PATH]: path, [FILESTATS_ID.MTIMEMS]: await FILESTATS.GetMTimeMS(path), [FILESTATS_ID.HASH]: await FILESTATS.GetB64Hash(path) });
       return FILESTATS.QueryStats(path);
     } catch (error) {
       return CreateQueryError(error);
     }
   }
-  static RemoveStats(path: string): SQLQueryResult<boolean> {
+  static async UpdateRecordIfModified(record: FILESTATS_RECORD): Promise<SQLQueryResult<boolean>> {
     try {
-      FILESTATS_DB.DeleteRecord({ path: NodePlatform_Path_Join(path) });
+      const path = record[FILESTATS_ID.PATH] as string;
+      const record_mtimems = record[FILESTATS_ID.MTIMEMS] as number;
+      const record_hash = record[FILESTATS_ID.HASH] as string;
+      const real_mtimems = await FILESTATS.GetMTimeMS(path);
+      if (real_mtimems !== record_mtimems) {
+        FILESTATS_DB.UpdateRecord({ [FILESTATS_ID.PATH]: path, [FILESTATS_ID.MTIMEMS]: real_mtimems, [FILESTATS_ID.HASH]: await FILESTATS.GetB64Hash(path) });
+        return { data: true, error: undefined };
+      } else {
+        const real_hash = await FILESTATS.GetB64Hash(path);
+        if (real_hash !== record_hash) {
+          FILESTATS_DB.UpdateRecord({ [FILESTATS_ID.PATH]: path, [FILESTATS_ID.MTIMEMS]: real_mtimems, [FILESTATS_ID.HASH]: real_hash });
+          return { data: true, error: undefined };
+        }
+      }
+      return { data: false, error: undefined };
+    } catch (error) {
+      return CreateQueryError(error);
+    }
+  }
+  static RemoveStats(path: string): SQLQueryResult<boolean> {
+    path = NODE_PATH.join(path);
+    try {
+      FILESTATS_DB.DeleteRecord({ path: path });
       return { data: true };
     } catch (error) {
       return CreateQueryError(error);
@@ -401,8 +449,9 @@ export class FILESTATS {
     }
   }
   static async PathIsStale(path: string): Promise<SQLQueryResult<boolean>> {
+    path = NODE_PATH.join(path);
     try {
-      const q0 = FILESTATS_DB.GetRecord[FILESTATS_ID.PATH]({ [FILESTATS_ID.PATH]: NodePlatform_Path_Join(path) });
+      const q0 = FILESTATS_DB.GetRecord[FILESTATS_ID.PATH]({ [FILESTATS_ID.PATH]: path });
       if (q0 === undefined || q0[FILESTATS_ID.MTIMEMS] !== (await FILESTATS.GetMTimeMS(path)) || q0[FILESTATS_ID.HASH] !== (await FILESTATS.GetB64Hash(path))) {
         return { data: true };
       }
@@ -412,9 +461,11 @@ export class FILESTATS {
     }
   }
   static async PathsAreEqual(path0: string, path1: string): Promise<SQLQueryResult<boolean>> {
+    path0 = NODE_PATH.join(path0);
+    path1 = NODE_PATH.join(path1);
     try {
-      const q0 = FILESTATS_DB.GetRecord[FILESTATS_ID.PATH]({ [FILESTATS_ID.PATH]: NodePlatform_Path_Join(path0) });
-      const q1 = FILESTATS_DB.GetRecord[FILESTATS_ID.PATH]({ [FILESTATS_ID.PATH]: NodePlatform_Path_Join(path1) });
+      const q0 = FILESTATS_DB.GetRecord[FILESTATS_ID.PATH]({ [FILESTATS_ID.PATH]: path0 });
+      const q1 = FILESTATS_DB.GetRecord[FILESTATS_ID.PATH]({ [FILESTATS_ID.PATH]: path1 });
       if (q0 !== undefined && q1 !== undefined) {
         const current_mtimems0 = await FILESTATS.GetMTimeMS(path0);
         const current_mtimems1 = await FILESTATS.GetMTimeMS(path1);
@@ -424,8 +475,8 @@ export class FILESTATS {
         const current_hash0 = await FILESTATS.GetHash(path0);
         const current_hash1 = await FILESTATS.GetHash(path1);
         if (current_hash0 === current_hash1) {
-          FILESTATS_DB.UpdateRecord({ [FILESTATS_ID.PATH]: NodePlatform_Path_Join(path0), [FILESTATS_ID.MTIMEMS]: current_mtimems1, [FILESTATS_ID.HASH]: btoa(current_hash1.toString()) });
-          FILESTATS_DB.UpdateRecord({ [FILESTATS_ID.PATH]: NodePlatform_Path_Join(path1), [FILESTATS_ID.MTIMEMS]: current_mtimems0, [FILESTATS_ID.HASH]: btoa(current_hash0.toString()) });
+          FILESTATS_DB.UpdateRecord({ [FILESTATS_ID.PATH]: NODE_PATH.join(path0), [FILESTATS_ID.MTIMEMS]: current_mtimems1, [FILESTATS_ID.HASH]: btoa(current_hash1.toString()) });
+          FILESTATS_DB.UpdateRecord({ [FILESTATS_ID.PATH]: NODE_PATH.join(path1), [FILESTATS_ID.MTIMEMS]: current_mtimems0, [FILESTATS_ID.HASH]: btoa(current_hash0.toString()) });
           return { data: true };
         }
       }
@@ -435,13 +486,22 @@ export class FILESTATS {
     }
   }
   static async GetB64Hash(path: string): Promise<string> {
-    return btoa((await FILESTATS.GetHash(path)).toString());
+    const hash = await FILESTATS.GetHash(path);
+    return btoa(hash.toString());
   }
   static async GetHash(path: string): Promise<bigint> {
-    return h64Raw(await BunPlatform_File_Async_ReadBytes(path));
+    const { error, value: bytes } = await Async_BunPlatform_File_Read_Bytes(path);
+    if (bytes !== undefined) {
+      return h64Raw(bytes);
+    }
+    throw error;
   }
   static async GetMTimeMS(path: string): Promise<number> {
-    return (await NodePlatform_Path_Async_GetStats(path)).mtimeMs;
+    const { error, value: stats } = await Async_NodePlatform_Path_Get_Stats(path);
+    if (stats !== undefined) {
+      return stats.mtimeMs;
+    }
+    throw error;
   }
 }
 
@@ -471,3 +531,81 @@ process.on('beforeExit', () => {
 process.on('exit', () => {
   CACHELOCK.UnlockAll();
 });
+
+// watcher
+
+export async function Async_Cacher_Watch_Directory(
+  path: string, //
+  min_delay_ms: number,
+  max_delay_ms: number,
+  callback: (added: Set<string>, deleted: Set<string>, modified: Set<string>) => Promise<void>,
+) {
+  let delay_ms = min_delay_ms;
+  let abort = false;
+
+  const glob = new Bun.Glob('**/*');
+
+  async function scan() {
+    if (abort === true) return;
+
+    const added_set = new Set<string>();
+    const deleted_set = new Set<string>();
+    const modified_set = new Set<string>();
+
+    for (const subpath of await Array.fromAsync(
+      glob.scan({
+        absolute: false,
+        cwd: path,
+        dot: true,
+        followSymlinks: false,
+        onlyFiles: true,
+        throwErrorOnBrokenSymlink: false,
+      }),
+    )) {
+      added_set.add(NODE_PATH.join(path, subpath));
+    }
+
+    const query_results = FILESTATS.QueryStatsLike(path);
+    if (query_results.data !== undefined) {
+      for (const record of query_results.data) {
+        const record_path = record[FILESTATS_ID.PATH] as string;
+        if (added_set.has(record_path)) {
+          // check for modication
+          const { data: modified } = await FILESTATS.UpdateRecordIfModified(record);
+          if (modified === true) {
+            modified_set.add(record_path);
+          }
+        } else {
+          FILESTATS.RemoveStats(record_path);
+          deleted_set.add(record_path);
+        }
+        added_set.delete(record_path);
+      }
+    }
+
+    for (const path of added_set) {
+      await FILESTATS.UpdateStats(path);
+    }
+
+    // @ts-ignore typescript doesn't understand asynchronous code
+    if (abort === true) return;
+
+    await callback(added_set, deleted_set, modified_set);
+
+    if (added_set.size > 0 || deleted_set.size > 0 || modified_set.size > 0) {
+      delay_ms = min_delay_ms;
+    } else {
+      if (delay_ms < max_delay_ms) {
+        delay_ms += 50;
+      }
+    }
+
+    setTimeout(scan, delay_ms);
+  }
+
+  await scan();
+
+  return () => {
+    abort = true;
+  };
+}

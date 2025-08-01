@@ -2,11 +2,11 @@
   "dependencies": {},
   "devDependencies": {
     "@types/adm-zip": "^0.5.7",
-    "@types/bun": "^1.2.14",
-    "@types/chrome": "^0.0.323",
-    "@types/node": "^22.15.23",
+    "@types/bun": "^1.2.19",
+    "@types/chrome": "^0.1.1",
+    "@types/node": "^24.1.0",
     "adm-zip": "^0.5.16",
-    "prettier": "^3.5.3",
+    "prettier": "^3.6.2",
     "xxhash-wasm": "^1.1.0"
   },
   "scripts": {

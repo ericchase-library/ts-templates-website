@@ -1,6 +1,9 @@
 import { Subprocess } from 'bun';
-import { Core_Promise_Orphan, Core_Stream_Uint8_Async_ReadLines, Core_Utility_Async_Sleep } from '../../../src/lib/ericchase/api.core.js';
-import { NodePlatform_Path_Join, NodePlatform_Shell_StdIn_AddListener } from '../../../src/lib/ericchase/api.platform-node.js';
+import { Core_Promise_Orphan } from '../../../src/lib/ericchase/Core_Promise_Orphan.js';
+import { Async_Core_Stream_Uint8_Read_Lines } from '../../../src/lib/ericchase/Core_Stream_Uint8_Read_Lines.js';
+import { Async_Core_Utility_Sleep } from '../../../src/lib/ericchase/Core_Utility_Sleep.js';
+import { NODE_PATH } from '../../../src/lib/ericchase/NodePlatform.js';
+import { NodePlatform_Shell_StdIn_AddListener } from '../../../src/lib/ericchase/NodePlatform_Shell_StdIn.js';
 import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
 
@@ -21,15 +24,15 @@ class Class implements Builder.Step {
     if (Builder.GetMode() !== Builder.MODE.DEV) return;
 
     this.channel.log('Start Server');
-    const p0 = Bun.spawn(['bun', 'run', 'server/tools/start.ts'], { env: { PUBLIC_PATH: NodePlatform_Path_Join('..', Builder.Dir.Out) }, stderr: 'pipe', stdout: 'pipe' });
+    const p0 = Bun.spawn(['bun', 'run', 'server/tools/start.ts'], { env: { PUBLIC_PATH: NODE_PATH.join('..', Builder.Dir.Out) }, stderr: 'pipe', stdout: 'pipe' });
     const [stdout, stdout_tee] = p0.stdout.tee();
     // wait for server to finish starting up
     // grab host and setup listener to toggle hot reloading
-    await Core_Stream_Uint8_Async_ReadLines(stdout_tee, (line) => {
+    await Async_Core_Stream_Uint8_Read_Lines(stdout_tee, (line) => {
       if (line.startsWith('Serving at')) {
         DEVSERVERHOST = new URL(line.slice('Serving at'.length).trim()).host;
       } else if (line.startsWith('Console at')) {
-        NodePlatform_Shell_StdIn_AddListener(async (bytes, text) => {
+        NodePlatform_Shell_StdIn_AddListener((bytes, text) => {
           if (text === 'h') {
             this.hotreload_enabled = !this.hotreload_enabled;
             if (this.hotreload_enabled === true) {
@@ -43,14 +46,14 @@ class Class implements Builder.Step {
         return false;
       }
     });
-    Core_Promise_Orphan(Core_Stream_Uint8_Async_ReadLines(p0.stderr, (line) => this.channel.error(line)));
-    Core_Promise_Orphan(Core_Stream_Uint8_Async_ReadLines(stdout, (line) => this.channel.log(line)));
+    Core_Promise_Orphan(Async_Core_Stream_Uint8_Read_Lines(p0.stderr, (line) => this.channel.error(line)));
+    Core_Promise_Orphan(Async_Core_Stream_Uint8_Read_Lines(stdout, (line) => this.channel.log(line)));
     this.process_server = p0;
   }
   async onRun(): Promise<void> {
     if (this.process_server !== undefined && this.hotreload_enabled === true) {
       fetch(`http://${DEVSERVERHOST}/server/reload`)
-        .then(() => Core_Utility_Async_Sleep(1000))
+        .then(() => Async_Core_Utility_Sleep(1000))
         .then(() => {
           // a reminder to dev that the server is running
           this.channel.log(`Serving at http://${DEVSERVERHOST}/`);
