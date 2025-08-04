@@ -20,6 +20,7 @@ class Class implements Builder.Step {
   process_server?: Subprocess<'ignore', 'pipe', 'pipe'>;
 
   async onStartUp(): Promise<void> {
+    // only start server if in dev mode
     if (Builder.GetMode() !== Builder.MODE.DEV) return;
 
     this.channel.log('Start Server');

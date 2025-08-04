@@ -594,8 +594,7 @@ export function Async_Cacher_Watch_Directory(
 
     timer_id = setTimeout(() => Core_Promise_Orphan(scan()), delay_ms);
   }
-
-  Core_Promise_Orphan(scan());
+  timer_id = setTimeout(() => Core_Promise_Orphan(scan()), delay_ms);
 
   return () => {
     clearTimeout(timer_id);

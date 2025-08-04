@@ -12,10 +12,3 @@ bun.lock
 # processor bundles
 tools/core/bundle/*
 tools/core-web/bundle/*
-
-##
-## Repo Specific
-##
-
-# up to you whether you want to format the resulting files
-out/

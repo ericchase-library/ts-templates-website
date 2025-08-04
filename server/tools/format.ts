@@ -1,4 +1,4 @@
-await Bun.spawn(['prettier', '--write', '.'], {
+await Bun.spawn(['bunx', 'prettier', '--write', '.'], {
   stderr: 'inherit',
   stdout: 'inherit',
 }).exited;

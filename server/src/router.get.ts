@@ -34,7 +34,7 @@ async function getPublicResource(pathname: string): Promise<Response | undefined
       throw new Error(`PUBLIC_PATH "${Bun.env.PUBLIC_PATH}" does not exist or is not a directory.`);
     }
     // join handles the '/'
-    const resource_path_resolved = NODE_PATH.resolve(public_path, NODE_PATH.join(public_path, pathname));
+    const resource_path_resolved = NODE_PATH.resolve(NODE_PATH.join(public_path, pathname));
     if (resource_path_resolved.startsWith(public_path_resolved)) {
       const resource_file = Bun.file(resource_path_resolved);
       if (await resource_file.exists()) {

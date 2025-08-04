@@ -1,5 +1,6 @@
+import { Async_BunPlatform_Glob_Scan_Generator } from '../../../src/lib/ericchase/BunPlatform_Glob_Scan_Generator.js';
 import { NODE_PATH } from '../../../src/lib/ericchase/NodePlatform.js';
-import { Async_NodePlatform_Directory_ReadDir } from '../../../src/lib/ericchase/NodePlatform_Directory_ReadDir.js';
+import { Async_NodePlatform_Path_Is_Directory } from '../../../src/lib/ericchase/NodePlatform_Path_Is_Directory.js';
 import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
 import { Step_FS_Copy_Files } from '../../core/step/Step_FS_Copy_Files.js';
@@ -24,13 +25,13 @@ class Class implements Builder.Step {
         from: NODE_PATH.join(this.from, Builder.Dir.Src, '@types'),
         to: NODE_PATH.join(this.to, Builder.Dir.Src, '@types'),
         include_patterns: ['**/*'],
-        exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
+        // exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
       }),
       Step_FS_Mirror_Directory({
         from: NODE_PATH.join(this.from, Builder.Dir.Lib, 'ericchase'),
         to: NODE_PATH.join(this.to, Builder.Dir.Lib, 'ericchase'),
         include_patterns: ['**/*'],
-        exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
+        // exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
       }),
       // Loose Files
       Step_FS_Copy_Files({
@@ -67,15 +68,14 @@ class Class implements Builder.Step {
       }),
     ];
     // Tools
-    const { value: entries } = await Async_NodePlatform_Directory_ReadDir(Builder.Dir.Tools, false);
-    for (const entry of entries ?? []) {
-      if (entry.isDirectory()) {
+    for await (const entry of Async_BunPlatform_Glob_Scan_Generator(this.from, `${Builder.Dir.Tools}/*`, { only_files: false })) {
+      if (await Async_NodePlatform_Path_Is_Directory(NODE_PATH.join(this.from, entry))) {
         this.steps.push(
           Step_FS_Mirror_Directory({
-            from: NODE_PATH.join(this.from, entry.parentPath, entry.name),
-            to: NODE_PATH.join(this.to, entry.parentPath, entry.name),
+            from: NODE_PATH.join(this.from, entry),
+            to: NODE_PATH.join(this.to, entry),
             include_patterns: ['**/*'],
-            exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
+            // exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
           }),
         );
       }
