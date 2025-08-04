@@ -1,167 +1,10 @@
-// src/lib/ericchase/Core_Array_Uint8.ts
-var ARRAY__UINT8__BYTE_TO_B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-var ARRAY__UINT8__B64_TO_BYTE = new Map([...ARRAY__UINT8__BYTE_TO_B64].map((char, byte) => [char, byte]));
-var ARRAY__UINT8__EMPTY = Uint8Array.from([]);
-
-// src/lib/ericchase/platform-web.ts
-class ClassDomAttributeObserver {
-  constructor({
-    source = document.documentElement,
-    options = { attributeOldValue: true, subtree: true }
-  }) {
-    this.mutationObserver = new MutationObserver((mutationRecords) => {
-      for (const record of mutationRecords) {
-        this.send(record);
-      }
-    });
-    this.mutationObserver.observe(source, {
-      attributes: true,
-      attributeFilter: options.attributeFilter,
-      attributeOldValue: options.attributeOldValue ?? true,
-      subtree: options.subtree ?? true
-    });
-  }
-  subscribe(callback) {
-    this.subscriptionSet.add(callback);
-    return () => {
-      this.subscriptionSet.delete(callback);
-    };
-  }
-  mutationObserver;
-  subscriptionSet = new Set;
-  send(record) {
-    for (const callback of this.subscriptionSet) {
-      callback(record, () => {
-        this.subscriptionSet.delete(callback);
-      });
-    }
-  }
+// src/lib/ericchase/Core_Console_Error.ts
+function Core_Console_Error(...items) {
+  console["error"](...items);
 }
 
-class ClassDomCharacterDataObserver {
-  constructor({ source = document.documentElement, options = { characterDataOldValue: true, subtree: true } }) {
-    this.mutationObserver = new MutationObserver((mutationRecords) => {
-      for (const record of mutationRecords) {
-        this.send(record);
-      }
-    });
-    this.mutationObserver.observe(source, {
-      characterData: true,
-      characterDataOldValue: options.characterDataOldValue ?? true,
-      subtree: options.subtree ?? true
-    });
-  }
-  subscribe(callback) {
-    this.subscriptionSet.add(callback);
-    return () => {
-      this.subscriptionSet.delete(callback);
-    };
-  }
-  mutationObserver;
-  subscriptionSet = new Set;
-  send(record) {
-    for (const callback of this.subscriptionSet) {
-      callback(record, () => {
-        this.subscriptionSet.delete(callback);
-      });
-    }
-  }
-}
-
-class ClassDomChildListObserver {
-  constructor({ source = document.documentElement, options = { subtree: true } }) {
-    this.mutationObserver = new MutationObserver((mutationRecords) => {
-      for (const record of mutationRecords) {
-        this.send(record);
-      }
-    });
-    this.mutationObserver.observe(source, {
-      childList: true,
-      subtree: options.subtree ?? true
-    });
-  }
-  subscribe(callback) {
-    this.subscriptionSet.add(callback);
-    return () => {
-      this.subscriptionSet.delete(callback);
-    };
-  }
-  mutationObserver;
-  subscriptionSet = new Set;
-  send(record) {
-    for (const callback of this.subscriptionSet) {
-      callback(record, () => {
-        this.subscriptionSet.delete(callback);
-      });
-    }
-  }
-}
-
-class ClassDomElementAddedObserver {
-  constructor({ source = document.documentElement, options = { subtree: true }, selector, includeExistingElements = true }) {
-    this.mutationObserver = new MutationObserver((mutationRecords) => {
-      for (const record of mutationRecords) {
-        if (record.target instanceof Element && record.target.matches(selector)) {
-          this.send(record.target);
-        }
-        const treeWalker = document.createTreeWalker(record.target, NodeFilter.SHOW_ELEMENT);
-        while (treeWalker.nextNode()) {
-          if (treeWalker.currentNode.matches(selector)) {
-            this.send(treeWalker.currentNode);
-          }
-        }
-      }
-    });
-    this.mutationObserver.observe(source, {
-      childList: true,
-      subtree: options.subtree ?? true
-    });
-    if (includeExistingElements === true) {
-      const treeWalker = document.createTreeWalker(document, NodeFilter.SHOW_ELEMENT);
-      while (treeWalker.nextNode()) {
-        if (treeWalker.currentNode.matches(selector)) {
-          this.send(treeWalker.currentNode);
-        }
-      }
-    }
-  }
-  disconnect() {
-    this.mutationObserver.disconnect();
-    for (const callback of this.subscriptionSet) {
-      this.subscriptionSet.delete(callback);
-    }
-  }
-  subscribe(callback) {
-    this.subscriptionSet.add(callback);
-    let abort = false;
-    for (const element of this.matchSet) {
-      callback(element, () => {
-        this.subscriptionSet.delete(callback);
-        abort = true;
-      });
-      if (abort)
-        return () => {};
-    }
-    return () => {
-      this.subscriptionSet.delete(callback);
-    };
-  }
-  mutationObserver;
-  matchSet = new Set;
-  subscriptionSet = new Set;
-  send(element) {
-    if (!this.matchSet.has(element)) {
-      this.matchSet.add(element);
-      for (const callback of this.subscriptionSet) {
-        callback(element, () => {
-          this.subscriptionSet.delete(callback);
-        });
-      }
-    }
-  }
-}
-
-class ClassNodeReference {
+// src/lib/ericchase/WebPlatform_Node_Reference_Class.ts
+class Class_WebPlatform_Node_Reference_Class {
   node;
   constructor(node) {
     if (node === null) {
@@ -212,15 +55,8 @@ class ClassNodeReference {
     this.as(HTMLElement).style.setProperty(property, value, priority);
   }
 }
-
-// src/lib/ericchase/api.platform-web.ts
-function WebPlatform_Node_Class_NodeReference(node) {
-  return new ClassNodeReference(node);
-}
-
-// src/lib/ericchase/Core_Console_Error.ts
-function Core_Console_Error(...items) {
-  console["error"](...items);
+function WebPlatform_Node_Reference_Class(node) {
+  return new Class_WebPlatform_Node_Reference_Class(node);
 }
 
 // src/lib/server/constants.ts
@@ -276,7 +112,7 @@ HotRefresh();
 class Page {
   divMessages;
   constructor() {
-    this.divMessages = WebPlatform_Node_Class_NodeReference(document.querySelector("#messages")).as(HTMLDivElement);
+    this.divMessages = WebPlatform_Node_Reference_Class(document.querySelector("#messages")).as(HTMLDivElement);
   }
   addMessage(text) {
     try {

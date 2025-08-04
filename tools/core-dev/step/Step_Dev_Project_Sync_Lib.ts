@@ -54,7 +54,7 @@ class Class implements Builder.Step {
         from: NODE_PATH.join(this.from, Builder.Dir.Tools),
         to: NODE_PATH.join(this.to, Builder.Dir.Tools),
         include_patterns: [
-          'pull.ts',
+          'pull-base.ts',
           //
         ],
         overwrite: true,

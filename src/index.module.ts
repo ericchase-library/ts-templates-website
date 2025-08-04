@@ -1,5 +1,5 @@
-import { WebPlatform_Node_Class_NodeReference } from './lib/ericchase/api.platform-web.js';
 import { Core_Console_Error } from './lib/ericchase/Core_Console_Error.js';
+import { WebPlatform_Node_Reference_Class } from './lib/ericchase/WebPlatform_Node_Reference_Class.js';
 import { HotRefresh } from './lib/server/HotRefresh.js';
 
 HotRefresh();
@@ -7,7 +7,7 @@ HotRefresh();
 class Page {
   divMessages: HTMLDivElement;
   constructor() {
-    this.divMessages = WebPlatform_Node_Class_NodeReference(document.querySelector('#messages')).as(HTMLDivElement);
+    this.divMessages = WebPlatform_Node_Reference_Class(document.querySelector('#messages')).as(HTMLDivElement);
   }
   addMessage(text: string) {
     try {
