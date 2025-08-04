@@ -454,7 +454,7 @@ async function Async_Process() {
       if (file !== undefined) {
         set__files_to_remove.add(file);
       } else {
-        Err(new Error(_errors._path_does_not_exist_(path)), _errors._path_does_not_exist_(path));
+        Log(_errors._path_does_not_exist_(path));
       }
     }
     set__deleted_paths.clear();
@@ -539,7 +539,7 @@ async function Async_Process() {
         Log(_logs._file_modified_(path), Builder.VERBOSITY._1_LOG);
         set__files_to_update.add(file);
       } else {
-        Err(new Error(_errors._path_does_not_exist_(path)), _errors._path_does_not_exist_(path));
+        Log(_errors._path_does_not_exist_(path));
       }
     }
     set__modified_paths.clear();

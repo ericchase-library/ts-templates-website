@@ -1,3 +1,5 @@
+// forgot what these were for, will probably come up again
+
 declare module '*.css' {
   const content: string;
   export default content;
