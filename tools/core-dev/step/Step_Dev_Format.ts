@@ -2,6 +2,10 @@ import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
 import { Step_Bun_Run } from '../../core/step/Step_Bun_Run.js';
 
+/**
+ * @defaults
+ * @param config.showlogs `true`;
+ */
 export function Step_Dev_Format(config?: Config): Builder.Step {
   return new Class(config ?? {});
 }

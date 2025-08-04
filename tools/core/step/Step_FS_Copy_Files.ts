@@ -21,6 +21,9 @@ class Class implements Builder.Step {
   channel = Logger(this.StepName).newChannel();
 
   constructor(readonly config: Config) {
+    this.config.exclude_patterns ??= [];
+    this.config.include_patterns ??= ['*'];
+    this.config.overwrite ??= false;
     this.config.from_path = NODE_PATH.join(this.config.from_path);
     this.config.to_path = NODE_PATH.join(this.config.to_path);
   }

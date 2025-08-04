@@ -3,6 +3,12 @@ import { Async_Core_Stream_Uint8_Read_All } from '../../../src/lib/ericchase/Cor
 import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
 
+/**
+ * @defaults
+ * @param config.dir `process.cwd()`;
+ * @param config.showlogs `true`;
+ * @param config.stdin `"ignore"`;
+ */
 export function Step_Bun_Run(config: Config): Builder.Step {
   return new Class(config);
 }

@@ -47,7 +47,7 @@ Builder.SetProcessorModules(
   // Bundle the modules.
   Processor_TypeScript_Generic_Bundler({ define: () => ({ 'process.env.DEVSERVERHOST': JSON.stringify(DEVSERVERHOST) }) }),
   // Write non-bundle files and non-library files.
-  Processor_Set_Writable({ include_patterns: ['**/*'], exclude_patterns: ['**/*.d.ts'] }, { include_libdir: false }),
+  Processor_Set_Writable({ include_patterns: ['**/*'] }),
   //
 );
 

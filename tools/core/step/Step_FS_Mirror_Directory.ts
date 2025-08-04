@@ -16,7 +16,6 @@ import { Logger } from '../../core/Logger.js';
  * @defaults
  * @param config.exclude_patterns `[]`
  * @param config.include_patterns `['*']`
- * @param config.overwrite `false`
  */
 export function Step_FS_Mirror_Directory(config: Config): Builder.Step {
   return new Class(config);
@@ -26,6 +25,8 @@ class Class implements Builder.Step {
   channel = Logger(this.StepName).newChannel();
 
   constructor(readonly config: Config) {
+    this.config.exclude_patterns ??= [];
+    this.config.include_patterns ??= ['*'];
     this.config.from_path = NODE_PATH.join(this.config.from_path);
     this.config.to_path = NODE_PATH.join(this.config.to_path);
   }

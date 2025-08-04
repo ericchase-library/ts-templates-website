@@ -26,6 +26,7 @@ export const PATTERN = {
  * @param config.external `["*.module.js"]`
  * @param config.sourcemap `'none'`
  * @param config.target `'browser'`
+ * @param extras.remap_imports `true`
  */
 export function Processor_TypeScript_Generic_Bundler(config?: Config, extras?: Extras): Builder.Processor {
   return new Class(config ?? {}, extras ?? {});
