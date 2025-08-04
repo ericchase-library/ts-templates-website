@@ -45,8 +45,8 @@ async function RemovePath(path: string) {
   await NODE_FS.rm(path, { recursive: true, force: true });
   expect(() => NODE_FS.stat(path)).toThrow();
 }
-async function ReadBytes(path: string, data: Uint8Array<ArrayBuffer>) {
-  expect(Uint8Array.from(await NODE_FS.readFile(path))).toEqual(data);
+async function ReadBytes(path: string, data: Uint8Array) {
+  expect(Uint8Array.from(await NODE_FS.readFile(path))).toEqual(data.slice());
 }
 async function ReadText(path: string, data: string) {
   expect(await NODE_FS.readFile(path, { encoding: 'utf8' })).toBe(data);
@@ -619,9 +619,9 @@ describe(Async_BunPlatform_File_Move.name + ' { overwrite = true }', async () =>
 });
 
 describe(Async_BunPlatform_File_Read_Bytes.name, async () => {
-  async function fn(path: string, expected?: Uint8Array<ArrayBuffer>) {
+  async function fn(path: string, expected?: Uint8Array) {
     const { value } = await Async_BunPlatform_File_Read_Bytes(path);
-    expect<Uint8Array<ArrayBuffer> | undefined>(value).toEqual(expected);
+    expect<Uint8Array | undefined>(value).toEqual(expected);
   }
 
   runner['[01] path is directory and empty'](async (path) => {

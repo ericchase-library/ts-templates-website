@@ -1,6 +1,6 @@
 import { Core_String_Split_Lines } from './Core_String_Split_Lines.js';
 
-export async function* Async_Core_Stream_Uint8_Read_Lines_Generator(stream: ReadableStream<Uint8Array<ArrayBufferLike>>): AsyncGenerator<string[]> {
+export async function* Async_Core_Stream_Uint8_Read_Lines_Generator(stream: ReadableStream<Uint8Array>): AsyncGenerator<string[]> {
   const textDecoderStream = new TextDecoderStream();
   const textDecoderReader = textDecoderStream.readable.getReader();
   const textDecoderWriter = textDecoderStream.writable.getWriter();
@@ -17,7 +17,7 @@ export async function* Async_Core_Stream_Uint8_Read_Lines_Generator(stream: Read
       }
     },
   });
-  const writable: WritableStream<Uint8Array<ArrayBufferLike>> = new WritableStream({
+  const writable: WritableStream<Uint8Array> = new WritableStream({
     // async abort() {
     //   await textDecoderWriter.abort();
     // },

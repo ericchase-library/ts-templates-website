@@ -79,7 +79,7 @@ export namespace Builder {
       public src_path: string,
       public out_path: string,
     ) {}
-    $data: { bytes?: Uint8Array<ArrayBuffer>; text?: string } = { bytes: undefined, text: undefined };
+    $data: { bytes?: Uint8Array; text?: string } = { bytes: undefined, text: undefined };
     $processor_list: { processor: Builder.Processor; method: Builder.ProcessorMethod }[] = [];
     /** When true, file contents have been modified during the current processing phase. */
     ismodified = true;
@@ -127,7 +127,7 @@ export namespace Builder {
       return map__downstream_to_upstream.get(this) ?? new Set();
     }
     // Get cached contents or contents from file on disk as Uint8Array.
-    async getBytes(): Promise<Uint8Array<ArrayBuffer>> {
+    async getBytes(): Promise<Uint8Array> {
       if (this.$data.bytes === undefined) {
         if (this.$data.text === undefined) {
           const { error, value: bytes } = await Async_BunPlatform_File_Read_Bytes(this.src_path);
@@ -174,7 +174,7 @@ export namespace Builder {
       this.$data.text = undefined;
     }
     // Set cached contents to Uint8Array.
-    setBytes(bytes: Uint8Array<ArrayBuffer>): void {
+    setBytes(bytes: Uint8Array): void {
       Log(_logs._file_set_bytes_(this.src_path), VERBOSITY._2_DEBUG);
       this.isoriginal = false;
       this.ismodified = true;

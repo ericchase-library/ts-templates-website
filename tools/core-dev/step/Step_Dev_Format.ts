@@ -2,8 +2,8 @@ import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
 import { Step_Bun_Run } from '../../core/step/Step_Bun_Run.js';
 
-export function Step_Dev_Format(config: Config): Builder.Step {
-  return new Class(config);
+export function Step_Dev_Format(config?: Config): Builder.Step {
+  return new Class(config ?? {});
 }
 class Class implements Builder.Step {
   StepName = Step_Dev_Format.name;

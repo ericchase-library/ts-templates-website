@@ -6,8 +6,8 @@ import { Logger } from '../../core/Logger.js';
 import { Step_FS_Copy_Files } from '../../core/step/Step_FS_Copy_Files.js';
 import { Step_FS_Mirror_Directory } from '../../core/step/Step_FS_Mirror_Directory.js';
 
-export function Step_Dev_Project_Sync_Lib(params: { from: string; to: string }): Builder.Step {
-  return new Class(params.from, params.to);
+export function Step_Dev_Project_Sync_Lib(config: Config): Builder.Step {
+  return new Class(config);
 }
 class Class implements Builder.Step {
   StepName = Step_Dev_Project_Sync_Lib.name;
@@ -15,28 +15,25 @@ class Class implements Builder.Step {
 
   steps: Builder.Step[] = [];
 
-  constructor(
-    readonly from: string,
-    readonly to: string,
-  ) {}
+  constructor(readonly config: Config) {}
   async onStartUp(): Promise<void> {
     this.steps = [
       Step_FS_Copy_Files({
-        from: NODE_PATH.join(this.from, Builder.Dir.Src, '@types'),
-        to: NODE_PATH.join(this.to, Builder.Dir.Src, '@types'),
+        from_path: NODE_PATH.join(this.config.from_path, Builder.Dir.Src, '@types'),
+        to_path: NODE_PATH.join(this.config.to_path, Builder.Dir.Src, '@types'),
         include_patterns: ['**/*'],
         // exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
       }),
       Step_FS_Mirror_Directory({
-        from: NODE_PATH.join(this.from, Builder.Dir.Lib, 'ericchase'),
-        to: NODE_PATH.join(this.to, Builder.Dir.Lib, 'ericchase'),
+        from_path: NODE_PATH.join(this.config.from_path, Builder.Dir.Lib, 'ericchase'),
+        to_path: NODE_PATH.join(this.config.to_path, Builder.Dir.Lib, 'ericchase'),
         include_patterns: ['**/*'],
         // exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
       }),
       // Loose Files
       Step_FS_Copy_Files({
-        from: NODE_PATH.join(this.from),
-        to: NODE_PATH.join(this.to),
+        from_path: NODE_PATH.join(this.config.from_path),
+        to_path: NODE_PATH.join(this.config.to_path),
         include_patterns: [
           '.vscode/settings.json',
           '.gitignore',
@@ -51,8 +48,8 @@ class Class implements Builder.Step {
         overwrite: false,
       }),
       Step_FS_Copy_Files({
-        from: NODE_PATH.join(this.from, Builder.Dir.Tools),
-        to: NODE_PATH.join(this.to, Builder.Dir.Tools),
+        from_path: NODE_PATH.join(this.config.from_path, Builder.Dir.Tools),
+        to_path: NODE_PATH.join(this.config.to_path, Builder.Dir.Tools),
         include_patterns: [
           'pull-base.ts',
           //
@@ -61,19 +58,19 @@ class Class implements Builder.Step {
       }),
       // Server
       Step_FS_Mirror_Directory({
-        from: NODE_PATH.join(this.from, 'server'),
-        to: NODE_PATH.join(this.to, 'server'),
+        from_path: NODE_PATH.join(this.config.from_path, 'server'),
+        to_path: NODE_PATH.join(this.config.to_path, 'server'),
         include_patterns: ['**/*'],
         exclude_patterns: ['.git/**/*', 'node_modules/**/*'],
       }),
     ];
     // Tools
-    for await (const entry of Async_BunPlatform_Glob_Scan_Generator(this.from, `${Builder.Dir.Tools}/*`, { only_files: false })) {
-      if (await Async_NodePlatform_Path_Is_Directory(NODE_PATH.join(this.from, entry))) {
+    for await (const entry of Async_BunPlatform_Glob_Scan_Generator(this.config.from_path, `${Builder.Dir.Tools}/*`, { only_files: false })) {
+      if (await Async_NodePlatform_Path_Is_Directory(NODE_PATH.join(this.config.from_path, entry))) {
         this.steps.push(
           Step_FS_Mirror_Directory({
-            from: NODE_PATH.join(this.from, entry),
-            to: NODE_PATH.join(this.to, entry),
+            from_path: NODE_PATH.join(this.config.from_path, entry),
+            to_path: NODE_PATH.join(this.config.to_path, entry),
             include_patterns: ['**/*'],
             // exclude_patterns: ['**/*{.deprecated,.example,.test}.ts'],
           }),
@@ -95,4 +92,8 @@ class Class implements Builder.Step {
       await step.onCleanUp?.();
     }
   }
+}
+interface Config {
+  from_path: string;
+  to_path: string;
 }

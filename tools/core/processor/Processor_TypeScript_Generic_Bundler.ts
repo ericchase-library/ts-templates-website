@@ -196,6 +196,18 @@ class Class implements Builder.Processor {
     }
   }
 }
+type Options = Parameters<typeof Bun.build>[0];
+interface Config {
+  define?: Options['define'] | (() => Options['define']);
+  env?: Options['env'];
+  external?: Options['external'];
+  sourcemap?: Options['sourcemap'];
+  target?: Options['target'];
+}
+interface Extras {
+  remap_imports?: boolean;
+}
+
 class BuildArtifact {
   blob: Blob;
   hash: string | null;
@@ -212,17 +224,6 @@ class BuildArtifact {
     this.sourcemap = artifact.sourcemap ? new BuildArtifact(artifact.sourcemap) : null;
   }
 }
-interface Config {
-  define?: Options['define'] | (() => Options['define']);
-  env?: Options['env'];
-  external?: Options['external'];
-  sourcemap?: Options['sourcemap'];
-  target?: Options['target'];
-}
-interface Extras {
-  remap_imports?: boolean;
-}
-type Options = Parameters<typeof Bun.build>[0];
 async function ProcessBuildResults(buildtask: Promise<Bun.BuildOutput>): Promise<{
   artifacts: BuildArtifact[];
   bundletext?: string;

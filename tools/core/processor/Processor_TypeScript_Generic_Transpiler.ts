@@ -9,33 +9,34 @@ import { Logger } from '../../core/Logger.js';
  * Use Processor_Set_Writable to directly include or exclude file patterns for writing.
  *
  * @defaults
- * @param include_patterns `[]`
- * @param exclude_patterns `[]`
- * @param config.define `undefined`
- * @param config.target `"browser"`
+ * @param config.exclude_patterns `[]`
+ * @param config.include_patterns `[]`
+ * @param extras.define `undefined`
+ * @param extras.target `"browser"`
  */
-export function Processor_TypeScript_Generic_Transpiler(patterns: { include_patterns?: string[]; exclude_patterns?: string[] }, config?: Config): Builder.Processor {
-  return new Class(patterns.include_patterns ?? [], patterns.exclude_patterns ?? [], config ?? {});
+export function Processor_TypeScript_Generic_Transpiler(config?: Config, extras?: Extras): Builder.Processor {
+  return new Class(config ?? {}, extras ?? {});
 }
 class Class implements Builder.Processor {
   ProcessorName = Processor_TypeScript_Generic_Transpiler.name;
   channel = Logger(this.ProcessorName).newChannel();
 
   constructor(
-    readonly include_patterns: string[],
-    readonly exclude_patterns: string[],
     readonly config: Config,
+    readonly extras: Extras,
   ) {
-    this.config.target ??= 'browser';
+    this.config.exclude_patterns ??= [];
+    this.config.include_patterns ??= [];
+    this.extras.target ??= 'browser';
   }
   async onAdd(files: Set<Builder.File>): Promise<void> {
     for (const file of files) {
       const src_path = NodePlatform_PathObject_Relative_Class(file.src_path).join();
-      if (BunPlatform_Glob_Match_Ex(src_path, this.exclude_patterns, []) === true) {
+      if (BunPlatform_Glob_Match_Ex(src_path, this.config.exclude_patterns ?? [], []) === true) {
         file.iswritable = false;
         continue;
       }
-      if (BunPlatform_Glob_Match_Ex(src_path, this.include_patterns, []) === true) {
+      if (BunPlatform_Glob_Match_Ex(src_path, this.config.include_patterns ?? [], []) === true) {
         file.iswritable = true;
         file.out_path = NodePlatform_PathObject_Relative_Class(file.out_path).replaceExt('.js').join();
         file.addProcessor(this, this.onProcess);
@@ -47,9 +48,9 @@ class Class implements Builder.Processor {
     try {
       const text = await file.getText();
       const transpiled_text = await new Bun.Transpiler({
-        define: typeof this.config.define === 'function' ? this.config.define() : this.config.define,
+        define: typeof this.extras.define === 'function' ? this.extras.define() : this.extras.define,
         loader: 'tsx',
-        target: this.config.target,
+        target: this.extras.target,
         // disable any altering processes
         deadCodeElimination: false,
         inline: false,
@@ -65,8 +66,12 @@ class Class implements Builder.Processor {
     }
   }
 }
+type Options = Bun.TranspilerOptions;
 interface Config {
+  exclude_patterns?: string[];
+  include_patterns?: string[];
+}
+interface Extras {
   define?: Options['define'] | (() => Options['define']);
   target?: Options['target'];
 }
-type Options = Bun.TranspilerOptions;

@@ -6,27 +6,30 @@ import { Builder } from '../../core/Builder.js';
 import { JSONC_Parse } from '../../core/bundle/jsonc-parser/parse.js';
 import { Logger } from '../../core/Logger.js';
 
-export function Step_Dev_Project_Sync_Config(params: { to: string }): Builder.Step {
-  return new Class(params.to);
+export function Step_Dev_Project_Sync_Config(config: Config): Builder.Step {
+  return new Class(config);
 }
 class Class implements Builder.Step {
   StepName = Step_Dev_Project_Sync_Config.name;
   channel = Logger(this.StepName).newChannel();
 
-  constructor(public project_path: string) {}
+  constructor(public config: Config) {}
   async onStartUp(): Promise<void> {}
   async onRun(): Promise<void> {
     // JSON-based Configs
-    await Async_MergeJSONConfigs(this.project_path, '.vscode/settings.json');
-    await Async_MergeJSONConfigs(this.project_path, '.prettierrc');
-    await Async_MergeJSONConfigs(this.project_path, 'package.json');
-    await Async_MergeJSONConfigs(this.project_path, 'tsconfig.json');
+    await Async_MergeJSONConfigs(this.config.project_path, '.vscode/settings.json');
+    await Async_MergeJSONConfigs(this.config.project_path, '.prettierrc');
+    await Async_MergeJSONConfigs(this.config.project_path, 'package.json');
+    await Async_MergeJSONConfigs(this.config.project_path, 'tsconfig.json');
 
     // INI-based Configs
-    await Async_MergeINIConfigs(this.project_path, '.gitignore');
-    await Async_MergeINIConfigs(this.project_path, '.prettierignore');
+    await Async_MergeINIConfigs(this.config.project_path, '.gitignore');
+    await Async_MergeINIConfigs(this.config.project_path, '.prettierignore');
   }
   async onCleanUp(): Promise<void> {}
+}
+interface Config {
+  project_path: string;
 }
 
 async function Async_MergeJSONConfigs(project_path: string, config_path: string) {

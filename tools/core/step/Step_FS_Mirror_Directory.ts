@@ -10,41 +10,38 @@ import { Builder } from '../../core/Builder.js';
 import { FILESTATS } from '../../core/Cacher.js';
 import { Logger } from '../../core/Logger.js';
 
-// !! WARNING: This step can DELETE entire directories. Use with caution!!
-
-export function Step_FS_Mirror_Directory(options: { from: string; to: string; include_patterns?: string[]; exclude_patterns?: string[] }): Builder.Step {
-  return new Class({
-    from: NODE_PATH.join(options.from),
-    to: NODE_PATH.join(options.to),
-    include_patterns: options.include_patterns ?? ['*'],
-    exclude_patterns: options.exclude_patterns ?? [],
-  });
+/**
+ * !! WARNING: This step can DELETE entire directories. Use with caution. !!
+ *
+ * @defaults
+ * @param config.exclude_patterns `[]`
+ * @param config.include_patterns `['*']`
+ * @param config.overwrite `false`
+ */
+export function Step_FS_Mirror_Directory(config: Config): Builder.Step {
+  return new Class(config);
 }
 class Class implements Builder.Step {
   StepName = Step_FS_Mirror_Directory.name;
   channel = Logger(this.StepName).newChannel();
 
-  constructor(
-    readonly options: {
-      from: string;
-      to: string;
-      include_patterns: string[];
-      exclude_patterns: string[];
-    },
-  ) {}
+  constructor(readonly config: Config) {
+    this.config.from_path = NODE_PATH.join(this.config.from_path);
+    this.config.to_path = NODE_PATH.join(this.config.to_path);
+  }
   async onRun(): Promise<void> {
-    if (this.options.from === this.options.to) {
+    if (this.config.from_path === this.config.to_path) {
       // same directory, skip
       return;
     }
-    await Async_NodePlatform_Path_Get_Stats(this.options.from);
-    await Async_NodePlatform_Directory_Create(this.options.to, true);
-    const set_from = await Async_BunPlatform_Glob_Scan_Ex(this.options.from, this.options.include_patterns, this.options.exclude_patterns);
-    const set_to = await Async_BunPlatform_Glob_Scan_Ex(this.options.to, ['**/*'], this.options.exclude_patterns);
+    await Async_NodePlatform_Path_Get_Stats(this.config.from_path);
+    await Async_NodePlatform_Directory_Create(this.config.to_path, true);
+    const set_from = await Async_BunPlatform_Glob_Scan_Ex(this.config.from_path, this.config.include_patterns ?? ['*'], this.config.exclude_patterns ?? []);
+    const set_to = await Async_BunPlatform_Glob_Scan_Ex(this.config.to_path, ['**/*'], this.config.exclude_patterns ?? []);
     // copy all files that are missing
     for (const path of set_from.difference(set_to)) {
-      const from = NODE_PATH.join(this.options.from, path);
-      const to = NODE_PATH.join(this.options.to, path);
+      const from = NODE_PATH.join(this.config.from_path, path);
+      const to = NODE_PATH.join(this.config.to_path, path);
       if ((await Async_BunPlatform_File_Copy(from, to, true)).value === true) {
         await FILESTATS.UpdateStats(to);
         this.channel.log(`Copied "${from}" -> "${to}"`);
@@ -52,8 +49,8 @@ class Class implements Builder.Step {
     }
     // check matching files for modification
     for (const path of set_from.intersection(set_to)) {
-      const from = NODE_PATH.join(this.options.from, path);
-      const to = NODE_PATH.join(this.options.to, path);
+      const from = NODE_PATH.join(this.config.from_path, path);
+      const to = NODE_PATH.join(this.config.to_path, path);
       if ((await FILESTATS.PathsAreEqual(from, to)).data !== true) {
         if ((await Async_BunPlatform_File_Copy(from, to, true)).value === true) {
           await FILESTATS.UpdateStats(from);
@@ -63,8 +60,8 @@ class Class implements Builder.Step {
       }
     }
     // remove all files that shouldn't be
-    for (const path of await Async_BunPlatform_Glob_Scan_Ex(this.options.to, ['**/*'], [...set_from, ...this.options.exclude_patterns])) {
-      const to = NODE_PATH.join(this.options.to, path);
+    for (const path of await Async_BunPlatform_Glob_Scan_Ex(this.config.to_path, ['**/*'], [...set_from, ...(this.config.exclude_patterns ?? [])])) {
+      const to = NODE_PATH.join(this.config.to_path, path);
       if ((await Async_NodePlatform_File_Delete(to)).value === true) {
         FILESTATS.RemoveStats(to);
         this.channel.log(`Deleted "${to}"`);
@@ -72,7 +69,7 @@ class Class implements Builder.Step {
     }
     // remove empty directories
     const directories: string[] = [];
-    const { value: entries } = await Async_NodePlatform_Directory_ReadDir(this.options.to, true);
+    const { value: entries } = await Async_NodePlatform_Directory_ReadDir(this.config.to_path, true);
     for (const entry of entries ?? []) {
       if (entry.isDirectory() === true) {
         directories.push(NODE_PATH.join(entry.parentPath, entry.name));
@@ -84,4 +81,10 @@ class Class implements Builder.Step {
       }
     }
   }
+}
+interface Config {
+  exclude_patterns?: string[];
+  from_path: string;
+  include_patterns?: string[];
+  to_path: string;
 }

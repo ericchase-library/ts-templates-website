@@ -1,7 +1,7 @@
 export function WebPlatform_Utility_Download(
   data: {
     blob?: Blob;
-    bytes?: Uint8Array<ArrayBuffer>;
+    bytes?: Uint8Array;
     json?: string;
     text?: string;
     url?: string;
@@ -13,7 +13,7 @@ export function WebPlatform_Utility_Download(
       return URL.createObjectURL(data.blob);
     }
     if (data.bytes !== undefined) {
-      return URL.createObjectURL(new Blob([data.bytes], { type: 'application/octet-stream;charset=utf-8' }));
+      return URL.createObjectURL(new Blob([data.bytes.slice()], { type: 'application/octet-stream;charset=utf-8' }));
     }
     if (data.json !== undefined) {
       return URL.createObjectURL(new Blob([data.json], { type: 'application/json;charset=utf-8' }));
