@@ -525,12 +525,12 @@ function CreateQueryError(message: any, options?: Record<string, any>): SQLQuery
 
 // watcher
 
-export function Async_Cacher_Watch_Directory(
+export function Cacher_Watch_Directory(
   path: string, //
   min_delay_ms: number,
   max_delay_ms: number,
   callback: (added: Set<string>, deleted: Set<string>, modified: Set<string>) => Promise<void>,
-) {
+): () => void {
   let delay_ms = min_delay_ms;
   let timer_id: Parameters<typeof clearTimeout>[0] = undefined;
   let abort = false;
