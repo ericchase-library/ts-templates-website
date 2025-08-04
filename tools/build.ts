@@ -9,6 +9,7 @@ import { Processor_TypeScript_Generic_Bundler } from './core/processor/Processor
 import { Step_Bun_Run } from './core/step/Step_Bun_Run.js';
 import { Step_FS_Clean_Directory } from './core/step/Step_FS_Clean_Directory.js';
 
+// Use command line arguments to set watch mode.
 if (BunPlatform_Args_Has('--dev')) {
   Builder.SetMode(Builder.MODE.DEV);
 }

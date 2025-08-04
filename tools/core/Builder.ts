@@ -75,6 +75,10 @@ export namespace Builder {
   }
 
   export class File {
+    static Get(path: string) {
+      return map__path_to_file.get(path);
+    }
+
     constructor(
       public src_path: string,
       public out_path: string,
