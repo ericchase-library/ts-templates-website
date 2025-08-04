@@ -66,7 +66,6 @@ class Class implements Builder.Processor {
         continue;
       }
       if (BunPlatform_Glob_Match(query, `**/*${PATTERN.TS_TSX_JS_JSX}`)) {
-        file.iswritable = false;
         trigger_reprocess = true;
       }
     }

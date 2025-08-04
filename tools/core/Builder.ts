@@ -89,7 +89,7 @@ export namespace Builder {
     ismodified = true;
     /** When false, $bytes/$text are no longer from the original file. */
     isoriginal = true;
-    iswritable = true;
+    iswritable = false;
     addProcessor(processor: Builder.Processor, method: Builder.ProcessorMethod): void {
       this.$processor_list.push({ processor, method });
     }

@@ -33,7 +33,6 @@ class Class implements Builder.Processor {
     for (const file of files) {
       const src_path = NodePlatform_PathObject_Relative_Class(file.src_path).join();
       if (BunPlatform_Glob_Match_Ex(src_path, this.config.exclude_patterns ?? [], []) === true) {
-        file.iswritable = false;
         continue;
       }
       if (BunPlatform_Glob_Match_Ex(src_path, this.config.include_patterns ?? [], []) === true) {
