@@ -28,9 +28,9 @@ Builder.SetStartUpSteps(
 // These steps are run before each processing phase.
 Builder.SetBeforeProcessingSteps();
 
-// Basic setup for a typescript powered project. Typescript files that match
+// Basic setup for a TypeScript powered project. TypeScript files that match
 // "*.module.ts" and "*.iife.ts" are bundled and written to the out folder.
-// The other typescript files do not produce bundles. Module ("*.module.ts")
+// The other TypeScript files do not produce bundles. Module ("*.module.ts")
 // files will not bundle other module files. Instead, they'll import whatever
 // exports are needed from other module files. IIFE ("*.iife.ts") files, on
 // the other hand, produce fully contained bundles. They do not import anything

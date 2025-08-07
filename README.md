@@ -4,84 +4,25 @@ https://github.com/ericchase-library/ts-templates-website
 
 This project houses the base website template project that I use to create new website projects.
 
-## TypeScript Library and Template Project
+## Build Tools V4
 
-For information about my TypeScript library and template projects, please visit:
+For information about my TypeScript library and Build Tools, please visit:
 
 - https://github.com/ericchase-library/ts-library
-- https://github.com/ericchase-library/ts-template
 
-## Disclaimer
+## Project Disclaimer
 
 This template may be updated from time to time.
 
-## Developer Environment Setup
+## Setup & Usage
 
-I generally recommend VSCode for web development.
+Setup and use the project as usual:
 
-**Install the Bun runtime**
-
-- https://bun.sh/
-
-**Install npm dependencies**
-
-```
+```bash
 bun install
+bun run build # full build
+bun run dev # dev mode
 ```
-
-**Build the project**
-
-For continuous building as you work:
-
-```
-bun run dev
-```
-
-For final builds:
-
-```
-bun run build
-```
-
-## Project Structure
-
-### ./src/
-
-This folder should contain _all_ of the source files of your project.
-
-- Also read `NOTES.md` under `./src/lib/components/`.
-
-`./src/lib/`
-
-- This folder should contain library files and modules that your main source code depend on.
-  - Library files are not intended to be updated often.
-
-`./src/lib/ericchase/`
-
-- This folder contains the TypeScript library I continuously develop.
-  - The build tools depend on modules from this library.
-  - You may use this library in your project as well.
-
-### ./tools/
-
-This folder contains the actual build tools that build the project.
-
-- To customize the build process, modify `./tools/build.ts` as you see fit.
-  - You can write your own file Processors or build Steps if needed.
-  - There are example files under `./tools/lib/examples/` to help get you started.
-
-### ./out/
-
-This folder is produced during the normal build process and will contain the final compiled/bundled source code.
-
-- This project produces a vanilla HTML, CSS, and JavaScript website.
-- _You may modify the contents of this folder for testing and debugging purposes, but keep in mind that these files are overwritten during each build._
-
-### ./server/
-
-A local server for testing and debugging the final project files. Visit the repository at https://github.com/ericchase/tool--basic-web-server for more information about the server.
-
-- You don't have to use this server. There are plenty of alternatives to choose from: Vite, VSCode Live Server, Webpack DevServer, etc.
 
 ## Copyright & License
 
