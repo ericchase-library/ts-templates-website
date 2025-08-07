@@ -317,25 +317,7 @@ async function Init() {
     NodePlatform_Shell_StdIn_StartReaderInRawMode();
   }
 
-  // Scan Source Folder
-  {
-    Log(_logs._scanning_dir_(Builder.Dir.Src));
-    for (const subpath of await Array.fromAsync(
-      new Bun.Glob('**/*').scan({
-        absolute: false,
-        cwd: Builder.Dir.Src,
-        dot: true,
-        followSymlinks: false,
-        onlyFiles: true,
-        throwErrorOnBrokenSymlink: false,
-      }),
-    )) {
-      const path = NODE_PATH.join(Builder.Dir.Src, subpath);
-      set__added_paths.add(path);
-      await FILESTATS.UpdateStats(path);
-    }
-  }
-
+  await Async_ScanSourceFolder();
   await Async_StartUp();
   await Async_BeforeSteps();
   await Async_Process();
@@ -346,9 +328,15 @@ async function Init() {
       await Async_CleanUp();
       break;
     case Builder.MODE.DEV:
+      unwatch_source_directory?.();
       SetupWatcher();
-      NodePlatform_Shell_StdIn_AddListener((bytes, text, removeSelf) => {
+      NodePlatform_Shell_StdIn_AddListener(async (bytes, text, removeSelf) => {
         if (text === 'r') {
+          await Async_ScanSourceFolder();
+          await Async_BeforeSteps();
+          await Async_Process();
+          await Async_AfterSteps();
+          unwatch_source_directory?.();
           SetupWatcher();
         }
       });
@@ -356,8 +344,25 @@ async function Init() {
   }
 }
 
+async function Async_ScanSourceFolder() {
+  Log(_logs._scanning_dir_(Builder.Dir.Src));
+  for (const subpath of await Array.fromAsync(
+    new Bun.Glob('**/*').scan({
+      absolute: false,
+      cwd: Builder.Dir.Src,
+      dot: true,
+      followSymlinks: false,
+      onlyFiles: true,
+      throwErrorOnBrokenSymlink: false,
+    }),
+  )) {
+    const path = NODE_PATH.join(Builder.Dir.Src, subpath);
+    set__added_paths.add(path);
+    await FILESTATS.UpdateStats(path);
+  }
+}
+
 function SetupWatcher() {
-  unwatch_source_directory?.();
   unwatch_source_directory = Cacher_Watch_Directory(Builder.Dir.Src, 250, 2_000, async (added, deleted, modified) => {
     for (const path of added) {
       set__added_paths.add(path);

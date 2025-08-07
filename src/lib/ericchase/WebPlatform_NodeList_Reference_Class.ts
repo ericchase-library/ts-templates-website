@@ -2,14 +2,8 @@ import { Class_WebPlatform_Node_Reference_Class, WebPlatform_Node_Reference_Clas
 
 export class Class_WebPlatform_NodeList_Reference_Class extends Array<Class_WebPlatform_Node_Reference_Class> {
   constructor(nodes?: NodeList | Node[] | null) {
-    if (nodes === null) {
-      throw new ReferenceError('Reference list is null.');
-    }
-    if (nodes === undefined) {
-      throw new ReferenceError('Reference list is undefined.');
-    }
     super();
-    for (const node of Array.from(nodes)) {
+    for (const node of Array.from(nodes ?? [])) {
       try {
         this.push(WebPlatform_Node_Reference_Class(node));
       } catch (_) {}

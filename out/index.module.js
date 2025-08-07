@@ -7,18 +7,13 @@ function Core_Console_Error(...items) {
 class Class_WebPlatform_Node_Reference_Class {
   node;
   constructor(node) {
-    if (node === null) {
-      throw new ReferenceError("Reference is null.");
-    }
-    if (node === undefined) {
-      throw new ReferenceError("Reference is undefined.");
-    }
     this.node = node;
   }
   as(constructor_ref) {
-    if (this.node instanceof constructor_ref)
+    if (this.node instanceof constructor_ref) {
       return this.node;
-    throw new TypeError(`Reference node is not ${constructor_ref}`);
+    }
+    throw new TypeError(`Reference node ${this.node} is not ${constructor_ref}`);
   }
   is(constructor_ref) {
     return this.node instanceof constructor_ref;

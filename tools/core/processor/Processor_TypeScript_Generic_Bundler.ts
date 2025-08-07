@@ -310,14 +310,19 @@ function RemapModuleImports(filepath: string, filetext: string, external?: strin
             if (import_statement.path.startsWith('.')) {
               // The import.meta.resolve api uses the current script file (this one) for resolving paths, which isn't what we want.
               // Instead, we'll use Node's resolve api to resolve the relative path using the source file's directory.
-              resolved_path = NODE_PATH.resolve(NODE_PATH.parse(source_comment.path).dir, import_statement.path);
+              resolved_path = NODE_PATH.resolve(NODE_PATH.dirname(source_comment.path), import_statement.path);
             } else {
               // Non-relative can be resolved using the import.meta.resolve api. If the file/module does not actually exist, an error will be thrown.
               // Node's fileURLToPath api will convert the resulting url path into a valid file path.
-              resolved_path = NODE_URL.fileURLToPath(import.meta.resolve(import_statement.path));
+              try {
+                const url = new URL(import.meta.resolve(import_statement.path));
+                if (url.protocol === 'file:') {
+                  resolved_path = NODE_URL.fileURLToPath(url);
+                }
+              } catch {}
             }
           } catch (error: any) {
-            throw new Error(error);
+            throw new Error(import_statement.path + '\n' + error);
           }
           if (resolved_path.startsWith(srcpath)) {
             // Convert resolved path into relative path

@@ -1,17 +1,10 @@
 export class Class_WebPlatform_Node_Reference_Class {
-  node: Node;
-  constructor(node?: Node | null) {
-    if (node === null) {
-      throw new ReferenceError('Reference is null.');
-    }
-    if (node === undefined) {
-      throw new ReferenceError('Reference is undefined.');
-    }
-    this.node = node;
-  }
+  constructor(public node?: Node | null) {}
   as<T extends abstract new (...args: any) => any>(constructor_ref: T): InstanceType<T> {
-    if (this.node instanceof constructor_ref) return this.node as InstanceType<T>;
-    throw new TypeError(`Reference node is not ${constructor_ref}`);
+    if (this.node instanceof constructor_ref) {
+      return this.node as InstanceType<T>;
+    }
+    throw new TypeError(`Reference node ${this.node} is not ${constructor_ref}`);
   }
   is<T extends abstract new (...args: any) => any>(constructor_ref: T): boolean {
     return this.node instanceof constructor_ref;
