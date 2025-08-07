@@ -6,11 +6,11 @@ import { Builder } from '../../core/Builder.js';
 import { JSONC_Parse } from '../../core/bundle/jsonc-parser/parse.js';
 import { Logger } from '../../core/Logger.js';
 
-export function Step_Dev_Project_Sync_Config(config: Config): Builder.Step {
+export function Step_Dev_Project_Update_Config(config: Config): Builder.Step {
   return new Class(config);
 }
 class Class implements Builder.Step {
-  StepName = Step_Dev_Project_Sync_Config.name;
+  StepName = Step_Dev_Project_Update_Config.name;
   channel = Logger(this.StepName).newChannel();
 
   constructor(public config: Config) {}

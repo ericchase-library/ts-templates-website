@@ -62,7 +62,7 @@ import { Async_Core_Stream_Uint8_Read_All } from '../../Core_Stream_Uint8_Read_A
 import { Async_Core_Stream_Uint8_Read_Lines } from '../../Core_Stream_Uint8_Read_Lines.js';
 import { Async_Core_Stream_Uint8_Read_Lines_Generator } from '../../Core_Stream_Uint8_Read_Lines_Generator.js';
 import { Async_Core_Stream_Uint8_Read_Some } from '../../Core_Stream_Uint8_Read_Some.js';
-import { Core_String_GetLeftMarginSize } from '../../Core_String_Get_Left_Margin_Size.js';
+import { Core_String_Get_Left_Margin_Size } from '../../Core_String_Get_Left_Margin_Size.js';
 import { Core_String_Line_Is_Only_WhiteSpace } from '../../Core_String_Line_Is_Only_WhiteSpace.js';
 import { Core_String_Remove_WhiteSpace_Only_Lines } from '../../Core_String_Remove_WhiteSpace_Only_Lines.js';
 import { Core_String_Remove_WhiteSpace_Only_Lines_From_Top_And_Bottom } from '../../Core_String_Remove_WhiteSpace_Only_Lines_From_Top_And_Bottom.js';
@@ -2231,21 +2231,21 @@ describe(Async_Core_Stream_Uint8_Read_Some.name, () => {
   });
 });
 
-describe(Core_String_GetLeftMarginSize.name, () => {
+describe(Core_String_Get_Left_Margin_Size.name, () => {
   test('Empty', () => {
-    expect(Core_String_GetLeftMarginSize('')).toBe(0);
+    expect(Core_String_Get_Left_Margin_Size('')).toBe(0);
   });
   test('0', () => {
-    expect(Core_String_GetLeftMarginSize('0')).toBe(0);
+    expect(Core_String_Get_Left_Margin_Size('0')).toBe(0);
   });
   test('1', () => {
-    expect(Core_String_GetLeftMarginSize(' 1')).toBe(1);
+    expect(Core_String_Get_Left_Margin_Size(' 1')).toBe(1);
   });
   test('2', () => {
-    expect(Core_String_GetLeftMarginSize('  2')).toBe(2);
+    expect(Core_String_Get_Left_Margin_Size('  2')).toBe(2);
   });
   test('3', () => {
-    expect(Core_String_GetLeftMarginSize('   3')).toBe(3);
+    expect(Core_String_Get_Left_Margin_Size('   3')).toBe(3);
   });
 });
 describe(Core_String_Line_Is_Only_WhiteSpace.name, () => {

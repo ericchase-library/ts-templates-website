@@ -148,7 +148,7 @@ class Class implements Builder.Processor {
         }
       }
     } catch (error) {
-      this.channel.error(error, 'Bundle Error');
+      this.channel.error(error, 'Module Bundle Error');
     }
   }
   async onProcessIIFEScript(file: Builder.File): Promise<void> {
@@ -187,12 +187,12 @@ class Class implements Builder.Processor {
             // handled above
             break;
           default:
-            await Async_NodePlatform_File_Write_Text(NODE_PATH.join(Builder.Dir.Out, artifact.path), await artifact.blob.text(), true);
+            await Async_NodePlatform_File_Write_Text(NODE_PATH.join(NODE_PATH.dirname(file.out_path), artifact.path), await artifact.blob.text(), true);
             break;
         }
       }
     } catch (error) {
-      this.channel.error('build error');
+      this.channel.error(error, 'IIFE Bundle Error');
     }
   }
 }
