@@ -363,7 +363,7 @@ async function Async_ScanSourceFolder() {
 }
 
 function SetupWatcher() {
-  unwatch_source_directory = Cacher_Watch_Directory(Builder.Dir.Src, 250, 2_000, async (added, deleted, modified) => {
+  unwatch_source_directory = Cacher_Watch_Directory(Builder.Dir.Src, 250, async (added, deleted, modified) => {
     for (const path of added) {
       set__added_paths.add(path);
     }

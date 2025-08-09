@@ -528,10 +528,10 @@ function CreateQueryError(message: any, options?: Record<string, any>): SQLQuery
 export function Cacher_Watch_Directory(
   path: string, //
   min_delay_ms: number,
-  max_delay_ms: number,
   callback: (added: Set<string>, deleted: Set<string>, modified: Set<string>) => Promise<void>,
 ): () => void {
   let delay_ms = min_delay_ms;
+  let scan_count = 0;
   let timer_id: Parameters<typeof clearTimeout>[0] = undefined;
   let abort = false;
 
@@ -585,10 +585,15 @@ export function Cacher_Watch_Directory(
     await callback(added_set, deleted_set, modified_set);
 
     if (added_set.size > 0 || deleted_set.size > 0 || modified_set.size > 0) {
+      // reset
       delay_ms = min_delay_ms;
+      scan_count = 0;
     } else {
-      if (delay_ms < max_delay_ms) {
-        delay_ms += 50;
+      if (delay_ms < 10_000) {
+        if (scan_count++ >= 5) {
+          delay_ms += 250;
+          scan_count = 0;
+        }
       }
     }
 
