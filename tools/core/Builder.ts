@@ -5,6 +5,7 @@ import { Async_BunPlatform_File_Write_Bytes } from '../../src/lib/ericchase/BunP
 import { Async_BunPlatform_File_Write_Text } from '../../src/lib/ericchase/BunPlatform_File_Write_Text.js';
 import { Core_Console_Error } from '../../src/lib/ericchase/Core_Console_Error.js';
 import { Core_Map_Get_Or_Default } from '../../src/lib/ericchase/Core_Map_Get_Or_Default.js';
+import { Class_Core_Promise_Deferred_Class, Core_Promise_Deferred_Class } from '../../src/lib/ericchase/Core_Promise_Deferred_Class.js';
 import { Core_String_Split_Lines } from '../../src/lib/ericchase/Core_String_Split_Lines.js';
 import { Core_Utility_Decode_Bytes } from '../../src/lib/ericchase/Core_Utility_Decode_Bytes.js';
 import { NODE_PATH } from '../../src/lib/ericchase/NodePlatform.js';
@@ -287,24 +288,25 @@ const set__error_paths = new Set<string>();
 
 let unwatch_source_directory: () => void;
 let unlock_stdin_reader: () => void;
-let waiting_for_cleanup = false;
+let busytask: Class_Core_Promise_Deferred_Class<void> | undefined = undefined;
+let quitting = false;
 
 async function Init() {
+  busytask = Core_Promise_Deferred_Class();
   // Secure Locks
   {
     FILESTATS.LockTable();
-    // FILESTATS.RemoveAllStats();
     CACHELOCK.TryLockEach(['Build', 'Format']);
   }
-
   // Setup Stdin Reader
   {
     unlock_stdin_reader = NodePlatform_Shell_StdIn_LockReader();
-    NodePlatform_Shell_StdIn_AddListener((bytes, text, removeSelf) => {
+    NodePlatform_Shell_StdIn_AddListener(async (bytes, text, removeSelf) => {
       if (text === 'q') {
         removeSelf();
         Log(_logs._user_command_('Quit'));
-        waiting_for_cleanup = true;
+        await busytask?.promise;
+        await Async_CleanUp();
       }
     });
     NodePlatform_Shell_StdIn_AddListener(async (bytes, text, removeSelf) => {
@@ -316,13 +318,11 @@ async function Init() {
     });
     NodePlatform_Shell_StdIn_StartReaderInRawMode();
   }
-
   await Async_ScanSourceFolder();
   await Async_StartUp();
   await Async_BeforeSteps();
   await Async_Process();
   await Async_AfterSteps();
-
   switch (_mode) {
     case Builder.MODE.BUILD:
       await Async_CleanUp();
@@ -332,16 +332,21 @@ async function Init() {
       SetupWatcher();
       NodePlatform_Shell_StdIn_AddListener(async (bytes, text, removeSelf) => {
         if (text === 'r') {
+          busytask = Core_Promise_Deferred_Class();
           await Async_ScanSourceFolder();
           await Async_BeforeSteps();
           await Async_Process();
           await Async_AfterSteps();
           unwatch_source_directory?.();
           SetupWatcher();
+          busytask.resolve();
+          busytask = undefined;
         }
       });
       break;
   }
+  busytask.resolve();
+  busytask = undefined;
 }
 
 async function Async_ScanSourceFolder() {
@@ -364,28 +369,30 @@ async function Async_ScanSourceFolder() {
 
 function SetupWatcher() {
   unwatch_source_directory = Cacher_Watch_Directory(Builder.Dir.Src, 250, async (added, deleted, modified) => {
-    for (const path of added) {
-      set__added_paths.add(path);
-    }
-    for (const path of deleted) {
-      set__deleted_paths.add(path);
-    }
-    for (const path of modified) {
-      set__modified_paths.add(path);
-    }
-    if (set__added_paths.size > 0 || set__deleted_paths.size > 0 || set__modified_paths.size > 0) {
-      for (const path of set__error_paths) {
+    if (quitting === false) {
+      for (const path of added) {
         set__added_paths.add(path);
+      }
+      for (const path of deleted) {
         set__deleted_paths.add(path);
+      }
+      for (const path of modified) {
         set__modified_paths.add(path);
       }
-      set__error_paths.clear();
-      await Async_BeforeSteps();
-      await Async_Process();
-      await Async_AfterSteps();
-    }
-    if (waiting_for_cleanup === true) {
-      await Async_CleanUp();
+      if (set__added_paths.size > 0 || set__deleted_paths.size > 0 || set__modified_paths.size > 0) {
+        for (const path of set__error_paths) {
+          set__added_paths.add(path);
+          set__deleted_paths.add(path);
+          set__modified_paths.add(path);
+        }
+        set__error_paths.clear();
+        busytask = Core_Promise_Deferred_Class();
+        await Async_BeforeSteps();
+        await Async_Process();
+        await Async_AfterSteps();
+        busytask.resolve();
+        busytask = undefined;
+      }
     }
   });
 }
@@ -639,6 +646,8 @@ async function Async_AfterSteps() {
 
 async function Async_CleanUp() {
   Log(_logs._phase_begin_('CleanUp'));
+
+  quitting = true;
 
   unwatch_source_directory?.();
 
