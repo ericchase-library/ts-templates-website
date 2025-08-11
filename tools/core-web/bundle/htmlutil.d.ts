@@ -268,15 +268,15 @@ export declare namespace HTML_UTIL {
      * 2. querySelector(document, `query`)
      * @return first matching node or `undefined`
      */
-    function ExtractNode(html: string, query: string, options?: {
-        convert_attribute_names_to_lowercase?: boolean;
-        convert_tag_names_to_lowercase?: boolean;
-    }): ClassDOMNode | undefined;
+    function ExtractNode(html: string, query: string, options?: Parameters<typeof HTML_UTIL.ParseDocument>[1]): ClassDOMNode | undefined;
     function GetAttribute(node: ClassDOMNode, attributeName: string): string | undefined;
     function GetAttributeNames(node: ClassDOMNode): string[];
     function GetHTML(node: ClassDOMNode, options?: {
         render_empty_string_for_empty_attribute_value?: boolean;
         use_self_closing_tags_for_empty_tags?: boolean;
+        xml_mode?: boolean | 'foreign';
+        encode_reserved_characters_for_html?: boolean | 'utf8';
+        decode_reserved_characters_for_html?: boolean;
     }): string;
     /** non-standard api
      * - The getter function for `Node.nodeValue`.
@@ -302,8 +302,14 @@ export declare namespace HTML_UTIL {
      * - Parses the `html` string into a Document node.
      */
     function ParseDocument(html: string, options?: {
-        convert_attribute_names_to_lowercase?: boolean;
+        xml_mode?: boolean;
+        decode_reserved_characters_for_html?: boolean;
         convert_tag_names_to_lowercase?: boolean;
+        convert_attribute_names_to_lowercase?: boolean;
+        recognize_CDATA?: boolean;
+        recognize_self_closing_tags?: boolean;
+        include_source_start_indices_for_nodes?: boolean;
+        include_source_end_indices_for_nodes?: boolean;
     }): ClassDOMNode;
     function QuerySelector(node: ClassDOMNode, query: string): ClassDOMNode | undefined;
     function QuerySelectorAll(node: ClassDOMNode, query: string): ClassDOMNode[];

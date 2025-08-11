@@ -288,7 +288,7 @@ const set__error_paths = new Set<string>();
 
 let unwatch_source_directory: () => void;
 let unlock_stdin_reader: () => void;
-let busytask: Class_Core_Promise_Deferred_Class<void> | undefined = undefined;
+let busytask: Class_Core_Promise_Deferred_Class<void> = Core_Promise_Deferred_Class();
 let quitting = false;
 
 async function Init() {
@@ -305,7 +305,7 @@ async function Init() {
       if (text === 'q') {
         removeSelf();
         Log(_logs._user_command_('Quit'));
-        await busytask?.promise;
+        await busytask.promise;
         await Async_CleanUp();
       }
     });
@@ -323,15 +323,19 @@ async function Init() {
   await Async_BeforeSteps();
   await Async_Process();
   await Async_AfterSteps();
+
   switch (_mode) {
     case Builder.MODE.BUILD:
       await Async_CleanUp();
+      busytask.resolve();
       break;
     case Builder.MODE.DEV:
+      busytask.resolve();
       unwatch_source_directory?.();
       SetupWatcher();
       NodePlatform_Shell_StdIn_AddListener(async (bytes, text, removeSelf) => {
         if (text === 'r') {
+          await busytask.promise;
           busytask = Core_Promise_Deferred_Class();
           await Async_ScanSourceFolder();
           await Async_BeforeSteps();
@@ -340,13 +344,10 @@ async function Init() {
           unwatch_source_directory?.();
           SetupWatcher();
           busytask.resolve();
-          busytask = undefined;
         }
       });
       break;
   }
-  busytask.resolve();
-  busytask = undefined;
 }
 
 async function Async_ScanSourceFolder() {
@@ -386,12 +387,12 @@ function SetupWatcher() {
           set__modified_paths.add(path);
         }
         set__error_paths.clear();
+        await busytask.promise;
         busytask = Core_Promise_Deferred_Class();
         await Async_BeforeSteps();
         await Async_Process();
         await Async_AfterSteps();
         busytask.resolve();
-        busytask = undefined;
       }
     }
   });

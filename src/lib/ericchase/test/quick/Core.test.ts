@@ -43,7 +43,7 @@ import { Core_Console_Log_With_Date } from '../../Core_Console_Log_With_Date.js'
 import { Core_JSON_Analyze } from '../../Core_JSON_Analyze.js';
 import { Core_JSON_Merge } from '../../Core_JSON_Merge.js';
 import { Core_JSON_Parse_Raw_String } from '../../Core_JSON_Parse_Raw_String.js';
-import { Core_Map_Get_Or_Default } from '../../Core_Map_Get_Or_Default.js';
+import { Async_Core_Map_Get_Or_Default, Core_Map_Get_Or_Default } from '../../Core_Map_Get_Or_Default.js';
 import { Core_Math_Cartesian_Product_Generator } from '../../Core_Math_Cartesian_Product_Generator.js';
 import { Core_Math_Factorial } from '../../Core_Math_Factorial.js';
 import { Core_Math_N_Cartesian_Products_Generator } from '../../Core_Math_N_Cartesian_Products_Generator.js';
@@ -1041,6 +1041,24 @@ describe(Core_Map_Get_Or_Default.name, () => {
     const map = new Map<number, string>();
     expect(Core_Map_Get_Or_Default(map, 0, () => 'a')).toBe('a');
     expect(Core_Map_Get_Or_Default(map, 0, () => 'a')).toBe('a');
+  });
+});
+
+describe(Async_Core_Map_Get_Or_Default.name, () => {
+  test('set and return default value if key not in map, get value if key in map', async () => {
+    const map = new Map<number, string>();
+    expect(
+      await Async_Core_Map_Get_Or_Default(map, 0, async () => {
+        await Async_Core_Utility_Sleep(0);
+        return 'a';
+      }),
+    ).toBe('a');
+    expect(
+      await Async_Core_Map_Get_Or_Default(map, 0, async () => {
+        await Async_Core_Utility_Sleep(0);
+        return 'a';
+      }),
+    ).toBe('a');
   });
 });
 
