@@ -56,7 +56,7 @@ class Class implements Builder.Processor {
 
   async onProcess(file: Builder.File): Promise<void> {
     const source_html = (await file.getText()).trim();
-    const source_node = HTML_UTIL.ParseDocument(source_html);
+    const source_node = HTML_UTIL.ParseDocument(source_html, { recognize_self_closing_tags: true }); // html only supports self-closing void tags
     let modified = false;
     // process components
     for (const [component_name, component_file] of this.component_map) {
@@ -91,7 +91,7 @@ function processCustomComponent(source_node: HTML_UTIL.ClassDOMNode, component_n
   let replacements = 0;
   const placeholder_list = HTML_UTIL.QuerySelectorAll(source_node, component_name);
   for (const placeholder_node of placeholder_list) {
-    const component_document = HTML_UTIL.ParseDocument(component_html);
+    const component_document = HTML_UTIL.ParseDocument(component_html, { recognize_self_closing_tags: true }); // html only supports self-closing void tags
     const component_node = component_document.childNodes.at(0);
     if (component_node !== undefined) {
       const attribute_names = new Set([...HTML_UTIL.GetAttributeNames(component_node), ...HTML_UTIL.GetAttributeNames(placeholder_node)]);
