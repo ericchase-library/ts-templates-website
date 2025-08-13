@@ -1,4 +1,4 @@
-export async function Async_WebPlatform_Utility_Upload(options?: { ext_or_mime?: string }): Promise<string | undefined> {
+export function Async_WebPlatform_Utility_Upload(options?: { ext_or_mime?: string }): Promise<string | undefined> {
   return new Promise<string | undefined>((resolve, reject) => {
     options ??= {};
     const input = document.createElement('input');
@@ -7,7 +7,7 @@ export async function Async_WebPlatform_Utility_Upload(options?: { ext_or_mime?:
       input.setAttribute('accept', options.ext_or_mime);
     }
     input.style.setProperty('display', 'none');
-    input.addEventListener('error', async (event) => {
+    input.addEventListener('error', (event) => {
       reject(event.error);
     });
     input.addEventListener('change', async () => {
