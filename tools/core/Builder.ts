@@ -83,7 +83,10 @@ export namespace Builder {
     constructor(
       public src_path: string,
       public out_path: string,
-    ) {}
+    ) {
+      this.src_path = NODE_PATH.join(src_path);
+      this.out_path = NODE_PATH.join(out_path);
+    }
     $data: { bytes?: Uint8Array; text?: string } = { bytes: undefined, text: undefined };
     $processor_list: { processor: Builder.Processor; method: Builder.ProcessorMethod }[] = [];
     /** When true, file contents have been modified during the current processing phase. */

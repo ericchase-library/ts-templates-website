@@ -1,4 +1,5 @@
 import { BunPlatform_Glob_Match } from '../../../src/lib/ericchase/BunPlatform_Glob_Match.js';
+import { BunPlatform_Glob_Match_Ex } from '../../../src/lib/ericchase/BunPlatform_Glob_Match_Ex.js';
 import { Core_Array_Binary_Search_Insertion_Index } from '../../../src/lib/ericchase/Core_Array_Binary_Search_Insertion_Index.js';
 import { NODE_PATH, NODE_URL } from '../../../src/lib/ericchase/NodePlatform.js';
 import { Async_NodePlatform_File_Write_Text } from '../../../src/lib/ericchase/NodePlatform_File_Write_Text.js';
@@ -7,26 +8,16 @@ import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
 
 export const PATTERN = {
-  MODULE: '{.module}{.ts,.tsx,.js,.jsx}',
-  IIFE: '{.iife}{.ts,.tsx,.js,.jsx}',
-  MODULE_IIFE: '{.module,.iife}{.ts,.tsx,.js,.jsx}',
-  TS_TSX_JS_JSX: '{.ts,.tsx,.js,.jsx}',
+  IIFE_MODULE: '{.iife,.module}{.js,.jsx,.ts,.tsx}',
+  IIFE: '{.iife}{.js,.jsx,.ts,.tsx}',
+  JS_JSX_TS_TSX: '{.js,.jsx,.ts,.tsx}',
+  MODULE: '{.module}{.js,.jsx,.ts,.tsx}',
 };
 
 /**
- * External pattern cannot contain more than one "*" wildcard.
- *
- * .module and .iife scripts will be set as writable.\
- * Non .module/.iife scripts will be set as not writable.\
- * Use Processor_Set_Writable to directly include or exclude file patterns for writing.
- *
- * @defaults
- * @param config.define `undefined`
- * @param config.env `"disable"`
- * @param config.external `["*.module.js"]`
- * @param config.sourcemap `'none'`
- * @param config.target `'browser'`
- * @param extras.remap_imports `true`
+ * - Patterns in the `external` may only contain a single `*` wildcard.
+ * - Files that match an `exclude_pattern` will be skipped.
+ * - Files that match an `include_pattern` and NOT an `exclude_pattern` will be processed.
  */
 export function Processor_TypeScript_Generic_Bundler(config?: Config, extras?: Extras): Builder.Processor {
   return new Class(config ?? {}, extras ?? {});
@@ -40,33 +31,37 @@ class Class implements Builder.Processor {
   constructor(
     readonly config: Config,
     readonly extras: Extras,
-  ) {
+  ) {}
+  async onStartUp(): Promise<void> {
     this.config.env ??= 'disable';
     this.config.external ??= [];
     this.config.external.push('*.module.js');
     this.config.sourcemap ??= 'none';
     this.config.target ??= 'browser';
+    this.extras.bundler_mode ??= 'module';
+    this.extras.exclude_patterns ??= [];
+    this.extras.include_patterns ??= this.extras.bundler_mode === 'iife' ? [`**/*${PATTERN.IIFE}`] : [`**/*${PATTERN.MODULE}`];
     this.extras.remap_imports ??= true;
+
+    for (let i = 0; i < this.extras.exclude_patterns.length; i++) {
+      this.extras.exclude_patterns[i] = Builder.Dir.Src + '/' + this.extras.exclude_patterns[i];
+    }
+    for (let i = 0; i < this.extras.include_patterns.length; i++) {
+      this.extras.include_patterns[i] = Builder.Dir.Src + '/' + this.extras.include_patterns[i];
+    }
   }
   async onAdd(files: Set<Builder.File>): Promise<void> {
     let trigger_reprocess = false;
     for (const file of files) {
       const query = file.src_path;
-      if (BunPlatform_Glob_Match(query, `**/*${PATTERN.MODULE}`)) {
+      if (BunPlatform_Glob_Match_Ex(query, this.extras.include_patterns ?? [], this.extras.exclude_patterns ?? []) === true) {
         file.iswritable = true;
         file.out_path = NodePlatform_PathObject_Relative_Class(file.out_path).replaceExt('.js').join();
-        file.addProcessor(this, this.onProcessModule);
+        file.addProcessor(this, this.extras.bundler_mode === 'iife' ? this.onProcessIIFEScript : this.onProcessModule);
         this.bundle_set.add(file);
         continue;
       }
-      if (BunPlatform_Glob_Match(query, `**/*${PATTERN.IIFE}`)) {
-        file.iswritable = true;
-        file.out_path = NodePlatform_PathObject_Relative_Class(file.out_path).replaceExt('.js').join();
-        file.addProcessor(this, this.onProcessIIFEScript);
-        this.bundle_set.add(file);
-        continue;
-      }
-      if (BunPlatform_Glob_Match(query, `**/*${PATTERN.TS_TSX_JS_JSX}`)) {
+      if (BunPlatform_Glob_Match_Ex(query, [Builder.Dir.Src + '/' + '**/*' + PATTERN.JS_JSX_TS_TSX], [Builder.Dir.Src + '/' + '**/*' + PATTERN.IIFE_MODULE]) === true) {
         trigger_reprocess = true;
       }
     }
@@ -80,11 +75,11 @@ class Class implements Builder.Processor {
     let trigger_reprocess = false;
     for (const file of files) {
       const query = file.src_path;
-      if (BunPlatform_Glob_Match(query, `**/*${PATTERN.MODULE_IIFE}`)) {
+      if (BunPlatform_Glob_Match(query, Builder.Dir.Src + '/' + '**/*' + PATTERN.IIFE_MODULE)) {
         this.bundle_set.delete(file);
         continue;
       }
-      if (BunPlatform_Glob_Match(query, `**/*${PATTERN.TS_TSX_JS_JSX}`)) {
+      if (BunPlatform_Glob_Match(query, Builder.Dir.Src + '/' + '**/*' + PATTERN.JS_JSX_TS_TSX)) {
         trigger_reprocess = true;
       }
     }
@@ -198,13 +193,36 @@ class Class implements Builder.Processor {
 }
 type Options = Parameters<typeof Bun.build>[0];
 interface Config {
+  /** @default undefined */
   define?: Options['define'] | (() => Options['define']);
+  /** @default 'disable' */
   env?: Options['env'];
+  /**
+   * Note: IIFE bundles do not have imports.
+   * @default ['*.module.js']
+   */
   external?: Options['external'];
+  /** @default 'none' */
   sourcemap?: Options['sourcemap'];
+  /** @default 'browser' */
   target?: Options['target'];
 }
 interface Extras {
+  /** @default 'module' */
+  bundler_mode?: 'iife' | 'module';
+  /** @default [] */
+  exclude_patterns?: string[];
+  /**
+   * Note: `|` is used here to work around JavaScript's multi-line comments. Use `/` instead.
+   * @default
+   * [`**|*${PATTERN.IIFE}`] when bundler_mode = 'iife'
+   * [`**|*${PATTERN.MODULE}`] when bundler_mode = 'module'
+   */
+  include_patterns?: string[];
+  /**
+   * Note: IIFE bundles do not have imports.
+   * @default true
+   */
   remap_imports?: boolean;
 }
 

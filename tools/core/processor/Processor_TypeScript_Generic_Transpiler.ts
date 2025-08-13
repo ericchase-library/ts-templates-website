@@ -2,17 +2,11 @@ import { BunPlatform_Glob_Match_Ex } from '../../../src/lib/ericchase/BunPlatfor
 import { NodePlatform_PathObject_Relative_Class } from '../../../src/lib/ericchase/NodePlatform_PathObject_Relative_Class.js';
 import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
+import { PATTERN } from './Processor_TypeScript_Generic_Bundler.js';
 
 /**
- * Scripts that match an include_pattern will be set as writable.\
- * Scripts that match both an include_pattern and an exclude_pattern will be set as not writable.\
- * Use Processor_Set_Writable to directly include or exclude file patterns for writing.
- *
- * @defaults
- * @param config.exclude_patterns `[]`
- * @param config.include_patterns `[]`
- * @param extras.define `undefined`
- * @param extras.target `"browser"`
+ * - Files that match an `exclude_pattern` will be skipped.
+ * - Files that match an `include_pattern` and NOT an `exclude_pattern` will be processed.
  */
 export function Processor_TypeScript_Generic_Transpiler(config?: Config, extras?: Extras): Builder.Processor {
   return new Class(config ?? {}, extras ?? {});
@@ -24,18 +18,23 @@ class Class implements Builder.Processor {
   constructor(
     readonly config: Config,
     readonly extras: Extras,
-  ) {
-    this.config.exclude_patterns ??= [];
-    this.config.include_patterns ??= [];
-    this.extras.target ??= 'browser';
+  ) {}
+  async onStartUp(): Promise<void> {
+    this.config.target ??= 'browser';
+    this.extras.exclude_patterns ??= [];
+    this.extras.include_patterns ??= [`**/*${PATTERN.JS_JSX_TS_TSX}`];
+
+    for (let i = 0; i < this.extras.exclude_patterns.length; i++) {
+      this.extras.exclude_patterns[i] = Builder.Dir.Src + '/' + this.extras.exclude_patterns[i];
+    }
+    for (let i = 0; i < this.extras.include_patterns.length; i++) {
+      this.extras.include_patterns[i] = Builder.Dir.Src + '/' + this.extras.include_patterns[i];
+    }
   }
   async onAdd(files: Set<Builder.File>): Promise<void> {
     for (const file of files) {
-      const src_path = NodePlatform_PathObject_Relative_Class(file.src_path).join();
-      if (BunPlatform_Glob_Match_Ex(src_path, this.config.exclude_patterns ?? [], []) === true) {
-        continue;
-      }
-      if (BunPlatform_Glob_Match_Ex(src_path, this.config.include_patterns ?? [], []) === true) {
+      const query = file.src_path;
+      if (BunPlatform_Glob_Match_Ex(query, this.extras.include_patterns ?? [], this.extras.exclude_patterns ?? []) === true) {
         file.iswritable = true;
         file.out_path = NodePlatform_PathObject_Relative_Class(file.out_path).replaceExt('.js').join();
         file.addProcessor(this, this.onProcess);
@@ -47,9 +46,9 @@ class Class implements Builder.Processor {
     try {
       const text = await file.getText();
       const transpiled_text = await new Bun.Transpiler({
-        define: typeof this.extras.define === 'function' ? this.extras.define() : this.extras.define,
+        define: typeof this.config.define === 'function' ? this.config.define() : this.config.define,
         loader: 'tsx',
-        target: this.extras.target,
+        target: this.config.target,
         // disable any altering processes
         deadCodeElimination: false,
         inline: false,
@@ -67,10 +66,18 @@ class Class implements Builder.Processor {
 }
 type Options = Bun.TranspilerOptions;
 interface Config {
-  exclude_patterns?: string[];
-  include_patterns?: string[];
+  /** @default undefined */
+  define?: Options['define'] | (() => Options['define']);
+  /** @default 'browser' */
+  target?: Options['target'];
 }
 interface Extras {
-  define?: Options['define'] | (() => Options['define']);
-  target?: Options['target'];
+  /** @default [] */
+  exclude_patterns?: string[];
+  /**
+   * Note: `|` is used here to work around JavaScript's multi-line comments. Use `/` instead.
+   * @default
+   * [`**|*${PATTERN.JS_JSX_TS_TSX}`]
+   */
+  include_patterns?: string[];
 }

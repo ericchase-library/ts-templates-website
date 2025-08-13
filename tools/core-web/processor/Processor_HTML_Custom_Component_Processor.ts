@@ -1,3 +1,4 @@
+import { BunPlatform_Glob_Match } from '../../../src/lib/ericchase/BunPlatform_Glob_Match.js';
 import { NODE_PATH } from '../../../src/lib/ericchase/NodePlatform.js';
 import { NodePlatform_PathObject_Relative_Class } from '../../../src/lib/ericchase/NodePlatform_PathObject_Relative_Class.js';
 import { Builder } from '../../core/Builder.js';
@@ -15,15 +16,17 @@ class Class implements Builder.Processor {
   htmlfile_set = new Set<Builder.File>();
 
   async onAdd(files: Set<Builder.File>): Promise<void> {
-    const component_path = NODE_PATH.join(Builder.Dir.Lib, 'components');
     let trigger_reprocess = false;
     for (const file of files) {
-      const src_pathobject = NodePlatform_PathObject_Relative_Class(file.src_path);
-      if (src_pathobject.ext === '.html') {
-        if (file.src_path.startsWith(component_path)) {
-          this.component_map.set(src_pathobject.name, file);
-          trigger_reprocess = true;
-        }
+      const query = file.src_path;
+      if (BunPlatform_Glob_Match(query, Builder.Dir.Lib + '/' + 'components/**/*.html') === true) {
+        file.addProcessor(this, this.onProcess);
+        this.component_map.set(NodePlatform_PathObject_Relative_Class(file.src_path).name, file);
+        this.htmlfile_set.add(file);
+        trigger_reprocess = true;
+        continue;
+      }
+      if (BunPlatform_Glob_Match(query, Builder.Dir.Src + '/' + '**/*.html') === true) {
         file.addProcessor(this, this.onProcess);
         this.htmlfile_set.add(file);
       }
@@ -35,15 +38,16 @@ class Class implements Builder.Processor {
     }
   }
   async onRemove(files: Set<Builder.File>): Promise<void> {
-    const component_path = NODE_PATH.join(Builder.Dir.Lib, 'components');
     let trigger_reprocess = false;
     for (const file of files) {
-      const src_pathobject = NodePlatform_PathObject_Relative_Class(file.src_path);
-      if (src_pathobject.ext === '.html') {
-        if (file.src_path.startsWith(component_path)) {
-          this.component_map.delete(src_pathobject.name);
-          trigger_reprocess = true;
-        }
+      const query = file.src_path;
+      if (BunPlatform_Glob_Match(query, Builder.Dir.Lib + '/' + 'components/**/*.html') === true) {
+        this.component_map.delete(NodePlatform_PathObject_Relative_Class(file.src_path).name);
+        this.htmlfile_set.delete(file);
+        trigger_reprocess = true;
+        continue;
+      }
+      if (BunPlatform_Glob_Match(query, Builder.Dir.Src + '/' + '**/*.html') === true) {
         this.htmlfile_set.delete(file);
       }
     }

@@ -1,14 +1,20 @@
-// forgot what these were for, will probably come up again
-
 declare module '*.css' {
-  const content: string;
-  export default content;
+  const contents: string;
+  export = contents;
+}
+declare module '*.html' {
+  const contents: string;
+  export = contents;
 }
 declare module '*.sass' {
-  const content: string;
-  export default content;
+  const contents: string;
+  export = contents;
 }
 declare module '*.scss' {
-  const content: string;
-  export default content;
+  const contents: string;
+  export = contents;
+}
+declare module '*.svg' {
+  const contents: string;
+  export = contents;
 }
