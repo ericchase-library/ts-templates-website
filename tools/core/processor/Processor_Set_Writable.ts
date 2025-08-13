@@ -3,8 +3,8 @@ import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
 
 /**
- * - Files that match an `exclude_pattern` will be skipped.
- * - Files that match an `include_pattern` and NOT an `exclude_pattern` will be marked either writable or not writable depending on `config.value`.
+ * - Files that match a pattern in `config.exclude_patterns` will be skipped.
+ * - Files that match a pattern in `config.include_patterns` but NOT in `config.exclude_patterns` will be marked either writable or not writable depending on `config.value`.
  */
 export function Processor_Set_Writable(config: Config = {}, extras: Extras = {}): Builder.Processor {
   return new Class(config, extras);

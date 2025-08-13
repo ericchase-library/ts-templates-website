@@ -44,7 +44,7 @@ Builder.SetBeforeProcessingSteps();
 Builder.SetProcessorModules(
   // Process the custom html components.
   Processor_HTML_Custom_Component_Processor(),
-  // Bundle the modules.
+  // Bundle the iife scripts and modules.
   Processor_TypeScript_Generic_Bundler({ define: () => ({ 'process.env.DEVSERVERHOST': JSON.stringify(DEVSERVERHOST) }) }, { bundler_mode: 'iife' }),
   Processor_TypeScript_Generic_Bundler({ define: () => ({ 'process.env.DEVSERVERHOST': JSON.stringify(DEVSERVERHOST) }) }, { bundler_mode: 'module' }),
   // Write non-bundle files and non-library files.

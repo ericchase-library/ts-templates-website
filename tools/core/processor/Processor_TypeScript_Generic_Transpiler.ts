@@ -5,8 +5,8 @@ import { Logger } from '../../core/Logger.js';
 import { PATTERN } from './Processor_TypeScript_Generic_Bundler.js';
 
 /**
- * - Files that match an `exclude_pattern` will be skipped.
- * - Files that match an `include_pattern` and NOT an `exclude_pattern` will be processed.
+ * - Files that match a pattern in `extras.exclude_patterns` will be skipped.
+ * - Files that match a pattern in `extras.include_patterns` but NOT in `extras.exclude_patterns` will be processed.
  */
 export function Processor_TypeScript_Generic_Transpiler(config?: Config, extras?: Extras): Builder.Processor {
   return new Class(config ?? {}, extras ?? {});

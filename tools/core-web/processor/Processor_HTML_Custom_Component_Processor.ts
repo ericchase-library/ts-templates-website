@@ -77,9 +77,9 @@ class Class implements Builder.Processor {
       if (src !== undefined) {
         const ext = NODE_PATH.parse(src).ext;
         switch (ext) {
+          case '.jsx':
           case '.ts':
           case '.tsx':
-          case '.jsx':
             HTML_UTIL.SetAttribute(script, 'src', `${src.slice(0, src.lastIndexOf(ext))}.js`);
             modified = true;
             break;
