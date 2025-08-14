@@ -68,7 +68,10 @@ class Class implements Builder.Step {
     }
   }
   async onCleanUp(): Promise<void> {
-    this.process_server?.kill(0); // 0 is important here
-    this.process_server = undefined;
+    if (this.process_server !== undefined) {
+      this.process_server.kill('SIGTERM');
+      await this.process_server.exited;
+      this.process_server = undefined;
+    }
   }
 }

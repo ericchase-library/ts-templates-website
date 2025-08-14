@@ -1,8 +1,8 @@
+import { Async_BunPlatform_File_Write_Text } from '../../../src/lib/ericchase/BunPlatform_File_Write_Text.js';
 import { BunPlatform_Glob_Match } from '../../../src/lib/ericchase/BunPlatform_Glob_Match.js';
 import { BunPlatform_Glob_Match_Ex } from '../../../src/lib/ericchase/BunPlatform_Glob_Match_Ex.js';
 import { Core_Array_Binary_Search_Insertion_Index } from '../../../src/lib/ericchase/Core_Array_Binary_Search_Insertion_Index.js';
 import { NODE_PATH, NODE_URL } from '../../../src/lib/ericchase/NodePlatform.js';
-import { Async_NodePlatform_File_Write_Text } from '../../../src/lib/ericchase/NodePlatform_File_Write_Text.js';
 import { NodePlatform_PathObject_Relative_Class } from '../../../src/lib/ericchase/NodePlatform_PathObject_Relative_Class.js';
 import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
@@ -138,7 +138,7 @@ class Class implements Builder.Processor {
             // handled above
             break;
           default:
-            await Async_NodePlatform_File_Write_Text(NODE_PATH.join(NODE_PATH.dirname(file.out_path), artifact.path), await artifact.blob.text(), true);
+            await Async_BunPlatform_File_Write_Text(NODE_PATH.join(NODE_PATH.dirname(file.out_path), artifact.path), await artifact.blob.text());
             break;
         }
       }
@@ -182,7 +182,7 @@ class Class implements Builder.Processor {
             // handled above
             break;
           default:
-            await Async_NodePlatform_File_Write_Text(NODE_PATH.join(NODE_PATH.dirname(file.out_path), artifact.path), await artifact.blob.text(), true);
+            await Async_BunPlatform_File_Write_Text(NODE_PATH.join(NODE_PATH.dirname(file.out_path), artifact.path), await artifact.blob.text());
             break;
         }
       }

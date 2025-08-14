@@ -16,9 +16,13 @@ class Class implements Builder.Step {
       const zip_instance = new AdmZip();
       zip_instance.addLocalFolder(this.config.dirpath);
       zip_instance.writeZip(this.config.outfile);
-      const { value: stats } = await Async_NodePlatform_Path_Get_Stats(this.config.outfile);
-      if (stats?.isFile() === true) {
-        this.channel.log(`ZIP: [${stats.size}] ${this.config.outfile}`);
+      const { error, value: stats } = await Async_NodePlatform_Path_Get_Stats(this.config.outfile);
+      if (stats !== undefined) {
+        if (stats.isFile() === true) {
+          this.channel.log(`ZIP: [${stats.size}] ${this.config.outfile}`);
+        }
+      } else {
+        throw error;
       }
     } catch (error) {
       this.channel.log(`Error while creating archive for "${this.config.dirpath}".`);

@@ -32,8 +32,18 @@ class Class implements Builder.Step {
       // same directory, skip
       return;
     }
-    await Async_NodePlatform_Path_Get_Stats(this.config.from_path);
-    await Async_NodePlatform_Directory_Create(this.config.to_path, true);
+    {
+      const { error, value } = await Async_NodePlatform_Path_Get_Stats(this.config.from_path);
+      if (value === undefined) {
+        throw error;
+      }
+    }
+    {
+      const { error, value } = await Async_NodePlatform_Directory_Create(this.config.to_path, true);
+      if (value === undefined) {
+        throw error;
+      }
+    }
     const set_from = await Async_BunPlatform_Glob_Scan_Ex(this.config.from_path, this.config.include_patterns ?? ['*'], this.config.exclude_patterns ?? []);
     const set_to = await Async_BunPlatform_Glob_Scan_Ex(this.config.to_path, this.config.include_patterns ?? ['*'], this.config.exclude_patterns ?? []);
     // copy all files that are missing

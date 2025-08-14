@@ -21,6 +21,8 @@ await AddLoggerOutputDirectory('cache');
 namespace _errors {
   export const _dependency_cycle_ = (p0: string, p1: string) => `Dependency Cycle: Between upstream "${p0}" and downstream "${p1}"!`;
   export const _dependency_cycle_self_ = (p0: string) => `Dependency Cycle: "${p0}" - A file cannot depend on itself!`;
+  export const _error_reading_file_ = (p0: string) => `Error reading file "${p0}"!`;
+  export const _error_writing_file_ = (p0: string) => `Error writing file "${p0}"!`;
   export const _path_does_not_exist_ = (p0: string) => `Path "${p0}" does not exist!`;
   export const _upstream_does_not_exist_ = (p0: string) => `Upstream path "${p0}" does not exist!`;
   export const _upstream_not_in_src_ = (p0: string) => `Upstream path "${p0}" must reside in src directory!`;
@@ -142,6 +144,7 @@ export namespace Builder {
           if (bytes !== undefined) {
             this.$data.bytes = bytes;
           } else {
+            Err(error, _errors._error_reading_file_(this.src_path));
             throw error;
           }
         } else {
@@ -159,7 +162,7 @@ export namespace Builder {
           if (text !== undefined) {
             this.$data.text = text;
           } else {
-            Err(error, _errors._path_does_not_exist_(this.src_path));
+            Err(error, _errors._error_reading_file_(this.src_path));
             throw new Error();
           }
         } else {
@@ -540,12 +543,17 @@ async function Async_Process() {
       // Write Files
       for (const file of set__files_to_add) {
         if (file.iswritable === true) {
-          if (file.$data.text !== undefined) {
-            await Async_BunPlatform_File_Write_Text(file.out_path, file.$data.text);
-          } else {
-            await Async_BunPlatform_File_Write_Bytes(file.out_path, await file.getBytes());
+          try {
+            if (file.$data.text !== undefined) {
+              await Async_BunPlatform_File_Write_Text(file.out_path, file.$data.text);
+            } else {
+              await Async_BunPlatform_File_Write_Bytes(file.out_path, await file.getBytes());
+            }
+            file.ismodified = false;
+          } catch (error) {
+            Err(error, _errors._error_writing_file_(file.src_path));
+            caught_error = true;
           }
-          file.ismodified = false;
         }
       }
     }
@@ -605,12 +613,17 @@ async function Async_Process() {
       // Write Files
       for (const file of set__files_to_update) {
         if (file.iswritable === true && file.ismodified === true) {
-          if (file.$data.text !== undefined) {
-            await Async_BunPlatform_File_Write_Text(file.out_path, file.$data.text);
-          } else {
-            await Async_BunPlatform_File_Write_Bytes(file.out_path, await file.getBytes());
+          try {
+            if (file.$data.text !== undefined) {
+              await Async_BunPlatform_File_Write_Text(file.out_path, file.$data.text);
+            } else {
+              await Async_BunPlatform_File_Write_Bytes(file.out_path, await file.getBytes());
+            }
+            file.ismodified = false;
+          } catch (error) {
+            Err(error, _errors._error_writing_file_(file.src_path));
+            caught_error = true;
           }
-          file.ismodified = false;
         }
       }
     }
@@ -759,7 +772,7 @@ async function KillChildren() {
 
 function KillProcess(pid: number) {
   return new Promise<string>((resolve, reject) => {
-    treekill(pid, 'SIGKILL', (error) => {
+    treekill(pid, 'SIGTERM', (error) => {
       if (error) {
         reject(error);
       } else {

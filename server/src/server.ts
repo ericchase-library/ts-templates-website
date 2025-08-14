@@ -254,4 +254,8 @@ export async function async_analyzeBody(req: Request | Response) {
   return data;
 }
 
+process.on('SIGTERM', async () => {
+  process.exit(2); // 2 for shutdown
+});
+
 await async_tryStartServer(PREFERRED_HOSTNAME, PREFERRED_PORT);

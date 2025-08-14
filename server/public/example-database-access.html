@@ -27,11 +27,19 @@
           }
         } catch (err) {}
 
+        await sendQuery('CREATE TABLE IF NOT EXISTS orders(id INT PRIMARY KEY, status TEXT NOT NULL);');
+        await sendQuery('INSERT INTO orders(id, status) VALUES($1, $2);', ['0', 'Done']);
+        await sendQuery('INSERT INTO orders(id, status) VALUES($1, $2);', ['1', 'Pending']);
+        await sendQuery('SELECT * FROM orders;');
+        await sendQuery('SELECT * FROM orders WHERE id = $1;', ['0']);
+      })();
+
+      async function sendQuery(text, values = []) {
         try {
           console.log('Try POST Request');
           const response = await fetch('http://localhost:8000/database/query', {
             method: 'POST',
-            body: JSON.stringify({ id: 0 }),
+            body: JSON.stringify({ text, values }),
             headers: {
               'content-type': 'application/json',
             },
@@ -42,7 +50,7 @@
             console.log('-- TEXT:', await response.text());
           }
         } catch (err) {}
-      })();
+      }
     </script>
   </body>
 </html>
