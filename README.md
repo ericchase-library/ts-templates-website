@@ -1,7 +1,5 @@
 ## About
 
-https://github.com/ericchase-library/ts-templates-website
-
 This project houses the base website template project that I use to create new website projects.
 
 ## Build Tools V4
@@ -9,6 +7,7 @@ This project houses the base website template project that I use to create new w
 For information about my TypeScript library and Build Tools, please visit:
 
 - https://github.com/ericchase-library/ts-library
+- https://github.com/ericchase-library/ts-templates-website
 
 ## Project Disclaimer
 

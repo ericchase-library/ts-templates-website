@@ -17,7 +17,6 @@ Bun.env.PUBLIC_PATH = PREFERRED_PUBLIC_PATH;
 interface WebSocketData {}
 function createServer(hostname: string, port: number) {
   const server = Bun.serve({
-    development: false,
     hostname,
     port,
     routes: {

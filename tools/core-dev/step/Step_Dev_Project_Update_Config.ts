@@ -41,8 +41,6 @@ async function Async_MergeJSONConfigs(project_path: string, config_path: string)
 async function Async_MergeINIConfigs(project_path: string, config_path: string) {
   const base_config = (await Async_BunPlatform_File_Read_Text(NODE_PATH.join(project_path, Builder.Dir.Tools, 'base-config', config_path))).value ?? '';
   const repo_config = (await Async_BunPlatform_File_Read_Text(NODE_PATH.join(project_path, 'repo-config', config_path))).value ?? '';
-  const separator = `\n\n##
-## Repo Specific
-##\n\n`;
-  await Async_BunPlatform_File_Write_Text(NODE_PATH.join(project_path, config_path), base_config.trim() + separator + repo_config.trim());
+  const separator = '\n\n## Project Specific\n\n';
+  await Async_BunPlatform_File_Write_Text(NODE_PATH.join(project_path, config_path), base_config.trim() + separator + repo_config.trim() + '\n');
 }

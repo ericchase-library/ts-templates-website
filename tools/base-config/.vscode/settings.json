@@ -5,10 +5,14 @@
   "typescript.preferences.importModuleSpecifierEnding": "js",
   "typescript.tsc.autoDetect": "off",
   "files.readonlyInclude": {
-    ".vscode/settings.json": true,
+    ".vscode/**": true,
+    "cache/**": true,
+    "coverage/**": true,
+    "out/**": true,
     ".gitignore": true,
     ".prettierignore": true,
     ".prettierrc": true,
-    "tsconfig.json": true
+    "tsconfig.json": true,
+    "bun.lock": true
   }
 }
