@@ -56,7 +56,7 @@ class Class implements Builder.Step {
   }
   async onRun(): Promise<void> {
     if (this.process_server !== undefined && this.hotreload_enabled === true) {
-      fetch(`http://${DEVSERVERHOST}/server/reload`)
+      fetch(`http://${DEVSERVERHOST}/api/websockets/reload`, { method: 'POST' })
         .then(() => {
           // a reminder to dev that the server is running
           this.channel.log(`Serving at http://${DEVSERVERHOST}/`);

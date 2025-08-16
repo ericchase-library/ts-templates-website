@@ -322,7 +322,7 @@ async function Init() {
         await ForceQuit();
       }
     });
-    if (NodePlatform_Shell_StdIn_StartReaderInRawMode() === true) {
+    if (NodePlatform_Shell_StdIn_StartReaderInRawMode() === false) {
       Log('Could not set standard input to raw mode.');
     }
   }
@@ -407,6 +407,7 @@ function SetupWatcher() {
 }
 
 async function Async_StartUp() {
+  _channel.newLine();
   Log(_logs._phase_begin_('StartUp'));
 
   // All Steps onStartUp
@@ -499,7 +500,7 @@ async function Async_Process() {
         set__files.delete(file);
         set__paths.delete(file.src_path);
         await Async_NodePlatform_File_Delete(file.out_path);
-        Log(_logs._file_deleted_(file.src_path), Builder.VERBOSITY._1_LOG);
+        Log(_logs._file_deleted_(file.src_path), Builder.VERBOSITY._2_DEBUG);
       }
     }
   }
@@ -511,7 +512,7 @@ async function Async_Process() {
         const new_file = new Builder.File(path, NODE_PATH.join(Builder.Dir.Out, NODE_PATH.relative(Builder.Dir.Src, path)));
         set__files.add(new_file);
         set__paths.add(path);
-        Log(_logs._file_added_(path), Builder.VERBOSITY._1_LOG);
+        Log(_logs._file_added_(path), Builder.VERBOSITY._2_DEBUG);
         return new_file;
       });
       set__files_to_add.add(file);
@@ -566,7 +567,7 @@ async function Async_Process() {
     for (const path of set__modified_paths) {
       const file = map__path_to_file.get(path);
       if (file !== undefined) {
-        Log(_logs._file_modified_(path), Builder.VERBOSITY._1_LOG);
+        Log(_logs._file_modified_(path), Builder.VERBOSITY._2_DEBUG);
         set__files_to_update.add(file);
       } else {
         Log(_errors._path_does_not_exist_(path));
