@@ -322,7 +322,9 @@ async function Init() {
         await ForceQuit();
       }
     });
-    NodePlatform_Shell_StdIn_StartReaderInRawMode();
+    if (NodePlatform_Shell_StdIn_StartReaderInRawMode() === true) {
+      Log('Could not set standard input to raw mode.');
+    }
   }
   await Async_ScanSourceFolder();
   await Async_StartUp();

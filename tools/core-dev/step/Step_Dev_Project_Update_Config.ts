@@ -35,12 +35,12 @@ interface Config {
 async function Async_MergeJSONConfigs(project_path: string, config_path: string) {
   const base_config = JSONC_Parse((await Async_BunPlatform_File_Read_Text(NODE_PATH.join(project_path, Builder.Dir.Tools, 'base-config', config_path))).value ?? '{}');
   const repo_config = JSONC_Parse((await Async_BunPlatform_File_Read_Text(NODE_PATH.join(project_path, 'repo-config', config_path))).value ?? '{}');
-  await Async_BunPlatform_File_Write_Text(NODE_PATH.join(project_path, config_path), JSON.stringify(Core_JSON_Merge(base_config, repo_config), null, 2));
+  await Async_BunPlatform_File_Write_Text(NODE_PATH.join(project_path, config_path), JSON.stringify(Core_JSON_Merge(base_config, repo_config), null, 2).trim() + '\n');
 }
 
 async function Async_MergeINIConfigs(project_path: string, config_path: string) {
-  const base_config = (await Async_BunPlatform_File_Read_Text(NODE_PATH.join(project_path, Builder.Dir.Tools, 'base-config', config_path))).value ?? '';
-  const repo_config = (await Async_BunPlatform_File_Read_Text(NODE_PATH.join(project_path, 'repo-config', config_path))).value ?? '';
+  const base_config = (await Async_BunPlatform_File_Read_Text(NODE_PATH.join(project_path, Builder.Dir.Tools, 'base-config', config_path))).value?.trim() ?? '';
+  const repo_config = (await Async_BunPlatform_File_Read_Text(NODE_PATH.join(project_path, 'repo-config', config_path))).value?.trim() ?? '';
   const separator = '\n\n## Project Specific\n\n';
-  await Async_BunPlatform_File_Write_Text(NODE_PATH.join(project_path, config_path), base_config.trim() + separator + repo_config.trim() + '\n');
+  await Async_BunPlatform_File_Write_Text(NODE_PATH.join(project_path, config_path), (base_config + separator + repo_config).trim() + '\n');
 }

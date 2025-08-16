@@ -44,29 +44,37 @@ export function NodePlatform_Shell_StdIn_StartReader(): void {
   }
 }
 
-export function NodePlatform_Shell_StdIn_StartReaderInRawMode(): void {
-  if (Data_Internal_NodePlatform_Shell.bool__reader_enabled === true && Data_Internal_NodePlatform_Shell.bool__raw_mode_enabled === false) {
-    NodePlatform_Shell_StdIn_StopReader();
-  }
-  if (Data_Internal_NodePlatform_Shell.bool__reader_enabled === false) {
-    process.stdin //
-      .setRawMode(true)
-      .addListener('data', NodePlatform_Shell_StdIn_ReaderHandler)
-      .resume();
-    Data_Internal_NodePlatform_Shell.bool__reader_enabled = true;
-    Data_Internal_NodePlatform_Shell.bool__raw_mode_enabled = true;
-  }
+export function NodePlatform_Shell_StdIn_StartReaderInRawMode(): boolean {
+  try {
+    if (Data_Internal_NodePlatform_Shell.bool__reader_enabled === true && Data_Internal_NodePlatform_Shell.bool__raw_mode_enabled === false) {
+      NodePlatform_Shell_StdIn_StopReader();
+    }
+    if (Data_Internal_NodePlatform_Shell.bool__reader_enabled === false) {
+      process.stdin //
+        .setRawMode(true)
+        .addListener('data', NodePlatform_Shell_StdIn_ReaderHandler)
+        .resume();
+      Data_Internal_NodePlatform_Shell.bool__reader_enabled = true;
+      Data_Internal_NodePlatform_Shell.bool__raw_mode_enabled = true;
+    }
+    return true;
+  } catch {}
+  return false;
 }
 
-export function NodePlatform_Shell_StdIn_StopReader(): void {
-  if (SHELL__STDIN__READERLOCKS.size === 0) {
-    if (Data_Internal_NodePlatform_Shell.bool__reader_enabled === true) {
-      process.stdin //
-        .pause()
-        .removeListener('data', NodePlatform_Shell_StdIn_ReaderHandler)
-        .setRawMode(false);
-      Data_Internal_NodePlatform_Shell.bool__reader_enabled = true;
-      Data_Internal_NodePlatform_Shell.bool__raw_mode_enabled = false;
+export function NodePlatform_Shell_StdIn_StopReader(): boolean {
+  try {
+    if (SHELL__STDIN__READERLOCKS.size === 0) {
+      if (Data_Internal_NodePlatform_Shell.bool__reader_enabled === true) {
+        process.stdin //
+          .pause()
+          .removeListener('data', NodePlatform_Shell_StdIn_ReaderHandler)
+          .setRawMode(false);
+        Data_Internal_NodePlatform_Shell.bool__reader_enabled = false;
+        Data_Internal_NodePlatform_Shell.bool__raw_mode_enabled = false;
+      }
     }
-  }
+    return true;
+  } catch {}
+  return false;
 }
