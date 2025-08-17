@@ -92,7 +92,10 @@ class Class implements Builder.Processor {
 
   async onProcessModule(file: Builder.File): Promise<void> {
     try {
-      const define: Options['define'] = typeof this.config.define === 'function' ? this.config.define() : this.config.define;
+      const define: Options['define'] = {};
+      for (const [key, value] of Object.entries(this.config.define?.() ?? {})) {
+        define[key] = value === undefined ? 'undefined' : JSON.stringify(value);
+      }
 
       const results = await ProcessBuildResults(
         Bun.build({
@@ -150,7 +153,10 @@ class Class implements Builder.Processor {
   }
   async onProcessIIFEScript(file: Builder.File): Promise<void> {
     try {
-      const define: Options['define'] = (typeof this.config.define === 'function' ? this.config.define() : this.config.define) ?? {};
+      const define: Options['define'] = {};
+      for (const [key, value] of Object.entries(this.config.define?.() ?? {})) {
+        define[key] = value === undefined ? 'undefined' : JSON.stringify(value);
+      }
       define['import.meta.url'] = 'undefined';
 
       const results = await ProcessBuildResults(
@@ -199,7 +205,7 @@ class Class implements Builder.Processor {
 type Options = Parameters<typeof Bun.build>[0];
 interface Config {
   /** @default undefined */
-  define?: Options['define'] | (() => Options['define']);
+  define?: () => Record<string, any>;
   /** @default 'disable' */
   env?: Options['env'];
   /**

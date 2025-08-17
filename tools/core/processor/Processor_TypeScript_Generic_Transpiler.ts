@@ -44,9 +44,14 @@ class Class implements Builder.Processor {
 
   async onProcess(file: Builder.File): Promise<void> {
     try {
+      const define: Options['define'] = {};
+      for (const [key, value] of Object.entries(this.config.define?.() ?? {})) {
+        define[key] = value === undefined ? 'undefined' : JSON.stringify(value);
+      }
+
       const text = await file.getText();
       const transpiled_text = await new Bun.Transpiler({
-        define: typeof this.config.define === 'function' ? this.config.define() : this.config.define,
+        define,
         loader: 'tsx',
         target: this.config.target,
         // disable any altering processes
@@ -67,7 +72,7 @@ class Class implements Builder.Processor {
 type Options = Bun.TranspilerOptions;
 interface Config {
   /** @default undefined */
-  define?: Options['define'] | (() => Options['define']);
+  define?: () => Record<string, any>;
   /** @default 'browser' */
   target?: Options['target'];
 }

@@ -6,6 +6,8 @@ import { NodePlatform_Shell_StdIn_AddListener } from '../../../src/lib/ericchase
 import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
 
+export let DEV_SERVER_HOST: string | undefined = undefined;
+
 /** An AfterProcessingStep for running the dev server. */
 export function Step_Dev_Server(): Builder.Step {
   return new Class();
@@ -16,7 +18,6 @@ class Class implements Builder.Step {
 
   hotreload_enabled = true;
   process_server?: Subprocess<'ignore', 'pipe', 'pipe'>;
-  server_host?: string;
 
   async onStartUp(): Promise<void> {
     // only start server if in dev mode
@@ -33,7 +34,7 @@ class Class implements Builder.Step {
     // grab host and setup listener to toggle hot reloading
     await Async_Core_Stream_Uint8_Read_Lines(stdout_tee, (line) => {
       if (line.startsWith('Serving at')) {
-        this.server_host = new URL(line.slice('Serving at'.length).trim()).host;
+        DEV_SERVER_HOST = new URL(line.slice('Serving at'.length).trim()).host;
       } else if (line.startsWith('Console at')) {
         NodePlatform_Shell_StdIn_AddListener((bytes, text) => {
           if (text === 'h') {
@@ -55,11 +56,11 @@ class Class implements Builder.Step {
   }
   async onRun(): Promise<void> {
     if (this.process_server !== undefined && this.hotreload_enabled === true) {
-      fetch(`http://${this.server_host}/api/websockets/reload`, { method: 'POST' })
+      fetch(`http://${DEV_SERVER_HOST}/api/websockets/reload`, { method: 'POST' })
         .then(() => {
           // a reminder to dev that the server is running
-          this.channel.log(`Serving at http://${this.server_host}/`);
-          this.channel.log(`Console at http://${this.server_host}/console`);
+          this.channel.log(`Serving at http://${DEV_SERVER_HOST}/`);
+          this.channel.log(`Console at http://${DEV_SERVER_HOST}/console`);
         })
         .catch((error) => {
           this.channel.error(error);
