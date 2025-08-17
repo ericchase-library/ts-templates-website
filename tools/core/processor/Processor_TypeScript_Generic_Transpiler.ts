@@ -25,10 +25,10 @@ class Class implements Builder.Processor {
     this.extras.include_patterns ??= [`**/*${PATTERN.JS_JSX_TS_TSX}`];
 
     for (let i = 0; i < this.extras.exclude_patterns.length; i++) {
-      this.extras.exclude_patterns[i] = Builder.Dir.Src + '/' + this.extras.exclude_patterns[i];
+      this.extras.exclude_patterns[i] = `${Builder.Dir.Src}/${this.extras.exclude_patterns[i]}`;
     }
     for (let i = 0; i < this.extras.include_patterns.length; i++) {
-      this.extras.include_patterns[i] = Builder.Dir.Src + '/' + this.extras.include_patterns[i];
+      this.extras.include_patterns[i] = `${Builder.Dir.Src}/${this.extras.include_patterns[i]}`;
     }
   }
   async onAdd(files: Set<Builder.File>): Promise<void> {

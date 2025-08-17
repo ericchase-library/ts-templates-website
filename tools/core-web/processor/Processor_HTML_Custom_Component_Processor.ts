@@ -19,14 +19,14 @@ class Class implements Builder.Processor {
     let trigger_reprocess = false;
     for (const file of files) {
       const query = file.src_path;
-      if (BunPlatform_Glob_Match(query, Builder.Dir.Lib + '/' + 'components/**/*.html') === true) {
+      if (BunPlatform_Glob_Match(query, `${Builder.Dir.Lib}/components/**/*.html`) === true) {
         file.addProcessor(this, this.onProcess);
         this.component_map.set(NodePlatform_PathObject_Relative_Class(file.src_path).name, file);
         this.htmlfile_set.add(file);
         trigger_reprocess = true;
         continue;
       }
-      if (BunPlatform_Glob_Match(query, Builder.Dir.Src + '/' + '**/*.html') === true) {
+      if (BunPlatform_Glob_Match(query, `${Builder.Dir.Src}/**/*.html`) === true) {
         file.addProcessor(this, this.onProcess);
         this.htmlfile_set.add(file);
       }
@@ -41,13 +41,13 @@ class Class implements Builder.Processor {
     let trigger_reprocess = false;
     for (const file of files) {
       const query = file.src_path;
-      if (BunPlatform_Glob_Match(query, Builder.Dir.Lib + '/' + 'components/**/*.html') === true) {
+      if (BunPlatform_Glob_Match(query, `${Builder.Dir.Lib}/components/**/*.html`) === true) {
         this.component_map.delete(NodePlatform_PathObject_Relative_Class(file.src_path).name);
         this.htmlfile_set.delete(file);
         trigger_reprocess = true;
         continue;
       }
-      if (BunPlatform_Glob_Match(query, Builder.Dir.Src + '/' + '**/*.html') === true) {
+      if (BunPlatform_Glob_Match(query, `${Builder.Dir.Src}/**/*.html`) === true) {
         this.htmlfile_set.delete(file);
       }
     }

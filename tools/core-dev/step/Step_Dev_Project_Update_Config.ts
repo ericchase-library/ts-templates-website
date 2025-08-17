@@ -13,7 +13,7 @@ class Class implements Builder.Step {
   StepName = Step_Dev_Project_Update_Config.name;
   channel = Logger(this.StepName).newChannel();
 
-  constructor(public config: Config) {}
+  constructor(readonly config: Config) {}
   async onStartUp(): Promise<void> {}
   async onRun(): Promise<void> {
     // JSON-based Configs

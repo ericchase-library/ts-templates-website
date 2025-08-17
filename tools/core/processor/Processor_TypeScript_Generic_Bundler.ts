@@ -44,10 +44,10 @@ class Class implements Builder.Processor {
     this.extras.remap_imports ??= true;
 
     for (let i = 0; i < this.extras.exclude_patterns.length; i++) {
-      this.extras.exclude_patterns[i] = Builder.Dir.Src + '/' + this.extras.exclude_patterns[i];
+      this.extras.exclude_patterns[i] = `${Builder.Dir.Src}/${this.extras.exclude_patterns[i]}`;
     }
     for (let i = 0; i < this.extras.include_patterns.length; i++) {
-      this.extras.include_patterns[i] = Builder.Dir.Src + '/' + this.extras.include_patterns[i];
+      this.extras.include_patterns[i] = `${Builder.Dir.Src}/${this.extras.include_patterns[i]}`;
     }
   }
   async onAdd(files: Set<Builder.File>): Promise<void> {
@@ -61,7 +61,7 @@ class Class implements Builder.Processor {
         this.bundle_set.add(file);
         continue;
       }
-      if (BunPlatform_Glob_Match_Ex(query, [Builder.Dir.Src + '/' + '**/*' + PATTERN.JS_JSX_TS_TSX], [Builder.Dir.Src + '/' + '**/*' + PATTERN.IIFE_MODULE]) === true) {
+      if (BunPlatform_Glob_Match_Ex(query, [`${Builder.Dir.Src}/**/*${PATTERN.JS_JSX_TS_TSX}`], [`${Builder.Dir.Src}/**/*${PATTERN.IIFE_MODULE}`]) === true) {
         trigger_reprocess = true;
       }
     }
@@ -75,11 +75,11 @@ class Class implements Builder.Processor {
     let trigger_reprocess = false;
     for (const file of files) {
       const query = file.src_path;
-      if (BunPlatform_Glob_Match(query, Builder.Dir.Src + '/' + '**/*' + PATTERN.IIFE_MODULE)) {
+      if (BunPlatform_Glob_Match(query, `${Builder.Dir.Src}/**/*${PATTERN.IIFE_MODULE}`)) {
         this.bundle_set.delete(file);
         continue;
       }
-      if (BunPlatform_Glob_Match(query, Builder.Dir.Src + '/' + '**/*' + PATTERN.JS_JSX_TS_TSX)) {
+      if (BunPlatform_Glob_Match(query, `${Builder.Dir.Src}/**/*${PATTERN.JS_JSX_TS_TSX}`)) {
         trigger_reprocess = true;
       }
     }
@@ -238,7 +238,7 @@ class BuildArtifact {
   loader: 'js' | 'jsx' | 'ts' | 'tsx' | 'json' | 'toml' | 'file' | 'napi' | 'wasm' | 'text' | 'css' | 'html';
   path: string;
   sourcemap: BuildArtifact | null;
-  constructor(public artifact: Bun.BuildArtifact) {
+  constructor(readonly artifact: Bun.BuildArtifact) {
     this.blob = artifact;
     this.hash = artifact.hash;
     this.kind = artifact.kind;

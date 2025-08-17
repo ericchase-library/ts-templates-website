@@ -24,13 +24,13 @@ class Class implements Builder.Processor {
     this.extras.exclude_lib ??= true;
 
     for (let i = 0; i < this.config.exclude_patterns.length; i++) {
-      this.config.exclude_patterns[i] = Builder.Dir.Src + '/' + this.config.exclude_patterns[i];
+      this.config.exclude_patterns[i] = `${Builder.Dir.Src}/${this.config.exclude_patterns[i]}`;
     }
     for (let i = 0; i < this.config.include_patterns.length; i++) {
-      this.config.include_patterns[i] = Builder.Dir.Src + '/' + this.config.include_patterns[i];
+      this.config.include_patterns[i] = `${Builder.Dir.Src}/${this.config.include_patterns[i]}`;
     }
     if (this.extras.exclude_lib === true) {
-      this.config.exclude_patterns.push(Builder.Dir.Lib + '/' + '**/*');
+      this.config.exclude_patterns.push(`${Builder.Dir.Lib}/**/*`);
     }
   }
   async onAdd(files: Set<Builder.File>): Promise<void> {

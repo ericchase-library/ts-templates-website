@@ -32,7 +32,7 @@ class Class implements Builder.Step {
       }),
     ];
     // Core Tools
-    for await (const subpath of Async_BunPlatform_Glob_Scan_Generator(this.config.from_path, Builder.Dir.Tools + '/*', { only_files: false })) {
+    for await (const subpath of Async_BunPlatform_Glob_Scan_Generator(this.config.from_path, `${Builder.Dir.Tools}/*`, { only_files: false })) {
       if (await Async_NodePlatform_Path_Is_Directory(NODE_PATH.join(this.config.from_path, subpath))) {
         this.steps.push(
           Step_FS_Mirror_Directory({

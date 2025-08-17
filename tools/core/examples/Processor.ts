@@ -26,7 +26,7 @@ class Class implements Builder.Processor {
     for (const file of files) {
       const query = file.src_path;
       // Example glob matcher for text (.txt) files:
-      if (BunPlatform_Glob_Match(query, '**/*.txt')) {
+      if (BunPlatform_Glob_Match(query, `${Builder.Dir.Src}/**/*.txt`)) {
         file.addProcessor(this, this.onProcess);
       }
     }
