@@ -48,8 +48,8 @@ Builder.SetProcessorModules(
   // Bundle the IIFE scripts and module scripts.
   Processor_TypeScript_Generic_Bundler({}, { bundler_mode: 'iife' }),
   Processor_TypeScript_Generic_Bundler({}, { bundler_mode: 'module' }),
-  // Write non-bundle files and non-library files.
-  Processor_Set_Writable({ include_patterns: ['**/*'] }),
+  // Write non-bundle and non-library files.
+  Processor_Set_Writable({ include_patterns: ['**/*'], value: true }),
   //
 );
 
