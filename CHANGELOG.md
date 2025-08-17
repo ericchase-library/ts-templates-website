@@ -1,6 +1,6 @@
 ## 2025-08-16
 
-Please refer to the ts-library changelog: https://github.com/ericchase-library/ts-library/blob/main/CHANGELOG.md
+Please refer to the `ts-library` changelog: https://github.com/ericchase-library/ts-library/blob/main/CHANGELOG.md
 
 ## 2025-08-07
 
@@ -8,8 +8,8 @@ Please refer to the ts-library changelog: https://github.com/ericchase-library/t
 
 ## 2025-08-01
 
-- massively restructured entirety of api
-- finally fixed(?) build tools
+- Massively restructured the entirety of my library API
+- Finally fixed(?) the devastating errors in the build tools
 
 ## 2025-05-26
 

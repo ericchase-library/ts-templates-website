@@ -287,7 +287,7 @@ const runner = {
       }
     });
   },
-  win32: {
+  'win32': {
     '[13] path is NUL': (fn: (path: string) => Promise<void>, message?: string) => {
       const casename = runner.win32['[13] path is NUL'].name;
       test(casename + (message ? ' > ' + message : ''), async () => {
@@ -370,7 +370,7 @@ const runner = {
       });
     },
   },
-  posix: {
+  'posix': {
     '[13] path is FIFO device': (fn: (path: string) => Promise<void>, message?: string) => {
       const casename = runner.posix['[13] path is FIFO device'].name;
       test(casename + (message ? ' > ' + message : ''), async () => {

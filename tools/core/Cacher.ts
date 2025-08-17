@@ -560,7 +560,7 @@ export function Cacher_Watch_Directory(
         for (const record of query_results.data) {
           const record_path = record[FILESTATS_ID.PATH] as string;
           if (added_set.has(record_path)) {
-            // check for modication
+            // check for modification
             const { data: modified } = await FILESTATS.UpdateRecordIfModified(record);
             if (modified === true) {
               modified_set.add(record_path);
