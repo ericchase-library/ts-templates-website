@@ -12,10 +12,6 @@ import { Logger } from '../../core/Logger.js';
 
 /**
  * !! WARNING: This step can DELETE entire directories. Use with caution. !!
- *
- * @defaults
- * @param config.exclude_patterns `[]`
- * @param config.include_patterns `['*']`
  */
 export function Step_FS_Mirror_Directory(config: Config): Builder.Step {
   return new Class(config);
@@ -24,7 +20,8 @@ class Class implements Builder.Step {
   StepName = Step_FS_Mirror_Directory.name;
   channel = Logger(this.StepName).newChannel();
 
-  constructor(readonly config: Config) {
+  constructor(readonly config: Config) {}
+  async onStartUp(): Promise<void> {
     this.config.exclude_patterns ??= [];
     this.config.include_patterns ??= ['*'];
     this.config.from_path = NODE_PATH.join(this.config.from_path);
@@ -94,8 +91,10 @@ class Class implements Builder.Step {
   }
 }
 interface Config {
+  /** @default [] */
   exclude_patterns?: string[];
-  from_path: string;
+  /** @default ['*'] */
   include_patterns?: string[];
+  from_path: string;
   to_path: string;
 }

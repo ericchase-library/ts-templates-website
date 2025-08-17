@@ -55,54 +55,69 @@ function WebPlatform_Node_Reference_Class(node) {
 }
 
 // src/lib/server/constants.ts
-var SERVER_HOST = "127.0.0.1:8000";
-
-// src/lib/server/HotRefresh.ts
-function HotRefresh(serverhost) {
-  return new CHotRefresh(serverhost);
+var SERVERHOST = CheckENV() ?? CheckCurrentScript() ?? CheckMetaUrl() ?? CheckError() ?? window.location.host;
+function CheckENV() {
+  try {
+    return process.env.SERVERHOST;
+  } catch {}
+}
+function CheckCurrentScript() {
+  try {
+    return new URL(document.currentScript.src).host;
+  } catch {}
+}
+function CheckMetaUrl() {
+  try {
+    return new URL(import.meta.url).host;
+  } catch {}
+}
+function CheckError() {
+  try {
+    return new URL(new Error().fileName).host;
+  } catch {}
 }
 
-class CHotRefresh {
-  serverhost;
-  socket;
-  methods = {
-    onClose: (event) => {
-      this.cleanup();
-    },
-    onError: (event) => {
-      this.cleanup();
-    },
-    onMessage: (event) => {
-      if (event.data === "reload") {
-        window.location.reload();
-      }
-    }
-  };
-  constructor(serverhost) {
-    this.serverhost = serverhost;
-    this.serverhost ??= SERVER_HOST;
-    this.startup();
+// src/lib/server/enable-hot-reload.ts
+var socket = undefined;
+function cleanup() {
+  if (socket) {
+    socket.onclose = () => {};
+    socket.onerror = () => {};
+    socket.onmessage = () => {};
+    socket = undefined;
   }
-  cleanup() {
-    if (this.socket) {
-      this.socket.removeEventListener("close", this.methods.onClose);
-      this.socket.removeEventListener("error", this.methods.onError);
-      this.socket.removeEventListener("message", this.methods.onMessage);
-      this.socket = undefined;
+}
+function startup(serverhost) {
+  try {
+    socket = new WebSocket("ws://" + serverhost);
+    if (socket !== undefined) {
+      socket.onclose = () => cleanup();
+      socket.onerror = () => cleanup();
+      socket.onmessage = (event) => {
+        if (event.data === "reload") {
+          socket?.close();
+          setTimeout(() => async_reloadOnServerRestart(serverhost), 100);
+        }
+      };
     }
+  } catch (error) {
+    Core_Console_Error(error);
   }
-  startup() {
-    this.socket = new WebSocket(`ws://${this.serverhost}/`);
-    if (this.socket) {
-      this.socket.addEventListener("close", this.methods.onClose);
-      this.socket.addEventListener("error", this.methods.onError);
-      this.socket.addEventListener("message", this.methods.onMessage);
-    }
+}
+async function async_reloadOnServerRestart(serverhost) {
+  try {
+    await fetch(serverhost);
+    window.location.reload();
+  } catch {
+    setTimeout(() => async_reloadOnServerRestart(serverhost), 100);
   }
+}
+function EnableHotReload(serverhost) {
+  startup(serverhost ?? SERVERHOST);
 }
 
 // src/index.module.ts
-HotRefresh();
+EnableHotReload();
 
 class Page {
   divMessages;

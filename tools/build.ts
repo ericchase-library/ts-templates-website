@@ -2,7 +2,7 @@ import { BunPlatform_Args_Has } from '../src/lib/ericchase/BunPlatform_Args_Has.
 import { Step_Dev_Format } from './core-dev/step/Step_Dev_Format.js';
 import { Step_Dev_Project_Update_Config } from './core-dev/step/Step_Dev_Project_Update_Config.js';
 import { Processor_HTML_Custom_Component_Processor } from './core-web/processor/Processor_HTML_Custom_Component_Processor.js';
-import { DEVSERVERHOST, Step_Dev_Server } from './core-web/step/Step_Dev_Server.js';
+import { Step_Dev_Server } from './core-web/step/Step_Dev_Server.js';
 import { Builder } from './core/Builder.js';
 import { Processor_Set_Writable } from './core/processor/Processor_Set_Writable.js';
 import { Processor_TypeScript_Generic_Bundler } from './core/processor/Processor_TypeScript_Generic_Bundler.js';
@@ -45,8 +45,8 @@ Builder.SetProcessorModules(
   // Process the custom html components.
   Processor_HTML_Custom_Component_Processor(),
   // Bundle the iife scripts and modules.
-  Processor_TypeScript_Generic_Bundler({ define: () => ({ 'process.env.DEVSERVERHOST': JSON.stringify(DEVSERVERHOST) }) }, { bundler_mode: 'iife' }),
-  Processor_TypeScript_Generic_Bundler({ define: () => ({ 'process.env.DEVSERVERHOST': JSON.stringify(DEVSERVERHOST) }) }, { bundler_mode: 'module' }),
+  Processor_TypeScript_Generic_Bundler({}, { bundler_mode: 'iife' }),
+  Processor_TypeScript_Generic_Bundler({}, { bundler_mode: 'module' }),
   // Write non-bundle files and non-library files.
   Processor_Set_Writable({ include_patterns: ['**/*'] }),
   //

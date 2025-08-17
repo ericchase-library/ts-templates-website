@@ -1,8 +1,8 @@
 import { Core_Console_Error } from './lib/ericchase/Core_Console_Error.js';
 import { WebPlatform_Node_Reference_Class } from './lib/ericchase/WebPlatform_Node_Reference_Class.js';
-import { HotRefresh } from './lib/server/HotRefresh.js';
+import { EnableHotReload } from './lib/server/enable-hot-reload.js';
 
-HotRefresh();
+EnableHotReload();
 
 class Page {
   divMessages: HTMLDivElement;

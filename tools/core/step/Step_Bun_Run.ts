@@ -3,12 +3,6 @@ import { Async_Core_Stream_Uint8_Read_All } from '../../../src/lib/ericchase/Cor
 import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
 
-/**
- * @defaults
- * @param config.dir `process.cwd()`;
- * @param config.showlogs `true`;
- * @param config.stdin `"ignore"`;
- */
 export function Step_Bun_Run(config: Config): Builder.Step {
   return new Class(config);
 }
@@ -16,7 +10,8 @@ class Class implements Builder.Step {
   StepName = Step_Bun_Run.name;
   channel = Logger(this.StepName).newChannel();
 
-  constructor(readonly config: Config) {
+  constructor(readonly config: Config) {}
+  async onStartUp(): Promise<void> {
     this.config.dir ??= process.cwd();
     this.config.showlogs ??= true;
     this.config.stdin ??= 'ignore';
@@ -41,10 +36,13 @@ class Class implements Builder.Step {
     }
   }
 }
+type SpawnOptions = NonNullable<Parameters<typeof Bun.spawn>[1]>;
 interface Config {
   cmd: string[];
+  /** @default process.cwd() */
   dir?: string;
+  /** @default true */
   showlogs?: boolean;
+  /** @default 'ignore' */
   stdin?: SpawnOptions['stdin'];
 }
-type SpawnOptions = NonNullable<Parameters<typeof Bun.spawn>[1]>;

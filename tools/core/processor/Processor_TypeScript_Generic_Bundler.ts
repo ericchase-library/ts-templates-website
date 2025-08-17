@@ -92,9 +92,11 @@ class Class implements Builder.Processor {
 
   async onProcessModule(file: Builder.File): Promise<void> {
     try {
+      const define: Options['define'] = typeof this.config.define === 'function' ? this.config.define() : this.config.define;
+
       const results = await ProcessBuildResults(
         Bun.build({
-          define: typeof this.config.define === 'function' ? this.config.define() : this.config.define,
+          define,
           entrypoints: [file.src_path],
           env: this.config.env,
           external: this.config.external,
@@ -148,12 +150,15 @@ class Class implements Builder.Processor {
   }
   async onProcessIIFEScript(file: Builder.File): Promise<void> {
     try {
+      const define: Options['define'] = (typeof this.config.define === 'function' ? this.config.define() : this.config.define) ?? {};
+      define['import.meta.url'] = 'undefined';
+
       const results = await ProcessBuildResults(
         Bun.build({
-          define: typeof this.config.define === 'function' ? this.config.define() : this.config.define,
+          define,
           entrypoints: [file.src_path],
           env: this.config.env,
-          format: 'esm',
+          format: 'iife',
           minify: {
             identifiers: false,
             syntax: false,
@@ -162,8 +167,8 @@ class Class implements Builder.Processor {
           sourcemap: this.config.sourcemap,
           target: this.config.target,
           // add iife around scripts
-          banner: '(() => {\n',
-          footer: '})();',
+          // banner: '(() => {\n',
+          // footer: '})();',
         }),
       );
       if (results.bundletext !== undefined) {

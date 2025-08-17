@@ -1,5 +1,5 @@
 import { Core_Console_Error } from '../ericchase/Core_Console_Error.js';
-import { SERVER_HOST } from '../server/constants.js';
+import { SERVERHOST } from '../server/constants.js';
 import { getLocalhost } from './dbdriver-localhost.js';
 
 // const db = DatabaseDriver.getNeon(<insert a valid connection string>);
@@ -8,7 +8,7 @@ import { getLocalhost } from './dbdriver-localhost.js';
 //
 // Note: Change this host string if needed. It should be automatically injected
 // by the build tools.
-const db = getLocalhost(`http://${SERVER_HOST}/`);
+const db = getLocalhost(`http://${SERVERHOST}/`);
 
 //                                                                          \\
 //

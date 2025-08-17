@@ -7,12 +7,6 @@ import { Builder } from '../../core/Builder.js';
 import { FILESTATS } from '../../core/Cacher.js';
 import { Logger } from '../../core/Logger.js';
 
-/**
- * @defaults
- * @param config.exclude_patterns `[]`
- * @param config.include_patterns `['*']`
- * @param config.overwrite `false`
- */
 export function Step_FS_Copy_Files(config: Config): Builder.Step {
   return new Class(config);
 }
@@ -20,12 +14,13 @@ class Class implements Builder.Step {
   StepName = Step_FS_Copy_Files.name;
   channel = Logger(this.StepName).newChannel();
 
-  constructor(readonly config: Config) {
+  constructor(readonly config: Config) {}
+  async onStartUp(): Promise<void> {
     this.config.exclude_patterns ??= [];
     this.config.include_patterns ??= ['*'];
-    this.config.overwrite ??= false;
     this.config.from_path = NODE_PATH.join(this.config.from_path);
     this.config.to_path = NODE_PATH.join(this.config.to_path);
+    this.config.overwrite ??= false;
   }
   async onRun(): Promise<void> {
     if (this.config.from_path === this.config.to_path) {
@@ -70,9 +65,12 @@ class Class implements Builder.Step {
   }
 }
 interface Config {
+  /** @default [] */
   exclude_patterns?: string[];
-  from_path: string;
+  /** @default ['*'] */
   include_patterns?: string[];
-  overwrite?: boolean;
+  from_path: string;
   to_path: string;
+  /** @default false */
+  overwrite?: boolean;
 }

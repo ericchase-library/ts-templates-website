@@ -588,7 +588,7 @@ export function Cacher_Watch_Directory(
         scan_count = 0;
       } else {
         if (delay_ms < 10_000) {
-          if (scan_count++ >= 5) {
+          if (scan_count++ >= 10) {
             delay_ms += 250;
             scan_count = 0;
           }

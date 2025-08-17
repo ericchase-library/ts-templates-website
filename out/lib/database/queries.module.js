@@ -4,7 +4,27 @@ function Core_Console_Error(...items) {
 }
 
 // src/lib/server/constants.ts
-var SERVER_HOST = "127.0.0.1:8000";
+var SERVERHOST = CheckENV() ?? CheckCurrentScript() ?? CheckMetaUrl() ?? CheckError() ?? window.location.host;
+function CheckENV() {
+  try {
+    return process.env.SERVERHOST;
+  } catch {}
+}
+function CheckCurrentScript() {
+  try {
+    return new URL(document.currentScript.src).host;
+  } catch {}
+}
+function CheckMetaUrl() {
+  try {
+    return new URL(import.meta.url).host;
+  } catch {}
+}
+function CheckError() {
+  try {
+    return new URL(new Error().fileName).host;
+  } catch {}
+}
 
 // src/lib/database/dbdriver-localhost.ts
 function getLocalhost(address) {
@@ -23,7 +43,7 @@ function getLocalhost(address) {
 }
 
 // src/lib/database/queries.module.ts
-var db = getLocalhost(`http://${SERVER_HOST}/`);
+var db = getLocalhost(`http://${SERVERHOST}/`);
 async function DatabaseConnected() {
   const q = "SELECT 1";
   await db.query(q, []);

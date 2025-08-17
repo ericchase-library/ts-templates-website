@@ -28,6 +28,11 @@ namespace _errors {
   export const _upstream_not_in_src_ = (p0: string) => `Upstream path "${p0}" must reside in src directory!`;
 }
 namespace _logs {
+  export namespace _step {
+    export const onStartUp = (p0: string) => `[onStartUp] ${p0}`;
+    export const onRun = (p0: string) => `[onRun] ${p0}`;
+    export const onCleanUp = (p0: string) => `[onCleanUp] ${p0}`;
+  }
   export const _file_added_ = (p0: string) => `[added] "${p0}"`;
   export const _file_deleted_ = (p0: string) => `[removed] "${p0}"`;
   export const _file_modified_ = (p0: string) => `[modified] "${p0}"`;
@@ -42,9 +47,6 @@ namespace _logs {
   export const _processor_onremove_ = (p0: string) => `[onRemove] ${p0}`;
   export const _processor_onstartup_ = (p0: string) => `[onStartUp] ${p0}`;
   export const _scanning_dir_ = (p0: string) => `[scan] "${p0}"`;
-  export const _step_oncleanup_ = (p0: string) => `[onCleanUp] ${p0}`;
-  export const _step_onrun_ = (p0: string) => `[onRun] ${p0}`;
-  export const _step_onstartup_ = (p0: string) => `[onStartUp] ${p0}`;
   export const _user_command_ = (p0: string) => `[command] "${p0}"`;
   export const _watching_dir_ = (p0: string) => `[watch] "${p0}"`;
 }
@@ -60,6 +62,74 @@ export namespace Builder {
     _2_DEBUG,
   }
 
+  export let Dir = {
+    get Lib() {
+      return _dir_lib;
+    },
+    set Lib(path: string) {
+      _dir_lib = NODE_PATH.join(path);
+    },
+    get Out() {
+      return _dir_out;
+    },
+    set Out(path: string) {
+      _dir_out = NODE_PATH.join(path);
+    },
+    get Src() {
+      return _dir_src;
+    },
+    set Src(path: string) {
+      _dir_src = NODE_PATH.join(path);
+    },
+    get Tools() {
+      return _dir_tools;
+    },
+    set Tools(path: string) {
+      _dir_tools = NODE_PATH.join(path);
+    },
+  };
+
+  export function GetMode(): Builder.MODE {
+    return _mode;
+  }
+  export function SetMode(mode: Builder.MODE): void {
+    _mode = mode;
+  }
+
+  export function GetVerbosity(): Builder.VERBOSITY {
+    return _verbosity;
+  }
+  export function SetVerbosity(verbosity: Builder.VERBOSITY): void {
+    _verbosity = verbosity;
+  }
+
+  export function GetWatcherDelay(): number {
+    return _watcher_delay;
+  }
+  export function SetWatcherDelay(delay_ms: number): void {
+    _watcher_delay = delay_ms;
+  }
+
+  export function SetStartUpSteps(...steps: Builder.Step[]): void {
+    array__startup_steps = steps;
+  }
+  export function SetBeforeProcessingSteps(...steps: Builder.Step[]): void {
+    array__before_steps = steps;
+  }
+  export function SetProcessorModules(...modules: Builder.Processor[]): void {
+    array__processor_modules = modules;
+  }
+  export function SetAfterProcessingSteps(...steps: Builder.Step[]): void {
+    array__after_steps = steps;
+  }
+  export function SetCleanUpSteps(...steps: Builder.Step[]): void {
+    array__cleanup_steps = steps;
+  }
+
+  export async function Start(): Promise<void> {
+    await Init();
+  }
+
   export interface Processor {
     ProcessorName: string;
     onStartUp?: () => Promise<void>;
@@ -67,16 +137,13 @@ export namespace Builder {
     onRemove?: (files: Set<Builder.File>) => Promise<void>;
     onCleanUp?: () => Promise<void>;
   }
-
   export type ProcessorMethod = (file: Builder.File) => Promise<void>;
-
   export interface Step {
     StepName: string;
     onStartUp?: () => Promise<void>;
     onRun?: () => Promise<void>;
     onCleanUp?: () => Promise<void>;
   }
-
   export class File {
     static Get(path: string) {
       return map__path_to_file.get(path);
@@ -201,67 +268,6 @@ export namespace Builder {
       this.$data.text = text;
     }
   }
-
-  export let Dir = {
-    get Lib() {
-      return _dir_lib;
-    },
-    set Lib(path: string) {
-      _dir_lib = NODE_PATH.join(path);
-    },
-    get Out() {
-      return _dir_out;
-    },
-    set Out(path: string) {
-      _dir_out = NODE_PATH.join(path);
-    },
-    get Src() {
-      return _dir_src;
-    },
-    set Src(path: string) {
-      _dir_src = NODE_PATH.join(path);
-    },
-    get Tools() {
-      return _dir_tools;
-    },
-    set Tools(path: string) {
-      _dir_tools = NODE_PATH.join(path);
-    },
-  };
-
-  export function GetMode(): Builder.MODE {
-    return _mode;
-  }
-  export function SetMode(mode: Builder.MODE): void {
-    _mode = mode;
-  }
-
-  export function GetVerbosity(): Builder.VERBOSITY {
-    return _verbosity;
-  }
-  export function SetVerbosity(verbosity: Builder.VERBOSITY): void {
-    _verbosity = verbosity;
-  }
-
-  export function SetStartUpSteps(...steps: Builder.Step[]): void {
-    array__startup_steps = steps;
-  }
-  export function SetBeforeProcessingSteps(...steps: Builder.Step[]): void {
-    array__before_steps = steps;
-  }
-  export function SetProcessorModules(...modules: Builder.Processor[]): void {
-    array__processor_modules = modules;
-  }
-  export function SetAfterProcessingSteps(...steps: Builder.Step[]): void {
-    array__after_steps = steps;
-  }
-  export function SetCleanUpSteps(...steps: Builder.Step[]): void {
-    array__cleanup_steps = steps;
-  }
-
-  export async function Start(): Promise<void> {
-    await Init();
-  }
 }
 
 let _dir_lib = 'src/lib';
@@ -272,6 +278,7 @@ let _dir_tools = 'tools';
 let _channel = Logger('Builder').newChannel();
 let _mode = Builder.MODE.BUILD;
 let _verbosity = Builder.VERBOSITY._1_LOG;
+let _watcher_delay = 250;
 
 let array__startup_steps: Builder.Step[] = [];
 let array__before_steps: Builder.Step[] = [];
@@ -377,7 +384,7 @@ async function Async_ScanSourceFolder() {
 }
 
 function SetupWatcher() {
-  unwatch_source_directory = Cacher_Watch_Directory(Builder.Dir.Src, 250, async (added, deleted, modified) => {
+  unwatch_source_directory = Cacher_Watch_Directory(Builder.Dir.Src, Builder.GetWatcherDelay(), async (added, deleted, modified) => {
     if (quitting === false) {
       for (const path of added) {
         set__added_paths.add(path);
@@ -406,30 +413,43 @@ function SetupWatcher() {
   });
 }
 
+async function Async_StepHelper(
+  step: Builder.Step,
+  step_kind: 'StartUp' | 'BeforeProcessing' | 'AfterProcessing' | 'CleanUp',
+  method: 'onStartUp' | 'onRun' | 'onCleanUp',
+  //
+) {
+  try {
+    Log(_logs._step[method](step.StepName), Builder.VERBOSITY._2_DEBUG);
+    await step[method]?.();
+  } catch (error) {
+    Err(error, `Unhandled exception in (${step_kind}) "${step.StepName}" ${method}:`);
+    Core_Console_Error(`Unhandled exception in (${step_kind}) "${step.StepName}" ${method}:`);
+    throw error;
+  }
+}
+
 async function Async_StartUp() {
   _channel.newLine();
   Log(_logs._phase_begin_('StartUp'));
 
   // All Steps onStartUp
-  for (const step of [...array__startup_steps, ...array__before_steps, ...array__after_steps, ...array__cleanup_steps]) {
-    try {
-      Log(_logs._step_onstartup_(step.StepName), Builder.VERBOSITY._2_DEBUG);
-      await step.onStartUp?.();
-    } catch (error) {
-      Err(error, `Unhandled exception in ${step.StepName} onStartUp:`);
-      throw error;
-    }
+  for (const step of array__startup_steps) {
+    await Async_StepHelper(step, 'StartUp', 'onStartUp');
+  }
+  for (const step of array__before_steps) {
+    await Async_StepHelper(step, 'BeforeProcessing', 'onStartUp');
+  }
+  for (const step of array__after_steps) {
+    await Async_StepHelper(step, 'AfterProcessing', 'onStartUp');
+  }
+  for (const step of array__cleanup_steps) {
+    await Async_StepHelper(step, 'CleanUp', 'onStartUp');
   }
 
   // StartUp Steps onRun
   for (const step of array__startup_steps) {
-    try {
-      Log(_logs._step_onrun_(step.StepName), Builder.VERBOSITY._2_DEBUG);
-      await step.onRun?.();
-    } catch (error) {
-      Err(error, `Unhandled exception in ${step.StepName} onRun:`);
-      throw error;
-    }
+    await Async_StepHelper(step, 'StartUp', 'onRun');
   }
 
   // Processor Modules onStartUp
@@ -439,6 +459,7 @@ async function Async_StartUp() {
       await processor.onStartUp?.();
     } catch (error) {
       Err(error, `Unhandled exception in ${processor.ProcessorName} onStartUp:`);
+      Core_Console_Error(`Unhandled exception in ${processor.ProcessorName} onStartUp:`);
       throw error;
     }
   }
@@ -451,13 +472,7 @@ async function Async_BeforeSteps() {
   Log(_logs._phase_begin_('BeforeSteps'));
 
   for (const step of array__before_steps) {
-    try {
-      Log(_logs._step_onrun_(step.StepName), Builder.VERBOSITY._2_DEBUG);
-      await step.onRun?.();
-    } catch (error) {
-      Err(error, `Unhandled exception in ${step.StepName} onRun:`);
-      throw error;
-    }
+    await Async_StepHelper(step, 'BeforeProcessing', 'onRun');
   }
 
   Log(_logs._phase_end_('BeforeSteps'));
@@ -651,13 +666,7 @@ async function Async_AfterSteps() {
   Log(_logs._phase_begin_('AfterSteps'));
 
   for (const step of array__after_steps) {
-    try {
-      Log(_logs._step_onrun_(step.StepName), Builder.VERBOSITY._2_DEBUG);
-      await step.onRun?.();
-    } catch (error) {
-      Err(error, `Unhandled exception in ${step.StepName} onRun:`);
-      throw error;
-    }
+    await Async_StepHelper(step, 'AfterProcessing', 'onRun');
   }
 
   Log(_logs._phase_end_('AfterSteps'));
@@ -678,30 +687,28 @@ async function Async_CleanUp() {
       await processor.onCleanUp?.();
     } catch (error) {
       Err(error, `Unhandled exception in ${processor.ProcessorName} onCleanUp:`);
+      Core_Console_Error(`Unhandled exception in ${processor.ProcessorName} onCleanUp:`);
       throw new Error();
     }
   }
 
   // CleanUp Steps onRun
   for (const step of array__cleanup_steps) {
-    try {
-      Log(_logs._step_onrun_(step.StepName), Builder.VERBOSITY._2_DEBUG);
-      await step.onRun?.();
-    } catch (error) {
-      Err(error, `Unhandled exception in ${step.StepName} onRun:`);
-      throw new Error();
-    }
+    await Async_StepHelper(step, 'CleanUp', 'onRun');
   }
 
   // All Steps onCleanUp
-  for (const step of [...array__startup_steps, ...array__before_steps, ...array__after_steps, ...array__cleanup_steps]) {
-    try {
-      Log(_logs._step_oncleanup_(step.StepName), Builder.VERBOSITY._2_DEBUG);
-      await step.onCleanUp?.();
-    } catch (error) {
-      Err(error, `Unhandled exception in ${step.StepName} onCleanUp:`);
-      throw new Error();
-    }
+  for (const step of array__startup_steps) {
+    await Async_StepHelper(step, 'StartUp', 'onCleanUp');
+  }
+  for (const step of array__before_steps) {
+    await Async_StepHelper(step, 'BeforeProcessing', 'onCleanUp');
+  }
+  for (const step of array__after_steps) {
+    await Async_StepHelper(step, 'AfterProcessing', 'onCleanUp');
+  }
+  for (const step of array__cleanup_steps) {
+    await Async_StepHelper(step, 'CleanUp', 'onCleanUp');
   }
 
   // Release Locks
