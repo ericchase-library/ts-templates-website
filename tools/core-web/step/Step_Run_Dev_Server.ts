@@ -9,11 +9,11 @@ import { Logger } from '../../core/Logger.js';
 export let DEV_SERVER_HOST: string | undefined = undefined;
 
 /** An AfterProcessingStep for running the dev server. */
-export function Step_Dev_Server(): Builder.Step {
+export function Step_Run_Dev_Server(): Builder.Step {
   return new Class();
 }
 class Class implements Builder.Step {
-  StepName = Step_Dev_Server.name;
+  StepName = Step_Run_Dev_Server.name;
   channel = Logger(this.StepName).newChannel();
 
   hotreload_enabled = true;
