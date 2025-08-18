@@ -2,8 +2,8 @@ import { BunPlatform_Glob_Match } from '../../../src/lib/ericchase/BunPlatform_G
 import { NODE_PATH } from '../../../src/lib/ericchase/NodePlatform.js';
 import { NodePlatform_PathObject_Relative_Class } from '../../../src/lib/ericchase/NodePlatform_PathObject_Relative_Class.js';
 import { Builder } from '../../core/Builder.js';
+import { HTML_UTIL } from '../../core/bundle/html-util/html-util.js';
 import { Logger } from '../../core/Logger.js';
-import { HTML_UTIL } from '../bundle/htmlutil.js';
 
 export function Processor_HTML_Custom_Component_Processor(): Builder.Processor {
   return new Class();

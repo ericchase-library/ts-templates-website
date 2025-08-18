@@ -1,5 +1,4 @@
 import { Database } from 'bun:sqlite';
-import { default as xxhash } from 'xxhash-wasm';
 import { Async_BunPlatform_File_Read_Bytes } from '../../src/lib/ericchase/BunPlatform_File_Read_Bytes.js';
 import { Core_Console_Error } from '../../src/lib/ericchase/Core_Console_Error.js';
 import { Core_Promise_Orphan } from '../../src/lib/ericchase/Core_Promise_Orphan.js';
@@ -9,7 +8,6 @@ import { Async_NodePlatform_Path_Get_Stats } from '../../src/lib/ericchase/NodeP
 
 // constants
 
-const { h64Raw } = await xxhash();
 export const cachepath = NODE_PATH.join('cache');
 if ((await Async_NodePlatform_Directory_Create(cachepath, true)).value !== true) {
   throw 'Could not create cache database path.';
@@ -489,7 +487,7 @@ export class FILESTATS {
   static async GetHash(path: string): Promise<bigint> {
     const { error, value: bytes } = await Async_BunPlatform_File_Read_Bytes(path);
     if (bytes !== undefined) {
-      return h64Raw(bytes);
+      return Bun.hash.wyhash(bytes);
     }
     throw error;
   }

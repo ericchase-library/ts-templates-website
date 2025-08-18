@@ -1,7 +1,7 @@
-import AdmZip from 'adm-zip';
 import { Async_NodePlatform_Path_Get_Stats } from '../../../src/lib/ericchase/NodePlatform_Path_Get_Stats.js';
 import { Builder } from '../../core/Builder.js';
 import { Logger } from '../../core/Logger.js';
+import { ZIP_UTIL } from '../bundle/zip-util/zip-util.js';
 
 export function Step_FS_Archive_Directory(config: Config): Builder.Step {
   return new Class(config);
@@ -13,9 +13,9 @@ class Class implements Builder.Step {
   constructor(readonly config: Config) {}
   async onRun(): Promise<void> {
     try {
-      const zip_instance = new AdmZip();
-      zip_instance.addLocalFolder(this.config.dirpath);
-      zip_instance.writeZip(this.config.outfile);
+      const zip = ZIP_UTIL.Instance();
+      zip.addLocalFolder(this.config.dirpath);
+      zip.writeZip(this.config.outfile);
       const { error, value: stats } = await Async_NodePlatform_Path_Get_Stats(this.config.outfile);
       if (stats !== undefined) {
         if (stats.isFile() === true) {
