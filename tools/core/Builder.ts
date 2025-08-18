@@ -14,9 +14,7 @@ import { NodePlatform_PathObject_Relative_Class } from '../../src/lib/ericchase/
 import { NodePlatform_Shell_Keys } from '../../src/lib/ericchase/NodePlatform_Shell_Keys.js';
 import { NodePlatform_Shell_StdIn_AddListener, NodePlatform_Shell_StdIn_LockReader, NodePlatform_Shell_StdIn_StartReaderInRawMode } from '../../src/lib/ericchase/NodePlatform_Shell_StdIn.js';
 import { CACHELOCK, Cacher_Watch_Directory, FILESTATS } from './Cacher.js';
-import { AddLoggerOutputDirectory, Logger, WaitForLogger } from './Logger.js';
-
-await AddLoggerOutputDirectory('cache');
+import { Logger, WaitForLogger } from './Logger.js';
 
 namespace _errors {
   export const _dependency_cycle_ = (p0: string, p1: string) => `Dependency Cycle: Between upstream "${p0}" and downstream "${p1}"!`;
