@@ -21,7 +21,7 @@ Builder.SetStartUpSteps(
       Step_FS_Mirror_Directory({
         from_path: NODE_PATH.join(template_path, 'tools/' + dir),
         to_path: NODE_PATH.join(Builder.Dir.Tools, dir),
-        include_patterns: ['**/*'],
+        include_patterns: ['**'],
       }),
     ),
   ),

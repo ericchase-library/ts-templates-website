@@ -828,7 +828,7 @@ describe(BunPlatform_Glob_Match.name, async () => {
   }
 
   runner['[01] path is directory and empty'](async (path) => {
-    await fn(path, '**/*', true);
+    await fn(path, '**', true);
   });
 });
 
@@ -838,14 +838,14 @@ describe(BunPlatform_Glob_Match_Ex.name, async () => {
   }
 
   runner['[01] path is directory and empty'](async (path) => {
-    await fn(path, ['**/*'], [], true);
-    await fn(path, ['**/*'], ['**/case_directory'], false);
+    await fn(path, ['**'], [], true);
+    await fn(path, ['**'], ['**/case_directory'], false);
   });
 });
 
 describe(Async_BunPlatform_Glob_Scan_Ex.name, async () => {
   async function fn(path: string, expected: string[]) {
-    const entries = Array.from(await Async_BunPlatform_Glob_Scan_Ex(path, ['**/*'], [], { absolute_paths: false, only_files: false }));
+    const entries = Array.from(await Async_BunPlatform_Glob_Scan_Ex(path, ['**'], [], { absolute_paths: false, only_files: false }));
     for (const entry of entries) {
       expect(entry).toBeOneOf(expected);
     }
@@ -897,7 +897,7 @@ describe(Async_BunPlatform_Glob_Scan_Ex.name, async () => {
 
 describe(Async_BunPlatform_Glob_Scan_Generator.name, async () => {
   async function fn(path: string, expected: string[]) {
-    const entries = await Array.fromAsync(Async_BunPlatform_Glob_Scan_Generator(path, '**/*', { absolute_paths: false, only_files: false }));
+    const entries = await Array.fromAsync(Async_BunPlatform_Glob_Scan_Generator(path, '**', { absolute_paths: false, only_files: false }));
     for (const entry of entries) {
       expect(entry).toBeOneOf(expected);
     }
