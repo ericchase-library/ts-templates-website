@@ -20,12 +20,12 @@ class Class implements Builder.Step {
     this.steps = [
       // Library
       Step_FS_Mirror_Directory({
-        include_patterns: ['**/*'],
+        include_patterns: ['**'],
         from_path: NODE_PATH.join(this.config.from_path, Builder.Dir.Lib, 'ericchase'),
         to_path: NODE_PATH.join(this.config.to_path, Builder.Dir.Lib, 'ericchase'),
       }),
       Step_FS_Copy_Files({
-        include_patterns: ['**/*'],
+        include_patterns: ['**'],
         from_path: NODE_PATH.join(this.config.from_path, Builder.Dir.Lib, 'server'),
         to_path: NODE_PATH.join(this.config.to_path, Builder.Dir.Lib, 'server'),
         overwrite: true,
@@ -36,7 +36,7 @@ class Class implements Builder.Step {
       if (await Async_NodePlatform_Path_Is_Directory(NODE_PATH.join(this.config.from_path, subpath))) {
         this.steps.push(
           Step_FS_Mirror_Directory({
-            include_patterns: ['**/*'],
+            include_patterns: ['**'],
             from_path: NODE_PATH.join(this.config.from_path, subpath),
             to_path: NODE_PATH.join(this.config.to_path, subpath),
           }),

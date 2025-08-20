@@ -100,6 +100,7 @@ class Class implements Builder.Processor {
       const results = await ProcessBuildResults(
         Bun.build({
           define,
+          drop: this.config.drop,
           entrypoints: [file.src_path],
           env: this.config.env,
           external: this.config.external,
@@ -162,6 +163,7 @@ class Class implements Builder.Processor {
       const results = await ProcessBuildResults(
         Bun.build({
           define,
+          drop: this.config.drop,
           entrypoints: [file.src_path],
           env: this.config.env,
           format: 'iife',
@@ -204,8 +206,19 @@ class Class implements Builder.Processor {
 }
 type Options = Parameters<typeof Bun.build>[0];
 interface Config {
-  /** @default undefined */
+  /**
+   * Let's you define key value pairs as-is. The processor will call
+   * `JSON.stringify(value)` for you.
+   * @default undefined
+   */
   define?: () => Record<string, any>;
+  /**
+   * Can only drop built-in and unbounded global identifiers, such as
+   * `console.log` and `debugger`. Cannot drop any identifier that is defined
+   * in the final bundle. The only real use case I've seen for this is removing
+   * debugger statements and logging.
+   * @default undefined */
+  drop?: Options['drop'];
   /** @default 'disable' */
   env?: Options['env'];
   /**

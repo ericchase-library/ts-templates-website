@@ -1,25 +1,25 @@
 interface Config {
   options?: {
+    /** @default undefined */
     attributeFilter?: string[];
+    /** @default true */
     attributeOldValue?: boolean;
+    /** @default true */
     subtree?: boolean;
   };
+  /** @default document.documentElement */
   source?: Node;
 }
 
 export class Class_WebPlatform_DOM_Attribute_Observer_Class {
   constructor(config: Config) {
     config.options ??= {};
-    config.options.attributeOldValue ??= true;
-    config.options.subtree ??= true;
-    config.source ??= document.documentElement;
-
     this.mutationObserver = new MutationObserver((mutationRecords: MutationRecord[]) => {
       for (const record of mutationRecords) {
         this.send(record);
       }
     });
-    this.mutationObserver.observe(config.source, {
+    this.mutationObserver.observe(config.source ?? document.documentElement, {
       attributes: true,
       attributeFilter: config.options.attributeFilter,
       attributeOldValue: config.options.attributeOldValue ?? true,

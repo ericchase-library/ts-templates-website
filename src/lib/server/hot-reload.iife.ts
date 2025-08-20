@@ -1,5 +1,13 @@
+/**
+ * To use this, add a classic script tag to any HTML file that should be
+ * hot-reloaded. The tag should look like this:
+ *
+ * <script src=".../lib/server/hot-reload.iife.ts"></script>
+ *
+ * Replace the `...` with a proper relative path.
+ */
 import { Core_Console_Error } from '../ericchase/Core_Console_Error.js';
-import { SERVERHOST } from './constants.js';
+import { SERVERHOST } from './info.js';
 let socket: WebSocket | undefined = undefined;
 function cleanup() {
   if (socket) {
@@ -34,6 +42,4 @@ async function async_reloadOnServerRestart(serverhost: string) {
     setTimeout(() => async_reloadOnServerRestart(serverhost), 100);
   }
 }
-export function EnableHotReload(serverhost?: string) {
-  startup(serverhost ?? SERVERHOST);
-}
+startup(SERVERHOST());

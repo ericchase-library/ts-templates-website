@@ -366,7 +366,7 @@ async function Init() {
 async function Async_ScanSourceFolder() {
   Log(_logs._scanning_dir_(Builder.Dir.Src));
   for (const subpath of await Array.fromAsync(
-    new Bun.Glob('**/*').scan({
+    new Bun.Glob('**').scan({
       absolute: false,
       cwd: Builder.Dir.Src,
       dot: true,

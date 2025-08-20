@@ -530,7 +530,7 @@ export function Cacher_Watch_Directory(
   let timer_id: Parameters<typeof clearTimeout>[0] = undefined;
   let abort = false;
 
-  const glob = new Bun.Glob('**/*');
+  const glob = new Bun.Glob('**');
 
   async function scan() {
     try {

@@ -45,7 +45,7 @@ class Class implements Builder.Step {
       }
     }
     const set_from = await Async_BunPlatform_Glob_Scan_Ex(this.config.from_path, this.config.include_patterns ?? ['*'], this.config.exclude_patterns ?? []);
-    const set_to = await Async_BunPlatform_Glob_Scan_Ex(this.config.to_path, ['**/*'], this.config.exclude_patterns ?? []);
+    const set_to = await Async_BunPlatform_Glob_Scan_Ex(this.config.to_path, ['**'], this.config.exclude_patterns ?? []);
     // copy all files that are missing
     for (const path of set_from.difference(set_to)) {
       const from = NODE_PATH.join(this.config.from_path, path);
@@ -68,7 +68,7 @@ class Class implements Builder.Step {
       }
     }
     // remove all files that shouldn't be
-    for (const path of await Async_BunPlatform_Glob_Scan_Ex(this.config.to_path, ['**/*'], [...set_from, ...(this.config.exclude_patterns ?? [])])) {
+    for (const path of await Async_BunPlatform_Glob_Scan_Ex(this.config.to_path, ['**'], [...set_from, ...(this.config.exclude_patterns ?? [])])) {
       const to = NODE_PATH.join(this.config.to_path, path);
       if ((await Async_NodePlatform_File_Delete(to)).value === true) {
         FILESTATS.RemoveStats(to);

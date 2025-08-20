@@ -19,8 +19,8 @@ class Class implements Builder.Step {
       Step_FS_Mirror_Directory({
         from_path: NODE_PATH.join(this.config.from_path, 'server'),
         to_path: NODE_PATH.join(this.config.to_path, 'server'),
-        include_patterns: ['**/*'],
-        exclude_patterns: ['.git/**/*', 'node_modules/**/*', 'public/**/*'],
+        include_patterns: ['**'],
+        exclude_patterns: ['.git/**', 'node_modules/**', 'public/**'],
       }),
     ];
 

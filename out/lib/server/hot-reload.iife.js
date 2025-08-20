@@ -1,33 +1,35 @@
 (() => {
   // src/lib/ericchase/Core_Console_Error.ts
   function Core_Console_Error(...items) {
-    console["error"](...items);
+    console['error'](...items);
   }
 
-  // src/lib/server/constants.ts
-  var SERVERHOST = CheckENV() ?? CheckCurrentScript() ?? CheckMetaUrl() ?? CheckError() ?? window.location.host;
-  function CheckENV() {
-    try {
-      return process.env.SERVERHOST;
-    } catch {}
-  }
-  function CheckCurrentScript() {
-    try {
-      return new URL(document.currentScript.src).host;
-    } catch {}
-  }
-  function CheckMetaUrl() {
-    try {
-      return new URL(undefined).host;
-    } catch {}
-  }
-  function CheckError() {
-    try {
-      return new URL(new Error().fileName).host;
-    } catch {}
+  // src/lib/server/info.ts
+  function SERVERHOST() {
+    const CheckENV = () => {
+      try {
+        return process.env.SERVERHOST;
+      } catch {}
+    };
+    const CheckCurrentScript = () => {
+      try {
+        return new URL(document.currentScript.src).host;
+      } catch {}
+    };
+    const CheckMetaUrl = () => {
+      try {
+        return new URL(undefined).host;
+      } catch {}
+    };
+    const CheckError = () => {
+      try {
+        return new URL(new Error().fileName).host;
+      } catch {}
+    };
+    return CheckENV() ?? CheckCurrentScript() ?? CheckMetaUrl() ?? CheckError() ?? window.location.host;
   }
 
-  // src/lib/server/enable-hot-reload.ts
+  // src/lib/server/hot-reload.iife.ts
   var socket = undefined;
   function cleanup() {
     if (socket) {
@@ -39,12 +41,12 @@
   }
   function startup(serverhost) {
     try {
-      socket = new WebSocket("ws://" + serverhost);
+      socket = new WebSocket('ws://' + serverhost);
       if (socket !== undefined) {
         socket.onclose = () => cleanup();
         socket.onerror = () => cleanup();
         socket.onmessage = (event) => {
-          if (event.data === "reload") {
+          if (event.data === 'reload') {
             socket?.close();
             setTimeout(() => async_reloadOnServerRestart(serverhost), 100);
           }
@@ -62,10 +64,5 @@
       setTimeout(() => async_reloadOnServerRestart(serverhost), 100);
     }
   }
-  function EnableHotReload(serverhost) {
-    startup(serverhost ?? SERVERHOST);
-  }
-
-  // src/lib/server/enable-hot-reload.iife.ts
-  EnableHotReload();
+  startup(SERVERHOST());
 })();

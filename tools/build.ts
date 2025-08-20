@@ -1,7 +1,8 @@
-import { BunPlatform_Args_Has } from '../src/lib/ericchase/BunPlatform_Args_Has.js';
+import { BunPlatform_Argv_Includes } from '../src/lib/ericchase/BunPlatform_Argv_Includes.js';
 import { Step_Dev_Format } from './core-dev/step/Step_Dev_Format.js';
 import { Step_Dev_Project_Update_Config } from './core-dev/step/Step_Dev_Project_Update_Config.js';
 import { Processor_HTML_Custom_Component_Processor } from './core-web/processor/Processor_HTML_Custom_Component_Processor.js';
+import { Processor_HTML_Remove_HotReload_On_Build } from './core-web/processor/Processor_HTML_Remove_HotReload_On_Build.js';
 import { Step_Run_Dev_Server } from './core-web/step/Step_Run_Dev_Server.js';
 import { Builder } from './core/Builder.js';
 import { Processor_Set_Writable } from './core/processor/Processor_Set_Writable.js';
@@ -13,7 +14,7 @@ import { Step_FS_Clean_Directory } from './core/step/Step_FS_Clean_Directory.js'
 // await AddLoggerOutputDirectory('cache');
 
 // Use command line arguments to set developer mode.
-if (BunPlatform_Args_Has('--dev')) {
+if (BunPlatform_Argv_Includes('--dev')) {
   Builder.SetMode(Builder.MODE.DEV);
 }
 // Set the logging verbosity
@@ -25,7 +26,6 @@ Builder.SetStartUpSteps(
   Step_Bun_Run({ cmd: ['bun', 'update', '--latest'], showlogs: false }),
   Step_Bun_Run({ cmd: ['bun', 'install'], showlogs: false }),
   Step_FS_Clean_Directory(Builder.Dir.Out),
-  Step_Dev_Format({ showlogs: false }),
   //
 );
 
@@ -46,6 +46,7 @@ Builder.SetBeforeProcessingSteps();
 // The processors are run for every file that added them during every
 // processing phase.
 Builder.SetProcessorModules(
+  Processor_HTML_Remove_HotReload_On_Build(),
   // Process the HTML custom components.
   Processor_HTML_Custom_Component_Processor(),
   // Bundle the IIFE scripts and module scripts.
@@ -66,6 +67,9 @@ Builder.SetAfterProcessingSteps(
 );
 
 // These steps are run during the cleanup phase only.
-Builder.SetCleanUpSteps();
+Builder.SetCleanUpSteps(
+  Step_Dev_Format({ showlogs: false }),
+  //
+);
 
 await Builder.Start();
