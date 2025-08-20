@@ -14,7 +14,7 @@ class Class implements Builder.Step {
     this.config.showlogs ??= true;
   }
   async onRun(): Promise<void> {
-    await Step_Bun_Run({ cmd: ['bunx', 'prettier', '--write', '.'], showlogs: this.config.showlogs }).onRun?.();
+    await Builder.ExecuteStep(Step_Bun_Run({ cmd: ['bunx', 'prettier', '--write', '.'], showlogs: this.config.showlogs }));
   }
 }
 interface Config {

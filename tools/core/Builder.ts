@@ -124,6 +124,11 @@ export namespace Builder {
     array__cleanup_steps = steps;
   }
 
+  export async function ExecuteStep(step: Builder.Step): Promise<void> {
+    await Async_StepHelper(step, 'ExecuteStep', 'onStartUp');
+    await Async_StepHelper(step, 'ExecuteStep', 'onRun');
+    await Async_StepHelper(step, 'ExecuteStep', 'onCleanUp');
+  }
   export async function Start(): Promise<void> {
     await Init();
   }
@@ -413,7 +418,7 @@ function SetupWatcher() {
 
 async function Async_StepHelper(
   step: Builder.Step,
-  step_kind: 'StartUp' | 'BeforeProcessing' | 'AfterProcessing' | 'CleanUp',
+  step_kind: 'StartUp' | 'BeforeProcessing' | 'AfterProcessing' | 'CleanUp' | 'ExecuteStep',
   method: 'onStartUp' | 'onRun' | 'onCleanUp',
   //
 ) {
