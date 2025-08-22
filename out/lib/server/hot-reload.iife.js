@@ -43,26 +43,43 @@
     try {
       socket = new WebSocket('ws://' + serverhost);
       if (socket !== undefined) {
-        socket.onclose = () => cleanup();
-        socket.onerror = () => cleanup();
+        socket.onclose = (event) => {
+          switch (event.code) {
+            case 1006:
+              reloadOnServerRestart(serverhost);
+              break;
+          }
+          cleanup();
+        };
+        socket.onerror = (event) => {};
         socket.onmessage = (event) => {
           if (event.data === 'reload') {
-            socket?.close();
-            setTimeout(() => async_reloadOnServerRestart(serverhost), 100);
+            reloadOnServerRestart(serverhost);
           }
         };
+        socket.onopen = (event) => {};
       }
     } catch (error) {
       Core_Console_Error(error);
     }
   }
-  async function async_reloadOnServerRestart(serverhost) {
-    try {
-      await fetch(serverhost);
-      window.location.reload();
-    } catch {
-      setTimeout(() => async_reloadOnServerRestart(serverhost), 100);
-    }
+  function reloadOnServerRestart(serverhost, options) {
+    const delay = options?.delay ?? 500;
+    const retry_count = options?.retry_count ?? 20;
+    socket?.close();
+    let count = 0;
+    const reload = async () => {
+      try {
+        count++;
+        await fetch(serverhost);
+        window.location.reload();
+      } catch {
+        if (count < retry_count) {
+          setTimeout(reload, delay);
+        }
+      }
+    };
+    setTimeout(reload, delay);
   }
   startup(SERVERHOST());
 })();

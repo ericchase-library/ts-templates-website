@@ -131,7 +131,7 @@ class Class implements Builder.Processor {
               file.setText(results.bundletext);
             }
           } catch (error) {
-            this.channel.error(error, 'Remap Error');
+            this.channel.error(error, `Remap Error, File: ${file.src_path}`);
           }
         } else {
           file.setText(results.bundletext);
@@ -144,12 +144,12 @@ class Class implements Builder.Processor {
             // handled above
             break;
           default:
-            await Async_BunPlatform_File_Write_Text(NODE_PATH.join(NODE_PATH.dirname(file.out_path), artifact.path), await artifact.blob.text());
+            await Async_BunPlatform_File_Write_Text(NODE_PATH.join(NODE_PATH.parse(file.out_path).dir, artifact.path), await artifact.blob.text());
             break;
         }
       }
     } catch (error) {
-      this.channel.error(error, 'Module Bundle Error');
+      this.channel.error(error, `Module Bundle Error, File: ${file.src_path}`);
     }
   }
   async onProcessIIFEScript(file: Builder.File): Promise<void> {
@@ -195,12 +195,12 @@ class Class implements Builder.Processor {
             // handled above
             break;
           default:
-            await Async_BunPlatform_File_Write_Text(NODE_PATH.join(NODE_PATH.dirname(file.out_path), artifact.path), await artifact.blob.text());
+            await Async_BunPlatform_File_Write_Text(NODE_PATH.join(NODE_PATH.parse(file.out_path).dir, artifact.path), await artifact.blob.text());
             break;
         }
       }
     } catch (error) {
-      this.channel.error(error, 'IIFE Bundle Error');
+      this.channel.error(error, `IIFE Bundle Error, File: ${file.src_path}`);
     }
   }
 }
@@ -213,10 +213,10 @@ interface Config {
    */
   define?: () => Record<string, any>;
   /**
-   * Can only drop built-in and unbounded global identifiers, such as
-   * `console.log` and `debugger`. Cannot drop any identifier that is defined
-   * in the final bundle. The only real use case I've seen for this is removing
-   * debugger statements and logging.
+   * Can only drop built-in and unbounded global identifiers, such as `console`
+   * and `debugger`. Cannot drop any identifier that is defined in the final
+   * bundle. The only real use case I've seen for this is removing debugger
+   * statements and logging.
    * @default undefined */
   drop?: Options['drop'];
   /** @default 'disable' */
@@ -347,26 +347,8 @@ function RemapModuleImports(filepath: string, filetext: string, external?: strin
            * "../lib/a.js" -> "./src/directory/../lib/a.js" -> "./src/lib/a.js".
            *
            */
-          let resolved_path = '';
-          try {
-            if (import_statement.path.startsWith('.')) {
-              // The import.meta.resolve API uses the current script file (this one) for resolving paths, which isn't what we want.
-              // Instead, we'll use Node's resolve API to resolve the relative path using the source file's directory.
-              resolved_path = NODE_PATH.resolve(NODE_PATH.dirname(source_comment.path), import_statement.path);
-            } else {
-              // Non-relative can be resolved using the import.meta.resolve API. If the file/module does not actually exist, an error will be thrown.
-              // Node's fileURLToPath API will convert the resulting URL path into a valid file path.
-              try {
-                const url = new URL(import.meta.resolve(import_statement.path));
-                if (url.protocol === 'file:') {
-                  resolved_path = NODE_URL.fileURLToPath(url);
-                }
-              } catch {}
-            }
-          } catch (error: any) {
-            throw new Error(import_statement.path + '\n' + error);
-          }
-          if (resolved_path.startsWith(srcpath)) {
+          const resolved_path = ResolveImportPath(source_comment.path, import_statement.path);
+          if (resolved_path?.startsWith(srcpath)) {
             // Convert resolved path into relative path
             // Import paths generally follow POSIX path rules, so we can convert to a POSIX relative path object here
             let relative_path_object = NodePlatform_PathObject_Relative_Class(NODE_PATH.relative(dirpath, resolved_path)).toPosix();
@@ -387,5 +369,25 @@ function RemapModuleImports(filepath: string, filetext: string, external?: strin
       array__bundletext_parts.push(filetext.slice(index__bundletext_parts));
       return array__bundletext_parts.join('');
     }
+  }
+}
+function ResolveImportPath(source_path: string, import_path: string): string | undefined {
+  try {
+    if (import_path.startsWith('.')) {
+      // The import.meta.resolve API uses the current script file (this one) for resolving paths, which isn't what we want.
+      // Instead, we'll use Node's resolve API to resolve the relative path using the source file's directory.
+      return NODE_PATH.resolve(NODE_PATH.parse(source_path).dir, import_path);
+    } else {
+      // Non-relative can be resolved using the import.meta.resolve API. If the file/module does not actually exist, an error will be thrown.
+      // Node's fileURLToPath API will convert the resulting URL path into a valid file path.
+      try {
+        const url = new URL(import.meta.resolve(import_path));
+        if (url.protocol === 'file:') {
+          return NODE_URL.fileURLToPath(url);
+        }
+      } catch {}
+    }
+  } catch (error: any) {
+    throw new Error(import_path + '\n' + error);
   }
 }

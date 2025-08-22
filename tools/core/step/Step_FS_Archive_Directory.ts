@@ -22,11 +22,10 @@ class Class implements Builder.Step {
           this.channel.log(`ZIP: [${stats.size}] ${this.config.outfile}`);
         }
       } else {
-        throw error;
+        this.channel.error(error, `Error getting path stats for "${this.config.outfile}".`);
       }
     } catch (error) {
-      this.channel.log(`Error while creating archive for "${this.config.dirpath}".`);
-      throw error;
+      this.channel.error(error, `Error creating archive for "${this.config.dirpath}".`);
     }
   }
 }

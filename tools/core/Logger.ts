@@ -60,8 +60,12 @@ export class ClassLogger {
     readonly $channel: string,
     readonly $name: string,
   ) {}
-  error(error: any, ...items: any[]) {
-    addlog(Kind.Err, this, items, error);
+  error(...items: any[]) {
+    if (items[0] instanceof Error) {
+      addlog(Kind.Err, this, items.slice(1), items[0]);
+    } else {
+      addlog(Kind.Err, this, items);
+    }
   }
   errorNotEmpty(...items: any[]) {
     if (items[0] instanceof Error) {

@@ -65,8 +65,6 @@ export async function Async_BunPlatform_Extract_Env_From_Dir(
     cmd.push(name);
   }
 
-  console.log(cmd);
-
   const p0 = Bun.spawn(cmd, { cwd: options.cwd, stdout: 'pipe', stderr: 'pipe' });
   await p0.exited;
   const stderr = await new Response(p0.stderr).text();

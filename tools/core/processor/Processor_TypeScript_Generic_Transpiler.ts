@@ -65,7 +65,7 @@ class Class implements Builder.Processor {
       }).transform(text);
       file.setText(transpiled_text);
     } catch (error) {
-      this.channel.error(`ERROR: Builder.Processor: ${__filename}, File: ${file.src_path}`, error);
+      this.channel.error(error, `Transpiler Error, File: ${file.src_path}`);
     }
   }
 }

@@ -32,7 +32,7 @@ class Class implements Builder.Step {
       }
       this.channel.log(`End: "${this.config.cmd.join(' ')}" | Directory: "${this.config.dir}"`);
     } catch (error) {
-      this.channel.error(`Command: "${this.config.cmd.join(' ')}" | Directory: "${this.config.dir}"`, error);
+      this.channel.error(error, `Command: "${this.config.cmd.join(' ')}" | Directory: "${this.config.dir}"`);
     }
   }
 }

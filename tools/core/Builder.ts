@@ -124,6 +124,22 @@ export namespace Builder {
     array__cleanup_steps = steps;
   }
 
+  export function AddStartUpSteps(...steps: Builder.Step[]): void {
+    array__startup_steps.push(...steps);
+  }
+  export function AddBeforeProcessingSteps(...steps: Builder.Step[]): void {
+    array__before_steps.push(...steps);
+  }
+  export function AddProcessorModules(...modules: Builder.Processor[]): void {
+    array__processor_modules.push(...modules);
+  }
+  export function AddAfterProcessingSteps(...steps: Builder.Step[]): void {
+    array__after_steps.push(...steps);
+  }
+  export function AddCleanUpSteps(...steps: Builder.Step[]): void {
+    array__cleanup_steps.push(...steps);
+  }
+
   export async function ExecuteStep(step: Builder.Step): Promise<void> {
     await Async_StepHelper(step, 'ExecuteStep', 'onStartUp');
     await Async_StepHelper(step, 'ExecuteStep', 'onRun');
