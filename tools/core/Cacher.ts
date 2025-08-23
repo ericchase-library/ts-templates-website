@@ -1,5 +1,6 @@
 import { Database } from 'bun:sqlite';
 import { Async_BunPlatform_File_Read_Bytes } from '../../src/lib/ericchase/BunPlatform_File_Read_Bytes.js';
+import { BunPlatform_Glob_Match } from '../../src/lib/ericchase/BunPlatform_Glob_Match.js';
 import { Core_Console_Error } from '../../src/lib/ericchase/Core_Console_Error.js';
 import { Core_Promise_Orphan } from '../../src/lib/ericchase/Core_Promise_Orphan.js';
 import { NODE_PATH } from '../../src/lib/ericchase/NodePlatform.js';
@@ -550,7 +551,9 @@ export function Cacher_Watch_Directory(
           throwErrorOnBrokenSymlink: false,
         }),
       )) {
-        added_set.add(NODE_PATH.join(path, subpath));
+        if (BunPlatform_Glob_Match(subpath, '**/node_modules/**') !== true) {
+          added_set.add(NODE_PATH.join(path, subpath));
+        }
       }
 
       const query_results = FILESTATS.QueryStatsLike(path);

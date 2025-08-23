@@ -16,7 +16,7 @@ class Class implements Builder.Step {
     for (const path of this.dirpaths) {
       if ((await Async_NodePlatform_Directory_Delete(path, true)).value === true) {
         if ((await Async_NodePlatform_Directory_Create(path, true)).value === true) {
-          this.channel.log(`Cleaned "${path}"`);
+          this.channel.log(`Clean "${path}"`);
         }
       }
     }

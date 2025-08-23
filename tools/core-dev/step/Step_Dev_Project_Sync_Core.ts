@@ -21,24 +21,24 @@ class Class implements Builder.Step {
       // Library
       Step_FS_Mirror_Directory({
         include_patterns: ['**'],
-        from_path: NODE_PATH.join(this.config.from_path, Builder.Dir.Lib, 'ericchase'),
-        to_path: NODE_PATH.join(this.config.to_path, Builder.Dir.Lib, 'ericchase'),
+        from_dir: NODE_PATH.join(this.config.from_dir, Builder.Dir.Lib, 'ericchase'),
+        into_dir: NODE_PATH.join(this.config.into_dir, Builder.Dir.Lib, 'ericchase'),
       }),
       Step_FS_Copy_Files({
         include_patterns: ['**'],
-        from_path: NODE_PATH.join(this.config.from_path, Builder.Dir.Lib, 'server'),
-        to_path: NODE_PATH.join(this.config.to_path, Builder.Dir.Lib, 'server'),
+        from_dir: NODE_PATH.join(this.config.from_dir, Builder.Dir.Lib, 'server'),
+        into_dir: NODE_PATH.join(this.config.into_dir, Builder.Dir.Lib, 'server'),
         overwrite: true,
       }),
     ];
     // Core Tools
-    for await (const subpath of Async_BunPlatform_Glob_Scan_Generator(this.config.from_path, `${Builder.Dir.Tools}/*`, { only_files: false })) {
-      if (await Async_NodePlatform_Path_Is_Directory(NODE_PATH.join(this.config.from_path, subpath))) {
+    for await (const subpath of Async_BunPlatform_Glob_Scan_Generator(this.config.from_dir, `${Builder.Dir.Tools}/*`, { only_files: false })) {
+      if (await Async_NodePlatform_Path_Is_Directory(NODE_PATH.join(this.config.from_dir, subpath))) {
         this.steps.push(
           Step_FS_Mirror_Directory({
             include_patterns: ['**'],
-            from_path: NODE_PATH.join(this.config.from_path, subpath),
-            to_path: NODE_PATH.join(this.config.to_path, subpath),
+            from_dir: NODE_PATH.join(this.config.from_dir, subpath),
+            into_dir: NODE_PATH.join(this.config.into_dir, subpath),
           }),
         );
       }
@@ -72,6 +72,6 @@ class Class implements Builder.Step {
   }
 }
 interface Config {
-  from_path: string;
-  to_path: string;
+  from_dir: string;
+  into_dir: string;
 }

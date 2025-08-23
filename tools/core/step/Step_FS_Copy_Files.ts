@@ -18,47 +18,47 @@ class Class implements Builder.Step {
   async onStartUp(): Promise<void> {
     this.config.exclude_patterns ??= [];
     this.config.include_patterns ??= ['*'];
-    this.config.from_path = NODE_PATH.join(this.config.from_path);
-    this.config.to_path = NODE_PATH.join(this.config.to_path);
+    this.config.from_dir = NODE_PATH.join(this.config.from_dir);
+    this.config.into_dir = NODE_PATH.join(this.config.into_dir);
     this.config.overwrite ??= false;
   }
   async onRun(): Promise<void> {
-    if (this.config.from_path === this.config.to_path) {
+    if (this.config.from_dir === this.config.into_dir) {
       // same directory, skip
       return;
     }
     {
-      const { error, value } = await Async_NodePlatform_Path_Get_Stats(this.config.from_path);
+      const { error, value } = await Async_NodePlatform_Path_Get_Stats(this.config.from_dir);
       if (value === undefined) {
         throw error;
       }
     }
     {
-      const { error, value } = await Async_NodePlatform_Directory_Create(this.config.to_path, true);
+      const { error, value } = await Async_NodePlatform_Directory_Create(this.config.into_dir, true);
       if (value === undefined) {
         throw error;
       }
     }
-    const set_from = await Async_BunPlatform_Glob_Scan_Ex(this.config.from_path, this.config.include_patterns ?? ['*'], this.config.exclude_patterns ?? []);
-    const set_to = await Async_BunPlatform_Glob_Scan_Ex(this.config.to_path, this.config.include_patterns ?? ['*'], this.config.exclude_patterns ?? []);
+    const set_from = await Async_BunPlatform_Glob_Scan_Ex(this.config.from_dir, this.config.include_patterns ?? [], this.config.exclude_patterns ?? []);
+    const set_to = await Async_BunPlatform_Glob_Scan_Ex(this.config.into_dir, this.config.include_patterns ?? [], this.config.exclude_patterns ?? []);
     // copy all files that are missing
     for (const path of set_from.difference(set_to)) {
-      const from = NODE_PATH.join(this.config.from_path, path);
-      const to = NODE_PATH.join(this.config.to_path, path);
+      const from = NODE_PATH.join(this.config.from_dir, path);
+      const to = NODE_PATH.join(this.config.into_dir, path);
       if ((await Async_BunPlatform_File_Copy(from, to, this.config.overwrite ?? false)).value === true) {
         await FILESTATS.UpdateStats(to);
-        this.channel.log(`Copied "${from}" -> "${to}"`);
+        this.channel.log(`Write "${from}" -> "${to}"`);
       }
     }
     // check matching files for modification
     for (const path of set_from.intersection(set_to)) {
-      const from = NODE_PATH.join(this.config.from_path, path);
-      const to = NODE_PATH.join(this.config.to_path, path);
+      const from = NODE_PATH.join(this.config.from_dir, path);
+      const to = NODE_PATH.join(this.config.into_dir, path);
       if ((await FILESTATS.PathsAreEqual(from, to)).data !== true) {
         if ((await Async_BunPlatform_File_Copy(from, to, this.config.overwrite ?? false)).value === true) {
           await FILESTATS.UpdateStats(from);
           await FILESTATS.UpdateStats(to);
-          this.channel.log(`Replaced "${from}" -> "${to}"`);
+          this.channel.log(`Overwrite "${from}" -> "${to}"`);
         }
       }
     }
@@ -69,8 +69,8 @@ interface Config {
   exclude_patterns?: string[];
   /** @default ['*'] */
   include_patterns?: string[];
-  from_path: string;
-  to_path: string;
+  from_dir: string;
+  into_dir: string;
   /** @default false */
   overwrite?: boolean;
 }

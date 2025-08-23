@@ -14,7 +14,7 @@ class Class implements Builder.Step {
   async onRun(): Promise<void> {
     for (const path of this.dirpaths) {
       if ((await Async_NodePlatform_Directory_Delete(path, true)).value === true) {
-        this.channel.log(`Deleted "${path}"`);
+        this.channel.log(`Delete "${path}"`);
       }
     }
   }

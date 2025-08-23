@@ -3,6 +3,7 @@ import { Async_BunPlatform_File_Read_Bytes } from '../../src/lib/ericchase/BunPl
 import { Async_BunPlatform_File_Read_Text } from '../../src/lib/ericchase/BunPlatform_File_Read_Text.js';
 import { Async_BunPlatform_File_Write_Bytes } from '../../src/lib/ericchase/BunPlatform_File_Write_Bytes.js';
 import { Async_BunPlatform_File_Write_Text } from '../../src/lib/ericchase/BunPlatform_File_Write_Text.js';
+import { BunPlatform_Glob_Match } from '../../src/lib/ericchase/BunPlatform_Glob_Match.js';
 import { Core_Console_Error } from '../../src/lib/ericchase/Core_Console_Error.js';
 import { Core_Map_Get_Or_Default } from '../../src/lib/ericchase/Core_Map_Get_Or_Default.js';
 import { Class_Core_Promise_Deferred_Class, Core_Promise_Deferred_Class } from '../../src/lib/ericchase/Core_Promise_Deferred_Class.js';
@@ -396,9 +397,11 @@ async function Async_ScanSourceFolder() {
       throwErrorOnBrokenSymlink: false,
     }),
   )) {
-    const path = NODE_PATH.join(Builder.Dir.Src, subpath);
-    set__added_paths.add(path);
-    await FILESTATS.UpdateStats(path);
+    if (BunPlatform_Glob_Match(subpath, '**/node_modules/**') !== true) {
+      const path = NODE_PATH.join(Builder.Dir.Src, subpath);
+      set__added_paths.add(path);
+      await FILESTATS.UpdateStats(path);
+    }
   }
 }
 

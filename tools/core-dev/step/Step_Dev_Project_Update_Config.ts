@@ -17,19 +17,19 @@ class Class implements Builder.Step {
   async onStartUp(): Promise<void> {}
   async onRun(): Promise<void> {
     // JSON-based Configs
-    await Async_MergeJSONConfigs(this.config.project_path, '.vscode/settings.json');
-    await Async_MergeJSONConfigs(this.config.project_path, '.prettierrc');
-    await Async_MergeJSONConfigs(this.config.project_path, 'package.json');
-    await Async_MergeJSONConfigs(this.config.project_path, 'tsconfig.json');
+    await Async_MergeJSONConfigs(this.config.project_dir, '.vscode/settings.json');
+    await Async_MergeJSONConfigs(this.config.project_dir, '.prettierrc');
+    await Async_MergeJSONConfigs(this.config.project_dir, 'package.json');
+    await Async_MergeJSONConfigs(this.config.project_dir, 'tsconfig.json');
 
     // INI-based Configs
-    await Async_MergeINIConfigs(this.config.project_path, '.gitignore');
-    await Async_MergeINIConfigs(this.config.project_path, '.prettierignore');
+    await Async_MergeINIConfigs(this.config.project_dir, '.gitignore');
+    await Async_MergeINIConfigs(this.config.project_dir, '.prettierignore');
   }
   async onCleanUp(): Promise<void> {}
 }
 interface Config {
-  project_path: string;
+  project_dir: string;
 }
 
 async function Async_MergeJSONConfigs(project_path: string, config_path: string) {

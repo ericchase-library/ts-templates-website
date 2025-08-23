@@ -250,31 +250,35 @@ interface Extras {
   remap_imports?: boolean;
 }
 
-class BuildArtifact {
+export class Class_BuildArtifact {
   blob: Blob;
-  hash: string | null;
-  kind: 'entry-point' | 'chunk' | 'asset' | 'sourcemap' | 'bytecode';
-  loader: 'js' | 'jsx' | 'ts' | 'tsx' | 'json' | 'toml' | 'file' | 'napi' | 'wasm' | 'text' | 'css' | 'html';
-  path: string;
-  sourcemap: BuildArtifact | null;
+  /** string */
+  path: Bun.BuildArtifact['path'];
+  /** "js" | "jsx" | "ts" | "tsx" | "json" | "toml" | "file" | "napi" | "wasm" | "text" | "css" | "html" */
+  loader: Bun.BuildArtifact['loader'];
+  /** string | null */
+  hash: Bun.BuildArtifact['hash'];
+  /** "entry-point" | "chunk" | "asset" | "sourcemap" | "bytecode" */
+  kind: Bun.BuildArtifact['kind'];
+  sourcemap: Class_BuildArtifact | null;
   constructor(readonly artifact: Bun.BuildArtifact) {
     this.blob = artifact;
+    this.path = artifact.path;
+    this.loader = artifact.loader;
     this.hash = artifact.hash;
     this.kind = artifact.kind;
-    this.loader = artifact.loader;
-    this.path = artifact.path;
-    this.sourcemap = artifact.sourcemap ? new BuildArtifact(artifact.sourcemap) : null;
+    this.sourcemap = artifact.sourcemap ? new Class_BuildArtifact(artifact.sourcemap) : null;
   }
 }
 async function ProcessBuildResults(buildtask: Promise<Bun.BuildOutput>): Promise<{
-  artifacts: BuildArtifact[];
+  artifacts: Class_BuildArtifact[];
   bundletext?: string;
   logs: Bun.BuildOutput['logs'];
   success: boolean;
 }> {
   const buildresults = await buildtask;
   const out: {
-    artifacts: BuildArtifact[];
+    artifacts: Class_BuildArtifact[];
     bundletext?: string;
     logs: Bun.BuildOutput['logs'];
     success: boolean;
@@ -291,7 +295,7 @@ async function ProcessBuildResults(buildtask: Promise<Bun.BuildOutput>): Promise
           out.bundletext = await artifact.text();
         }
       }
-      out.artifacts.push(new BuildArtifact(artifact));
+      out.artifacts.push(new Class_BuildArtifact(artifact));
     }
   }
   return out;
