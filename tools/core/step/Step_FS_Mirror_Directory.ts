@@ -45,7 +45,7 @@ class Class implements Builder.Step {
       }
     }
     const set_from = await Async_BunPlatform_Glob_Scan_Ex(this.config.from_dir, this.config.include_patterns ?? [], this.config.exclude_patterns ?? []);
-    const set_to = await Async_BunPlatform_Glob_Scan_Ex(this.config.into_dir, [], this.config.exclude_patterns ?? []);
+    const set_to = await Async_BunPlatform_Glob_Scan_Ex(this.config.into_dir, ['**'], this.config.exclude_patterns ?? []);
     // copy all files that are missing
     for (const path of set_from.difference(set_to)) {
       const from = NODE_PATH.join(this.config.from_dir, path);
