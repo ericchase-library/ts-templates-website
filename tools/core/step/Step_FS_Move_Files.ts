@@ -60,7 +60,10 @@ class Class implements Builder.Step {
     for (const path of set_from.intersection(set_to)) {
       const from = NODE_PATH.join(this.config.from_dir, path);
       const to = NODE_PATH.join(this.config.into_dir, path);
-      if ((await FILESTATS.PathsAreEqual(from, to)).data !== true) {
+      if ((await FILESTATS.PathsAreEqual(from, to)).data === true) {
+        await Async_NodePlatform_File_Delete(from);
+        this.channel.log(`Delete "${from}"`);
+      } else {
         if ((await Async_BunPlatform_File_Copy(from, to, this.config.overwrite ?? false)).value === true) {
           await FILESTATS.UpdateStats(from);
           await FILESTATS.UpdateStats(to);
