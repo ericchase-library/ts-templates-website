@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "strict": true,
     "resolveJsonModule": true,
-    "jsx": "react-jsx"
+    "jsx": "react"
   },
   "include": ["*", "src/**/*", "tools/**/*"]
 }

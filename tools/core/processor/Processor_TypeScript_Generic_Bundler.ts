@@ -36,6 +36,7 @@ class Class implements Builder.Processor {
     this.config.env ??= 'disable';
     this.config.external ??= [];
     this.config.external.push('*.module.js');
+    this.config.minify ??= false;
     this.config.sourcemap ??= 'none';
     this.config.target ??= 'browser';
     this.extras.bundler_mode ??= 'module';
@@ -105,11 +106,7 @@ class Class implements Builder.Processor {
           env: this.config.env,
           external: this.config.external,
           format: 'esm',
-          minify: {
-            identifiers: false,
-            syntax: false,
-            whitespace: false,
-          },
+          minify: this.config.minify,
           sourcemap: this.config.sourcemap,
           target: this.config.target,
         }),
@@ -167,11 +164,7 @@ class Class implements Builder.Processor {
           entrypoints: [file.src_path],
           env: this.config.env,
           format: 'iife',
-          minify: {
-            identifiers: false,
-            syntax: false,
-            whitespace: false,
-          },
+          minify: this.config.minify,
           sourcemap: this.config.sourcemap,
           target: this.config.target,
           // add IIFE syntax around scripts
@@ -226,6 +219,8 @@ interface Config {
    * @default ['*.module.js']
    */
   external?: Options['external'];
+  /** @default false */
+  minify?: Options['minify'];
   /** @default 'none' */
   sourcemap?: Options['sourcemap'];
   /** @default 'browser' */

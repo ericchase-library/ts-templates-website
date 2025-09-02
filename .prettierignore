@@ -10,5 +10,10 @@ bun.lock
 
 ## Project Specific
 
+# these do not need to be regularly formatted
+/server/
+/src/lib/ericchase/
+/tools/*/*
+
 # up to you whether you want to format the build files
 # /out/

@@ -17,7 +17,7 @@
 
     // Other options
     "resolveJsonModule": true,
-    "jsx": "react-jsx"
+    "jsx": "react"
   },
 
   // Include files for typescript/intellisense
