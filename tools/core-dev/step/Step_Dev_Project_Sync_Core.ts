@@ -18,6 +18,13 @@ class Class implements Builder.Step {
   constructor(readonly config: Config) {}
   async onStartUp(): Promise<void> {
     this.steps = [
+      // @types
+      Step_FS_Copy_Files({
+        include_patterns: ['**'],
+        from_dir: NODE_PATH.join(this.config.from_dir, Builder.Dir.Src, '@types'),
+        into_dir: NODE_PATH.join(this.config.into_dir, Builder.Dir.Src, '@types'),
+        overwrite: true,
+      }),
       // Library
       Step_FS_Mirror_Directory({
         include_patterns: ['**'],

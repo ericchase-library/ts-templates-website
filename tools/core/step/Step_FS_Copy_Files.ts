@@ -21,6 +21,7 @@ class Class implements Builder.Step {
     this.config.from_dir = NODE_PATH.join(this.config.from_dir);
     this.config.into_dir = NODE_PATH.join(this.config.into_dir);
     this.config.overwrite ??= false;
+    this.config.showlogs ??= true;
   }
   async onRun(): Promise<void> {
     if (this.config.from_dir === this.config.into_dir) {
@@ -41,13 +42,16 @@ class Class implements Builder.Step {
     }
     const set_from = await Async_BunPlatform_Glob_Scan_Ex(this.config.from_dir, this.config.include_patterns ?? [], this.config.exclude_patterns ?? []);
     const set_to = await Async_BunPlatform_Glob_Scan_Ex(this.config.into_dir, this.config.include_patterns ?? [], this.config.exclude_patterns ?? []);
+    this.channel.log(`Copy Files: "${this.config.from_dir}" -> "${this.config.into_dir}"`);
     // copy all files that are missing
     for (const path of set_from.difference(set_to)) {
       const from = NODE_PATH.join(this.config.from_dir, path);
       const to = NODE_PATH.join(this.config.into_dir, path);
       if ((await Async_BunPlatform_File_Copy(from, to, this.config.overwrite ?? false)).value === true) {
         await FILESTATS.UpdateStats(to);
-        this.channel.log(`Write "${from}" -> "${to}"`);
+        if (this.config.showlogs === true) {
+          this.channel.log(`Write "${from}" -> "${to}"`);
+        }
       }
     }
     // check matching files for modification
@@ -58,7 +62,9 @@ class Class implements Builder.Step {
         if ((await Async_BunPlatform_File_Copy(from, to, this.config.overwrite ?? false)).value === true) {
           await FILESTATS.UpdateStats(from);
           await FILESTATS.UpdateStats(to);
-          this.channel.log(`Overwrite "${from}" -> "${to}"`);
+          if (this.config.showlogs === true) {
+            this.channel.log(`Overwrite "${from}" -> "${to}"`);
+          }
         }
       }
     }
@@ -73,4 +79,6 @@ interface Config {
   into_dir: string;
   /** @default false */
   overwrite?: boolean;
+  /** @default true */
+  showlogs?: boolean;
 }

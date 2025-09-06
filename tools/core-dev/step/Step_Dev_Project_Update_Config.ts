@@ -25,6 +25,9 @@ class Class implements Builder.Step {
     // INI-based Configs
     await Async_MergeINIConfigs(this.config.project_dir, '.gitignore');
     await Async_MergeINIConfigs(this.config.project_dir, '.prettierignore');
+
+    // Fix Known Conflicts
+    await Async_RemoveDuplicatePackages(this.config.project_dir);
   }
   async onCleanUp(): Promise<void> {}
 }
@@ -43,4 +46,16 @@ async function Async_MergeINIConfigs(project_path: string, config_path: string) 
   const repo_config = (await Async_BunPlatform_File_Read_Text(NODE_PATH.join(project_path, 'repo-config', config_path))).value?.trim() ?? '';
   const separator = '\n\n## Project Specific\n\n';
   await Async_BunPlatform_File_Write_Text(NODE_PATH.join(project_path, config_path), (base_config + separator + repo_config).trim() + '\n');
+}
+
+async function Async_RemoveDuplicatePackages(project_path: string) {
+  const path = NODE_PATH.join(project_path, 'package.json');
+  const package_json = JSONC.parse((await Async_BunPlatform_File_Read_Text(path)).value?.trim() ?? '');
+  const dependency_set = new Set(Object.keys(package_json.dependencies ?? {}));
+  for (const key of Object.keys(package_json.devDependencies ?? {})) {
+    if (dependency_set.has(key)) {
+      delete package_json.devDependencies[key];
+    }
+  }
+  await Async_BunPlatform_File_Write_Text(path, JSON.stringify(package_json, null, 2).trim() + '\n');
 }
