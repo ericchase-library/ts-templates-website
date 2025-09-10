@@ -34,8 +34,10 @@ class Class_WebPlatform_DOM_Element_Added_Observer_Class {
               }
             }
           };
+          // process the added node
           processCurrentNode();
           if (this.config.options.subtree === true) {
+            // process all descendents
             while (tree_walker.nextNode()) {
               processCurrentNode();
             }
@@ -48,20 +50,27 @@ class Class_WebPlatform_DOM_Element_Added_Observer_Class {
       subtree: this.config.options.subtree,
     });
     if (this.config.include_existing_elements === true) {
-      const sent_set = new Set<Node>();
-      const tree_walker = document.createTreeWalker(this.config.source, NodeFilter.SHOW_ELEMENT);
-      const processCurrentNode = () => {
-        if (sent_set.has(tree_walker.currentNode) === false) {
-          if (tree_walker.currentNode instanceof Element && tree_walker.currentNode.matches(this.config.selector) === true) {
-            this.$send(tree_walker.currentNode as Element);
-            sent_set.add(tree_walker.currentNode);
-          }
-        }
-      };
-      processCurrentNode();
       if (this.config.options.subtree === true) {
+        const sent_set = new Set<Node>();
+        const tree_walker = document.createTreeWalker(this.config.source, NodeFilter.SHOW_ELEMENT);
+        const processCurrentNode = () => {
+          if (sent_set.has(tree_walker.currentNode) === false) {
+            if (tree_walker.currentNode instanceof Element && tree_walker.currentNode.matches(this.config.selector) === true) {
+              this.$send(tree_walker.currentNode as Element);
+              sent_set.add(tree_walker.currentNode);
+            }
+          }
+        };
+        // process all descendents
         while (tree_walker.nextNode()) {
           processCurrentNode();
+        }
+      } else {
+        // process children
+        for (const child of this.config.source.childNodes) {
+          if (child instanceof Element && child.matches(this.config.selector) === true) {
+            this.$send(child as Element);
+          }
         }
       }
     }
