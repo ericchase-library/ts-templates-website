@@ -4,6 +4,8 @@ Please refer to the `ts-library` changelog for library and build tool changes:
 
 ## 2025-10-01
 
+- Library and package updates
+
 ## 2025-09-01
 
 - Some minor changes here and there
