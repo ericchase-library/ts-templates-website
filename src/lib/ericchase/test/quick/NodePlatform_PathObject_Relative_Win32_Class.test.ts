@@ -493,6 +493,32 @@ describe(NodePlatform_PathObject_Relative_Win32_Class.name, () => {
       }
     });
 
+    //## top()
+    describe(PathFactory().top.name, () => {
+      const set_expected = Prep_SplitLines(`
+        .
+        .
+        .
+        name.ext
+        name.ext
+
+        ..
+        ..
+        ..
+        name.ext
+        name.ext
+
+        name.ext
+        name.ext
+      `);
+      for (const [received, expected] of Core_Array_Zip_Generator(set_relative_paths, set_expected)) {
+        test(received!, () => {
+          const path_object = PathFactory(received!);
+          expect(path_object.top()).toEqual(expected!);
+        });
+      }
+    });
+
     //## unshift()
     describe(PathFactory().unshift.name + '()', () => {
       const set_expected_1 = Prep_SplitLines(`

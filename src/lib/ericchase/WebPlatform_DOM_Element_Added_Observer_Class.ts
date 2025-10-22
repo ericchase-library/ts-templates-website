@@ -1,4 +1,4 @@
-class Class_WebPlatform_DOM_Element_Added_Observer_Class {
+export class Class_WebPlatform_DOM_Element_Added_Observer_Class {
   config: {
     include_existing_elements: boolean;
     options: {

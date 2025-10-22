@@ -543,6 +543,34 @@ describe(NodePlatform_PathObject_Absolute_Win32_Class.name, () => {
       }
     });
 
+    //## top()
+    describe(PathFactory('/').top.name, () => {
+      const set_expected = [
+        //
+        '\\',
+        'name.ext',
+        'name.ext',
+        'name.ext',
+        'name.ext',
+        'C:\\',
+        'name.ext',
+
+        '\\',
+        'name.ext',
+        'name.ext',
+        'name.ext',
+        'name.ext',
+        'C:\\',
+        'name.ext',
+      ];
+      for (const [received, expected] of Core_Array_Zip_Generator(set_absolute_paths, set_expected)) {
+        test(received!, () => {
+          const path_object = PathFactory(received!);
+          expect(path_object.top()).toEqual(expected!);
+        });
+      }
+    });
+
     //## slice()
     describe(PathFactory('/').slice.name + '(!0 => 0)', () => {
       for (const [received, expected] of Core_Array_Zip_Generator(set_absolute_paths, set_expected_split)) {

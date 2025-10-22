@@ -100,6 +100,13 @@ export class Class_NodePlatform_PathObject_Relative_Class {
   }
 
   /**
+   * Gets the last segment from the path.
+   */
+  top(): string {
+    return this.split().slice(-1)[0];
+  }
+
+  /**
    * Prepends new segments to the start of the path.
    * @param pathlike Segments to insert at the start of the path.
    */

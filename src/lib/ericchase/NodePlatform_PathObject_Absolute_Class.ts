@@ -90,6 +90,13 @@ export class Class_NodePlatform_PathObject_Absolute_Class {
   }
 
   /**
+   * Gets the last segment from the path.
+   */
+  top(): string {
+    return this.split().slice(-1)[0];
+  }
+
+  /**
    * Returns a section of the path object as a new path object.
    * For end, a negative index can be used to indicate an offset from the end of the array.
    * For example, -2 refers to the second to last element of the array.
