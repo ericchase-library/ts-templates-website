@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import { Core_Promise_Orphan } from '../../Core_Promise_Orphan.js';
 import { Core_Utility_Debounce_Immediate } from '../../Core_Utility_Debounce_Immediate.js';
 
 describe(Core_Utility_Debounce_Immediate.name, () => {
@@ -27,9 +28,9 @@ describe(Core_Utility_Debounce_Immediate.name, () => {
     let value = 0;
     const fn = Core_Utility_Debounce_Immediate(() => value++, 5);
     expect(value).toBe(0);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(1);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(1);
     await fn();
     expect(value).toBe(1);
@@ -42,11 +43,11 @@ describe(Core_Utility_Debounce_Immediate.name, () => {
     let value = 0;
     const fn = Core_Utility_Debounce_Immediate(() => value++, 5);
     expect(value).toBe(0);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(1);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(1);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(1);
     await Bun.sleep(50);
     expect(value).toBe(1);
@@ -78,9 +79,9 @@ describe(Core_Utility_Debounce_Immediate.name, () => {
       value++;
     }, 5);
     expect(value).toBe(0);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(0); // not enough time for inner function to complete
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(0);
     await fn();
     expect(value).toBe(1);
@@ -96,11 +97,11 @@ describe(Core_Utility_Debounce_Immediate.name, () => {
       value++;
     }, 5);
     expect(value).toBe(0);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(0); // not enough time for inner function to complete
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(0);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(0);
     await Bun.sleep(50);
     expect(value).toBe(1);

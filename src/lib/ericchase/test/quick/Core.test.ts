@@ -2047,9 +2047,9 @@ test(Core_Promise_Call_And_Orphan.name, () => {
 test(Core_Promise_Deferred_Class.name, async () => {
   const deferred = Core_Promise_Deferred_Class<number>();
   expect(deferred.promise).toBeInstanceOf(Promise);
-  (async () => {
+  Core_Promise_Call_And_Orphan(async () => {
     expect(await deferred.promise).toBe(1);
-  })();
+  });
   deferred.resolve(1);
 });
 test(Core_Promise_Orphan.name, () => {

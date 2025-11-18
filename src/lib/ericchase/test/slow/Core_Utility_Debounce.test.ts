@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { Core_Utility_Debounce } from '../../Core_Utility_Debounce.js';
+import { Core_Promise_Orphan } from '../../Core_Promise_Orphan.js';
 
 describe(Core_Utility_Debounce.name, async () => {
   test('Error.', async () => {
@@ -25,9 +26,9 @@ describe(Core_Utility_Debounce.name, async () => {
     let value = 0;
     const fn = Core_Utility_Debounce(() => value++, 5);
     expect(value).toBe(0);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(0);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(0);
     await fn();
     expect(value).toBe(1);
@@ -38,11 +39,11 @@ describe(Core_Utility_Debounce.name, async () => {
     let value = 0;
     const fn = Core_Utility_Debounce(() => value++, 5);
     expect(value).toBe(0);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(0);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(0);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(0);
     await Bun.sleep(50);
     expect(value).toBe(1);
@@ -70,9 +71,9 @@ describe(Core_Utility_Debounce.name, async () => {
       value++;
     }, 5);
     expect(value).toBe(0);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(0);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(0);
     await fn();
     expect(value).toBe(1);
@@ -86,11 +87,11 @@ describe(Core_Utility_Debounce.name, async () => {
       value++;
     }, 5);
     expect(value).toBe(0);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(0);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(0);
-    fn();
+    Core_Promise_Orphan(fn());
     expect(value).toBe(0);
     await Bun.sleep(50);
     expect(value).toBe(1);
